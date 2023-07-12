@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
  */
 @Entity
 @Audited
-class Book {
+public class Book {
 
     @Id
     @GeneratedValue

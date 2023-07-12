@@ -10,11 +10,8 @@ As the name has suggested [Spring Data Envers][1] utilises and simplifies the us
 # Dependency and Configuration
 In order to enable Envers features we will first include **spring-data-envers** as dependency.
 
-```xml
-<dependency>
-  <groupId>org.springframework.data</groupId>
-  <artifactId>spring-data-envers</artifactId>
-</dependency>
+```groovy
+implementation 'org.springframework.data:spring-data-envers'
 ```
 
 Next is to inform Spring Boot that we would like do enable Envers' features. This can be done by annotating a `@Configuration`
@@ -24,10 +21,8 @@ Example can be seen in [RepositoryConfiguration][4]:
 
 ```java
 @Configuration
-@EnableJpaRepositories(
-        repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class
-)
-public class RepositoryConfiguration {
+@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+class RepositoryConfiguration {
 }
 ```
 
@@ -44,12 +39,9 @@ public class Book {
     @GeneratedValue
     private Long id;
 
-    @NotBlank
     private String author;
 
-    @NotBlank
     private String title;
-
 }
 ```
 
@@ -67,112 +59,121 @@ We will be utilising on `@SpringBootTest` to verify that our implementation work
 
 ### Upon Creation an Initial Revision is Created
 ```java
-@SpringBootTest
-class BookRepositoryRevisionsTest {
+@Testcontainers
+@SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
+class BookAuditRevisionTests {
+
+    @Container
+    @ServiceConnection
+    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:latest");
 
     @Autowired
     private BookRepository repository;
-    
+
     @Test
-    void initialRevision() {
-        Book book = repository.save(
-                             Book.builder().author("Rudyard Kipling").title("Jungle Book").build()
-                     );
-        
-        Revisions<Integer, Book> revisions = repository.findRevisions(book.getId());
+    @DisplayName("When a book is created, then a revision information is available with revision number 1")
+    void create() {
+        var book = new Book();
+
+        book.setTitle("The Jungle Book");
+        book.setAuthor("Rudyard Kipling");
+
+        var createdBook = repository.save(book);
+
+        var revisions = repository.findRevisions(createdBook.getId());
 
         assertThat(revisions)
-                .isNotEmpty()
-                .allSatisfy(revision -> assertThat(revision.getEntity())
-                        .extracting(Book::getId, Book::getAuthor, Book::getTitle)
-                        .containsExactly(book.getId(), book.getAuthor(), book.getTitle())
-                );
+                .hasSize(1)
+                .first()
+                .extracting(Revision::getRevisionNumber)
+                .returns(1, Optional::get);
     }
+    
 }
 ```
 
 ### Revision Number Will Be Increase and Latest Revision is Available
 ```java
-@SpringBootTest
-class BookRepositoryRevisionsTest {
+@Testcontainers
+@SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
+class BookAuditRevisionTests {
+
+    @Container
+    @ServiceConnection
+    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:latest");
 
     @Autowired
     private BookRepository repository;
-    
+
     @Test
-    void updateIncreasesRevisionNumber() {
-        Book book = repository.save(
-                             Book.builder().author("Rudyard Kipling").title("Jungle Book").build()
-                     );
-    
-        book.setTitle("If");
+    @DisplayName("When a book is modified, then a revision number will increase")
+    void modify() {
+        var book = new Book();
 
-        repository.save(book);
+        book.setTitle("The Jungle Book");
+        book.setAuthor("Rudyard Kipling");
 
-        Optional<Revision<Integer, Book>> revision = repository.findLastChangeRevision(book.getId());
+        var createdBook = repository.save(book);
 
-        assertThat(revision)
-                .isPresent()
-                .hasValueSatisfying(rev ->
-                        assertThat(rev.getRevisionNumber()).hasValue(2)
-                )
-                .hasValueSatisfying(rev ->
-                        assertThat(rev.getEntity())
-                                .extracting(Book::getTitle)
-                                .containsOnly("If")
-                );
+        createdBook.setTitle("If");
+
+        repository.save(createdBook);
+
+        var revisions = repository.findRevisions(createdBook.getId());
+
+        assertThat(revisions)
+                .hasSize(2)
+                .last()
+                .extracting(Revision::getRevisionNumber)
+                .extracting(Optional::get).is(matching(greaterThan(1)));
     }
+
 }
 ```
 
 ### Upon Deletion All Entity Information Will be Removed Except its ID
 ```java
-@SpringBootTest
-class BookRepositoryRevisionsTest {
+@Testcontainers
+@SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
+class BookAuditRevisionTests {
+
+    @Container
+    @ServiceConnection
+    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:latest");
 
     @Autowired
     private BookRepository repository;
     
     @Test
-    void deletedItemWillHaveRevisionRetained() {
-        Book book = repository.save(
-                             Book.builder().author("Rudyard Kipling").title("Jungle Book").build()
-                     );
+    @DisplayName("When a book is removed, then only ID information is available")
+    void remove() {
+        var book = new Book();
 
-        repository.delete(book);
+        book.setTitle("The Jungle Book");
+        book.setAuthor("Rudyard Kipling");
 
-        Revisions<Integer, Book> revisions = repository.findRevisions(book.getId());
+        var createdBook = repository.save(book);
 
-        assertThat(revisions).hasSize(2);
+        repository.delete(createdBook);
 
-        Iterator<Revision<Integer, Book>> iterator = revisions.iterator();
+        var revision = repository.findLastChangeRevision(createdBook.getId());
 
-        Revision<Integer, Book> initialRevision = iterator.next();
-        Revision<Integer, Book> finalRevision = iterator.next();
-
-        assertThat(initialRevision)
-                .satisfies(rev ->
-                        assertThat(rev.getEntity())
-                                .extracting(Book::getId, Book::getAuthor, Book::getTitle)
-                                .containsExactly(book.getId(), book.getAuthor(), book.getTitle())
-                );
-
-        assertThat(finalRevision)
-                .satisfies(rev -> assertThat(rev.getEntity())
-                        .extracting(Book::getId, Book::getTitle, Book::getAuthor)
-                        .containsExactly(book.getId(), null, null)
-                );
+        assertThat(revision).get()
+                .extracting(Revision::getEntity)
+                .extracting("id", "title", "author")
+                .containsOnly(createdBook.getId(), null, null);
     }
+
 }
 ```
 
-All tests above can be found in [BookRepositoryRevisionsTest][8].
+All tests above can be found in [BookAuditRevisionTests][8].
 
 [1]: http://projects.spring.io/spring-data-envers/
 [2]: https://projects.spring.io/spring-data-jpa/
 [3]: http://hibernate.org/orm/envers/
-[4]: src/main/java/rz/demo/boot/data/envers/RepositoryConfiguration.java
-[5]: src/main/java/rz/demo/boot/data/envers/book/Book.java
+[4]: src/main/java/zin/rashidi/boot/data/envers/repository/RepositoryConfiguration.java
+[5]: src/main/java/zin/rashidi/boot/data/envers/book/Book.java
 [6]: https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/history/RevisionRepository.java
-[7]: src/main/java/rz/demo/boot/data/envers/book/BookRepository.java
-[8]: src/test/java/rz/demo/boot/data/envers/book/BookRepositoryRevisionsTest.java
+[7]: src/main/java/zin/rashidi/boot/data/envers/book/BookRepository.java
+[8]: src/test/java/zin/rashidi/boot/data/envers/BookAuditRevisionTests.java
