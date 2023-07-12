@@ -21,7 +21,7 @@ Example can be seen in [RepositoryConfiguration][4]:
 
 ```java
 @Configuration
-@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class, basePackages = "zin.rashidi.boot.data.envers")
 class RepositoryConfiguration {
 }
 ```
