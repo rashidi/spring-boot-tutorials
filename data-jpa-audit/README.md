@@ -11,37 +11,27 @@ structure is as follows:
 
 ```java
 @Entity
-@Table
-public class User {
-    
+class User {
+
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false)
-    @NotBlank(message = "name is required")
     private String name;
-
-    @Column(nullable = false)
-    @NotBlank(message = "username is required")
     private String username;
 
     @CreatedBy
-    @Column(nullable = false, updatable = false)
     private String createdBy;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime created;
+    private Instant created;
 
     @LastModifiedBy
-    @Column(nullable = false)
     private String modifiedBy;
 
     @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime modified;
-    
+    private Instant modified;
+
     // omitted getter / setter
 }
 ```
