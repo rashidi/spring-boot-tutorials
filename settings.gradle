@@ -13,3 +13,5 @@ gradleEnterprise {
 }
 
 rootProject.name = 'spring-boot-tutorials'
+
+include('data-jpa-audit')
