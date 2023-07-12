@@ -6,3 +6,6 @@ Repository contains a collection of [Spring Boot](https://spring.io/projects/spr
 separate project.
 
 # Topics
+| Topic | Description                       |
+| --- |-----------------------------------|
+| [Spring Data JPA Audit](data-jpa-audit) | Enable Audit with Spring Data JPA |
