@@ -14,8 +14,7 @@ import zin.rashidi.boot.cloud.jdbcenvrepo.greet.GreetService;
 
 @Testcontainers
 @SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:tc:mysql:8:///test?TC_INITSCRIPT=init-script.sql",
-        "logging.level.org.springframework.jdbc.core = TRACE"
+        "spring.datasource.url=jdbc:tc:mysql:8:///test?TC_INITSCRIPT=init-script.sql"
 })
 class CloudJdbcEnvRepoApplicationTests {
 
