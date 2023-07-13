@@ -7,4 +7,4 @@ CREATE TABLE `PROPERTIES` (
                               PRIMARY KEY (`KEY`, `APPLICATION`, `LABEL`)
 );
 
-INSERT INTO PROPERTIES (`APPLICATION`, `PROFILE`, `LABEL`, `KEY`, `VALUE`) VALUES ('demo', 'jdbc', 'master', 'app.greet.name', 'Demo');
+INSERT INTO PROPERTIES (`APPLICATION`, `PROFILE`, `LABEL`, `KEY`, `VALUE`) VALUES ('demo', 'default', 'master', 'app.greet.name', 'Demo');

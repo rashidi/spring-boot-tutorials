@@ -10,3 +10,4 @@ spring:
           sql-without-profile: SELECT `KEY`, `VALUE` from PROPERTIES where APPLICATION=? and PROFILE='default' and LABEL=?
   profiles:
     active: jdbc
+
