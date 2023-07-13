@@ -14,5 +14,6 @@ gradleEnterprise {
 
 rootProject.name = 'spring-boot-tutorials'
 
+include('cloud-jdbc-env-repo')
 include('data-envers-audit')
 include('data-jpa-audit')
