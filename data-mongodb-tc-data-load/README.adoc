@@ -1,0 +1,217 @@
+= Spring Data MongoDb with Testcontainers
+
+Preloaded data for testing.
+
+== Background
+It is common to have preloaded data when we are testing our delete, read, and update operations. One of the most common approaches is to
+load them programmatically. In this example, we will see how we can use Testcontainers to load data into our MongoDB instance.
+
+== Load Data Programmatically
+It is common that we load data programmatically. There are several approaches to do this.
+
+=== Using `@BeforeEach` and `@AfterEach`
+`@BeforeEach` will be executed before each test method execution while `@AfterEach` will be executed after test method executed. In this example,
+we will use `@BeforeEach` to load data and `@AfterEach` to delete data.
+
+```java
+@DataMongoTest
+@Testcontainers
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"));
+
+    @Autowired
+    private UserRepository repository;
+
+    @BeforeEach
+    void create() {
+        repository.save(new User(null, "rashidi.zin", "Rashidi Zin"));
+    }
+
+    @AfterEach
+    void delete() {
+        repository.deleteAll();
+    }
+
+    @Test
+    @DisplayName("Given there is a user with username rashidi.zin and name Rashidi Zin When I search for username rashidi.zin Then user with provided username should be returned")
+    void findByUsername() {
+        var user = repository.findByUsername("rashidi.zin");
+
+        assertThat(user)
+                .extracting("name")
+                .isEqualTo("Rashidi Zin");
+    }
+
+    @Test
+    @DisplayName("Given there is no user with username zaid.zin When I search for username zaid.zin Then null should be returned")
+    void findByUsernameWithNonExistingUsername() {
+        var user = repository.findByUsername("zaid.zin");
+
+        assertThat(user).isNull();
+    }
+}
+```
+
+While this approach works, it might be time-consuming when we have many methods to be executed. Another approach is to use `@TestExecutionListeners`
+
+=== Using `@TestExecutionListeners`
+`@TestExecutionListeners` allows us to register implemented https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/test/context/TestExecutionListener.html[`TestExecutionListener`]
+which can be used to execute code before and after test execution.
+
+The following `TestExecutionListener` is used to load data before executing the test class and remove all data after test class has been executed.
+
+```java
+class UserTestExecutionListener extends AbstractTestExecutionListener {
+
+    private User user;
+
+
+    @Override
+    public void beforeTestClass(TestContext testContext) {
+        var mongo = testContext.getApplicationContext().getBean(MongoOperations.class);
+
+        user = mongo.insert(new User(null, "rashidi.zin", "Rashidi Zin"));
+    }
+
+    @Override
+    public void afterTestClass(TestContext testContext) {
+        var mongo = testContext.getApplicationContext().getBean(MongoOperations.class);
+
+        mongo.remove(user);
+    }
+
+}
+```
+
+Then we will include it in our test class:
+
+```java
+@DataMongoTest
+@Import(UserRepositoryTests.TestcontainersConfiguration.class)
+@TestExecutionListeners(listeners = UserTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
+class UserRepositoryTests {
+
+    @Autowired
+    private UserRepository repository;
+
+    @Test
+    @DisplayName("Given there is a user with username rashidi.zin and name Rashidi Zin When I search for username rashidi.zin Then user with provided username should be returned")
+    void findByUsername() {
+        var user = repository.findByUsername("rashidi.zin");
+
+        assertThat(user)
+                .extracting("name")
+                .isEqualTo("Rashidi Zin");
+    }
+
+    @Test
+    @DisplayName("Given there is no user with username zaid.zin When I search for username zaid.zin Then null should be returned")
+    void findByUsernameWithNonExistingUsername() {
+        var user = repository.findByUsername("zaid.zin");
+
+        assertThat(user).isNull();
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    @ImportAutoConfiguration(TestcontainersPropertySourceAutoConfiguration.class)
+    static class TestcontainersConfiguration {
+
+        @Bean
+        MongoDBContainer mongoDbContainer(DynamicPropertyRegistry registry) {
+            var mongo = new MongoDBContainer("mongo:6");
+
+            registry.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl);
+
+            return mongo;
+        }
+
+    }
+}
+```
+
+In this example, we are using `@TestExecutionListeners` to register `UserTestExecutionListener` which will be executed before and after test class execution. Alternatively, we also no longer utilise on
+helpful annotations - `@Testcontainers`, `@Container`, and `@ServiceConnection`.
+
+== Load Data Using Testcontainers
+Next approach is to load data using `mongo-init.js` and Testcontainers. We will start by inserting data through link:src/test/resources/mongo-init.js[mongo-init.js] file.
+
+```javascript
+db.createCollection("user");
+
+db.user.insert({
+  "name": "Rashidi Zin",
+  "username": "rashidi.zin"
+});
+```
+
+Then we will create a `MongoDBContainer` and mount the `mongo-init.js` file into `/docker-entrypoint-initdb.d` directory.
+
+```java
+@DataMongoTest
+@Testcontainers
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
+            .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js");
+}
+```
+
+Next is to inform Testcontainers on how to determine that our MongoDB is ready. This will be determined by the checking that the phrase `waiting for connections`
+appeared twice:
+
+```java
+@DataMongoTest
+@Testcontainers
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
+            .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
+            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2));
+}
+```
+
+With that, data will be loaded into MongoDB before the test execution. Full implementation of link:src/test/java/zin/rashidi/data/mongodb/tc/dataload/user/UserRepositoryTests.java[`UserRepositoryTests`]:
+
+```java
+@DataMongoTest
+@Testcontainers
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
+            .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
+            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2))
+            .withStartupTimeout(ofSeconds(60));
+
+    @Autowired
+    private UserRepository repository;
+
+    @Test
+    @DisplayName("Given there is a user with username rashidi.zin and name Rashidi Zin When I search for username rashidi.zin Then user with provided username should be returned")
+    void findByUsername() {
+        var user = repository.findByUsername("rashidi.zin");
+
+        assertThat(user)
+                .extracting("name")
+                .isEqualTo("Rashidi Zin");
+    }
+
+    @Test
+    @DisplayName("Given there is no user with username zaid.zin When I search for username zaid.zin Then null should be returned")
+    void findByUsernameWithNonExistingUsername() {
+        var user = repository.findByUsername("zaid.zin");
+
+        assertThat(user).isNull();
+    }
+}
+```
+
+This also allows us to have a single source of truth in managing data for our tests.
