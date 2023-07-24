@@ -5,7 +5,7 @@ import org.springframework.data.envers.repository.support.EnversRevisionReposito
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
- * @author Rashidi Zin, GfK
+ * @author Rashidi Zin
  */
 @Configuration
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class, basePackages = "zin.rashidi.boot.data.envers")

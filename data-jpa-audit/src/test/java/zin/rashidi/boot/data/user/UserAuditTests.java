@@ -22,7 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 /**
- * @author Rashidi Zin, GfK
+ * @author Rashidi Zin
  */
 @Testcontainers
 @AutoConfigureTestDatabase(replace = NONE)
