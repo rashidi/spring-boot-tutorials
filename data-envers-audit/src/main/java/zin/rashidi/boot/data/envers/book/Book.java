@@ -7,7 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 /**
- * @author Rashidi Zin, GfK
+ * @author Rashidi Zin
  */
 @Entity
 @Audited

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author Rashidi Zin, GfK
+ * @author Rashidi Zin
  */
 @RestController
 class GreetResource {

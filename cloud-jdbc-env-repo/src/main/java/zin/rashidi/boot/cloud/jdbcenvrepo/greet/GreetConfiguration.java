@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author Rashidi Zin, GfK
+ * @author Rashidi Zin
  */
 @Configuration
 @EnableConfigurationProperties(GreetProperties.class)

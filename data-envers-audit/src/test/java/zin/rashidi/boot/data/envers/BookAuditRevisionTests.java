@@ -20,7 +20,7 @@ import zin.rashidi.boot.data.envers.book.Book;
 import zin.rashidi.boot.data.envers.book.BookRepository;
 
 /**
- * @author Rashidi Zin, GfK
+ * @author Rashidi Zin
  */
 @Testcontainers
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
