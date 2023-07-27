@@ -1,6 +1,7 @@
 package zin.rashidi.boot.data.mongodb.tm.user;
 
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -8,10 +9,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @Document
 class User {
+
+    @Id
     private ObjectId id;
     private final String name;
     private final String username;
-
     private Status status;
 
     User(String name, String username) {
@@ -31,4 +33,5 @@ class User {
         INACTIVE
 
     }
+
 }
