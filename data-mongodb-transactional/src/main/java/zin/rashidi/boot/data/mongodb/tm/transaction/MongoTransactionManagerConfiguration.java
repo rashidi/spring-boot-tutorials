@@ -1,4 +1,4 @@
-package zin.rashidi.boot.data.mongodb.tm.configuration;
+package zin.rashidi.boot.data.mongodb.tm.transaction;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
