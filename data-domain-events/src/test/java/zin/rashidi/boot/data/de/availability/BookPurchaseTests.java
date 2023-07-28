@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Import;
 
 import zin.rashidi.boot.data.de.TestDataDomainEventsApplication;
 import zin.rashidi.boot.data.de.book.Book;
@@ -18,8 +17,7 @@ import zin.rashidi.boot.data.de.book.BookRepository;
 /**
  * @author Rashidi Zin
  */
-@SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create", webEnvironment = RANDOM_PORT)
-@Import(TestDataDomainEventsApplication.class)
+@SpringBootTest(classes = TestDataDomainEventsApplication.class, properties = "spring.jpa.hibernate.ddl-auto=create", webEnvironment = RANDOM_PORT)
 class BookPurchaseTests {
 
     @Autowired
