@@ -1,0 +1,129 @@
+= @Transactional with Spring Data MongoDB
+Rashidi Zin <rashidi@zin.my>
+1.0, July 27, 2022
+:toc:
+:icons: font
+:url-quickref: https://docs.asciidoct.org/asciidoc/latest/syntax-quick-reference/
+
+Guide to utilise `@Transactional` with Spring Data MongoDB.
+
+== Background
+
+Unlike Spring Data JPA, Spring Data MongoDB does not support `@Transactional` out of the box. In this guide, we will explore how to implement `@Transactional` with Spring Data MongoDB.
+
+== Scenario
+
+We will implement based on the following scenario:
+
+[,text]
+----
+When a new User is created
+Then the status should be ACTIVE
+----
+
+== Implementation
+
+=== Integration Test
+
+We will verify our implementation through integration test whereby we will create a new `User` and verify that the status is `ACTIVE`.
+
+[source,java]
+----
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@Testcontainers
+class CreateUserTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"));
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Test
+    void create() {
+        var headers = new HttpHeaders() {{ setContentType(APPLICATION_JSON); }};
+        var body = """
+                {
+                  "username": "rashidi.zin",
+                  "name": "Rashidi Zin"
+                }
+                """;
+
+        var response = restTemplate.exchange("/users", POST, new HttpEntity<>(body, headers), User.class);
+        var createdUser = response.getBody();
+
+        assertThat(createdUser).extracting("status").isEqualTo(ACTIVE);
+    }
+
+}
+----
+
+=== Event Listener
+
+We will start by implementing an `EventListener` that will be responsible to assign the status to `ACTIVE` when a new `User` is created.
+
+[source,java]
+----
+@Component
+class UpdateUserStatus {
+
+    @TransactionalEventListener
+    public void onBeforeSave(BeforeSaveEvent<User> event) {
+        var user = event.getSource();
+
+        user.status(ACTIVE);
+    }
+
+}
+----
+
+As we can see, `onBeforeSave` is annotated with `@TransactionalEventListener`. This annotation will ensure that the event listener will be
+executed within a transaction.
+
+=== Transactional Method
+
+Next, we will implement a transactional method that will create a new `User`.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping("/users")
+    @ResponseStatus(CREATED)
+    @Transactional
+    public User add(@RequestBody User user) {
+        return repository.save(user);
+    }
+
+}
+----
+
+=== Configuration Class
+
+Finally, we will configure `MongoTransactionManager` to enable transaction support for MongoDB.
+
+[source,java]
+----
+@Configuration
+@EnableTransactionManagement
+class MongoTransactionManagerConfiguration {
+
+    @Bean
+    public PlatformTransactionManager transactionManager(MongoDatabaseFactory factory) {
+        return new MongoTransactionManager(factory);
+    }
+
+}
+----
+
+=== Verification
+
+In order to ensure that our implementation is working as expected, the test implemented in link:src/test/java/zin/rashidi/boot/data/mongodb/tm/user/CreateUserTests.java[CreateUserTests] should pass.
