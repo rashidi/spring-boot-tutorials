@@ -7,30 +7,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
 
 import zin.rashidi.boot.data.de.TestDataDomainEventsApplication;
 import zin.rashidi.boot.data.de.book.Book;
+import zin.rashidi.boot.data.de.book.BookRepository;
 
 /**
  * @author Rashidi Zin
  */
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create", webEnvironment = RANDOM_PORT)
 @Import(TestDataDomainEventsApplication.class)
-@AutoConfigureTestEntityManager
-@Transactional
 class BookPurchaseTests {
 
     @Autowired
     private BookAvailabilityRepository availabilities;
 
     @Autowired
-    private TestEntityManager em;
+    private BookRepository books;
 
     @Autowired
     private TestRestTemplate client;
@@ -39,13 +35,13 @@ class BookPurchaseTests {
 
     @BeforeEach
     void setup() {
-        book = em.persist(book());
+        book = books.save(book());
 
         availabilities.save(availability());
     }
 
     @Test
-    @DisplayName("Given total book availability is 100 When a book is purchased Then total book availability is 99")
+    @DisplayName("Given total book availability is 100 When a book is purchased Then total book availability should be 99")
     void purchase() {
         client.delete("/books/{id}/purchase", book.getId());
 
