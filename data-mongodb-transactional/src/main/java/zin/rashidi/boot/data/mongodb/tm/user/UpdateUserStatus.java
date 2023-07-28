@@ -16,7 +16,7 @@ class UpdateUserStatus {
     public void onBeforeSave(BeforeSaveEvent<User> event) {
         var user = event.getSource();
 
-        user.status(ACTIVE);
+        user.setStatus(ACTIVE);
     }
 
 }

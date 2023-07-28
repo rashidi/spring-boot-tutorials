@@ -12,18 +12,40 @@ class User {
 
     @Id
     private ObjectId id;
-    private final String name;
-    private final String username;
+    private String name;
+    private String username;
     private Status status;
 
-    User(String name, String username) {
+    public ObjectId getId() {
+        return id;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
         this.username = username;
     }
 
-    public User status(Status status) {
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
         this.status = status;
-        return this;
     }
 
     enum Status {
