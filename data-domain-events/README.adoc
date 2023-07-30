@@ -8,7 +8,7 @@ Rashidi Zin <rashidi@zin.my>
 Reduce method complexity by utilising `@DomainEvents` from link:https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.domain-events[Spring Data JPA].
 
 == Background
-In this repository we will explore Spring Data JPA helps us to adhere to [Single Responsibility](https://en.wikipedia.org/wiki/Single-responsibility_principle), a component of [SOLID Principles](https://en.wikipedia.org/wiki/SOLID).
+In this repository we will explore Spring Data JPA helps us to adhere to link:https://en.wikipedia.org/wiki/Single-responsibility_principle[Single Responsibility], a component of link:https://en.wikipedia.org/wiki/SOLID[SOLID Principles].
 
 We will reduce responsibilities of a method that does more than one thing.
 
@@ -43,7 +43,6 @@ class BookPurchaseTests {
 ----
 
 Full implementation can be found in link:src/test/java/zin/rashidi/boot/data/de/availability/BookPurchaseTests.java[BookPurchaseTests.java].
-This test will be unaffected by refactoring we will be doing through out the process.
 
 === Domain and Repository class
 
