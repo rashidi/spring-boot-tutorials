@@ -9,6 +9,7 @@ separate project.
 | Topic                                                                   | Description                                                                             |
 |-------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | [Spring Cloud Environment Repository](cloud-jdbc-env-repo)              | Store environment properties in MySQL database with Spring Cloud Environment Repository |
+| [Spring Data Domain Events](data-domain-events)                         | Publish Domain Events with Spring Data                                                  |
 | [Spring Data Envers Audit](data-envers-audit)                           | Enable with Entity Revisions using Spring Data Envers                                   |
 | [Spring Data JPA Audit](data-jpa-audit)                                 | Enable Audit with Spring Data JPA                                                       |
 | [Spring Data MongoDB: Transactional](data-mongodb-transactional)        | Enable `@Transactional` support for Spring Data MongoDB                                 |
