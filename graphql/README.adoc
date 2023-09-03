@@ -1,91 +1,186 @@
-= AsciiDoc Article Title
-Firstname Lastname <author@asciidoctor.org>
-3.0, July 29, 2022: AsciiDoc article template
+= GraphQL With Spring Boot
+Rashidi Zin <rashidi@zin.my>
+1.0, September 3, 2023: GraphQL With Spring Boot
 :toc:
 :icons: font
 :url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
 
-Content entered directly below the header but before the first section heading is called the preamble.
+Implementing https://graphql.org/[GraphQL] server with https://spring.io/guides/gs/graphql-server/[Spring Boot GraphQL Server].
 
-== First level heading
+== Background
 
-This is a paragraph with a *bold* word and an _italicized_ word.
+GraphQL provides the flexibility for clients to retrieve fields that are only relevant to them. In this tutorial we will
+explore how we can implement GraphQL server with Spring Boot.
 
-.Image caption
-image::image-file-name.png[I am the image alt text.]
+== Server Implementation
 
-This is another paragraph.footnote:[I am footnote text and will be displayed at the bottom of the article.]
+=== schema.graphqls
 
-=== Second level heading
-
-.Unordered list title
-* list item 1
-** nested list item
-*** nested nested list item 1
-*** nested nested list item 2
-* list item 2
-
-This is a paragraph.
-
-.Example block title
-====
-Content in an example block is subject to normal substitutions.
-====
-
-.Sidebar title
-****
-Sidebars contain aside text and are subject to normal substitutions.
-****
-
-==== Third level heading
-
-[#id-for-listing-block]
-.Listing block title
+[source,graphql]
 ----
-Content in a listing block is subject to verbatim substitutions.
-Listing block content is commonly used to preserve code input.
+scalar Long
+
+type Query {
+    findAll: [Book]
+    findByTitle(title: String): Book
+}
+
+type Book {
+    isbn: Isbn
+    title: String
+    author: Author
+}
+
+type Isbn {
+    ean: Long
+    registrationGroup: Int
+    registrant: Int
+    publication: Int
+    digit: Int
+}
+
+type Author {
+    name: Name
+}
+
+type Name {
+    first: String
+    last: String
+}
 ----
 
-===== Fourth level heading
+This is the schema that inform our clients on available fields and queries. Next is to implement a `@Controller` that
+handle all requests.
 
-.Table title
-|===
-|Column heading 1 |Column heading 2
+=== Controller
 
-|Column 1, row 1
-|Column 2, row 1
+[source, java]
+----
+@Controller
+class BookResource {
 
-|Column 1, row 2
-|Column 2, row 2
-|===
+    private final BookRepository repository;
 
-====== Fifth level heading
+    BookResource(BookRepository repository) {
+        this.repository = repository;
+    }
 
-[quote,firstname lastname,movie title]
-____
-I am a block quote or a prose excerpt.
-I am subject to normal substitutions.
-____
+    @QueryMapping
+    public List<Book> findAll() {
+        return repository.findAll();
+    }
 
-[verse,firstname lastname,poem title and more]
-____
-I am a verse block.
-  Indents and endlines are preserved in verse blocks.
-____
+    @QueryMapping
+    public Book findByTitle(@Argument String title) {
+        return repository.findByTitle(title);
+    }
 
-== First level heading
+}
+----
 
-TIP: There are five admonition labels: Tip, Note, Important, Caution and Warning.
+link:src/main/java/zin/rashidi/boot/graphql/book/BookResource.java[BookResource] implements two types of services -
+`findAll`, a service without parameter and `findByTitle`, a service with a parameter. Both services are annotated with
+`@QueryMapping` to indicate that they are GraphQL queries.
 
-// I am a comment and won't be rendered.
+== Verification
 
-. ordered list item
-.. nested ordered list item
-. ordered list item
+We will utilise `@GraphQlTest` to verify our implementation.
 
-The text at the end of this sentence is cross referenced to <<_third_level_heading,the third level heading>>
+=== Integration Test
 
-== First level heading
+[source, java]
+----
+@GraphQlTest(controllers = BookResource.class, includeFilters = @Filter(type = ANNOTATION, classes = {Configuration.class, Repository.class}))
+class BookResourceTests {
 
-This is a link to the https://docs.asciidoctor.org/home/[Asciidoctor documentation].
-This is an attribute reference {url-quickref}[that links this text to the AsciiDoc Syntax Quick Reference].
+    @Autowired
+    private GraphQlTester client;
+
+    @Test
+    @DisplayName("Given there are 3 books, when findAll is invoked, then return all books")
+    void findAll() {
+        client.documentName("books")
+                .execute()
+                .path("findAll")
+                .matchesJson(
+                        """
+                                        [
+                                              {
+                                                "title": "Clean Code"
+                                              },
+                                              {
+                                                "title": "Design Patterns"
+                                              },
+                                              {
+                                                "title": "The Hobbit"
+                                              }
+                                            ]
+                                """
+                )
+        ;
+    }
+
+    @Test
+    @DisplayName("Given there is a book titled The Hobbit, when findByTitle is invoked, then return the book")
+    void findByTitle() {
+        client.documentName("books")
+                .variable("title", "The Hobbit")
+                .execute()
+                .path("findByTitle")
+                .matchesJson(
+                        """
+                                {
+                                  "title": "The Hobbit",
+                                  "isbn": {
+                                    "ean": 9780132350884,
+                                    "registrationGroup": 978,
+                                    "registrant": 0,
+                                    "publication": 13235088,
+                                    "digit": 4
+                                  },
+                                  "author": {
+                                    "name": {
+                                      "first": "J.R.R.",
+                                      "last": "Tolkien"
+                                    }
+                                  }
+                                }
+                                """
+                );
+    }
+
+}
+----
+
+=== Client schema definition
+
+In order to map the response to a Java object, we need to define the schema of the response. This is done in link:src/test/resources/graphql-test/books.graphql[books.graphl].
+
+[source, graphql]
+----
+query books($title: String) {
+  findByTitle(title: $title) {
+    title
+    isbn {
+      ean
+      registrationGroup
+      registrant
+      publication
+      digit
+    }
+    author {
+      name {
+        first
+        last
+      }
+    }
+  }
+
+  findAll {
+    title
+  }
+
+}
+----
+
+By executing tests implemented in link:src/test/java/zin/rashidi/boot/graphql/book/BookResourceTests.java[BookResourceTests], we can verify that our implementation is working as expected.
