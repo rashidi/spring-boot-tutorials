@@ -1,0 +1,23 @@
+query books($title: String) {
+  findByTitle(title: $title) {
+    title
+    isbn {
+      ean
+      registrationGroup
+      registrant
+      publication
+      digit
+    }
+    author {
+      name {
+        first
+        last
+      }
+    }
+  }
+
+  findAll {
+    title
+  }
+
+}

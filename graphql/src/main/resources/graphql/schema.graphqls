@@ -1,0 +1,29 @@
+scalar Long
+
+type Query {
+    findAll: [Book]
+    findByTitle(title: String): Book
+}
+
+type Book {
+    isbn: Isbn
+    title: String
+    author: Author
+}
+
+type Isbn {
+    ean: Long
+    registrationGroup: Int
+    registrant: Int
+    publication: Int
+    digit: Int
+}
+
+type Author {
+    name: Name
+}
+
+type Name {
+    first: String
+    last: String
+}
