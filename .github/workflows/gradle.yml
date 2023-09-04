@@ -29,4 +29,20 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-    - run: ./gradlew build --scan
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+    - name: Run build with Gradle wrapper
+      id: gradle
+      run: ./gradlew build --scan    
+    - name: "Add Build Scan URL as PR comment"
+      uses: actions/github-script@v5
+      if: github.event_name == 'pull_request' && failure()
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '❌ ${{ github.workflow }} failed: ${{ steps.gradle.outputs.build-scan-url }}'
+          })
