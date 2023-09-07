@@ -12,6 +12,7 @@ separate project.
 | [Spring Data Domain Events](data-domain-events)                         | Publish Domain Events with Spring Data                                                  |
 | [Spring Data Envers Audit](data-envers-audit)                           | Enable with Entity Revisions using Spring Data Envers                                   |
 | [Spring Data JPA Audit](data-jpa-audit)                                 | Enable Audit with Spring Data JPA                                                       |
+| [Spring Data MongoDB Audit](data-mongodb-audit)                         | Enable Audit with Spring Data MongoDB                                                   |
 | [Spring Data MongoDB: Transactional](data-mongodb-transactional)        | Enable `@Transactional` support for Spring Data MongoDB                                 |
 | [Spring GraphQL Server](graphql)                                        | Implement GraphQL server with Spring GrapQL Server                                      |
 | [Spring Test: Load data with Testcontainers](data-mongodb-tc-data-load) | Load test data with Testcontainers instead of `BeforeEach`                              |
