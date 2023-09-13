@@ -8,6 +8,7 @@ separate project.
 # Topics
 | Topic                                                                   | Description                                                                             |
 |-------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [Spring Batch: Batch Job With REST API source](batch-rest-repository) | Spring Batch job that reads information from REST API |
 | [Spring Cloud Environment Repository](cloud-jdbc-env-repo)              | Store environment properties in MySQL database with Spring Cloud Environment Repository |
 | [Spring Data Domain Events](data-domain-events)                         | Publish Domain Events with Spring Data                                                  |
 | [Spring Data Envers Audit](data-envers-audit)                           | Enable with Entity Revisions using Spring Data Envers                                   |

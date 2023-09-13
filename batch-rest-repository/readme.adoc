@@ -1,0 +1,158 @@
+= Spring Batch: Working With REST Resources
+Rashidi Zin <rashidi@zin.my>
+3.0, July 29, 2022: AsciiDoc article template
+:toc:
+:icons: font
+:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+
+Implement batch operation for REST resources with https://spring.io/projects/spring-batch[Spring Batch]
+
+== Background
+Spring Batch allows us to perform large volumes of records from several resources such as https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/item/file/FlatFileItemReader.html[File],
+https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/item/database/JpaPagingItemReader.html[Relational Database], and,
+https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/item/json/JsonItemReader.html[JSON file] to name a few. However, there is no options for reading from REST API.
+
+In this article, we will explore how to implement batch operation that reads from REST resources with Spring Batch. We will retrieve a list of users from https://jsonplaceholder.typicode.com/users[JSON Placeholder] and save them into a database.
+
+== REST Repository
+We will implement link:src/main/java/zin/rashidi/boot/batch/user/UserRepository.java[UserRepository], a REST repository that will be
+responsible to retrieve list of link:src/main/java/zin/rashidi/boot/batch/user/User.java[User] from JSON Placeholder.
+
+[source,java]
+----
+interface UserRepository {
+
+    @GetExchange("/users")
+    List<User> findAll();
+
+}
+----
+
+This class is implemented with https://docs.spring.io/spring-framework/reference/web/webflux-http-interface-client.html[declarative HTTP].
+For details on its implementation please look into link:src/main/java/zin/rashidi/boot/batch/web/WebClientConfiguration.java[WebClientConfiguration]
+and link:src/main/java/zin/rashidi/boot/batch/user/UserWebClientConfiguration.java[UserWebClientConfiguration].
+
+== Job Configuration
+Next is to implement the job that will be responsible to read from REST resource and save them into a database. `Job` consists of `Step` and `Step`
+consists of `ItemReader` and `ItemWriter`. We will implement all of them in link:src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[UserJobConfiguration].
+
+[source,java]
+----
+@Configuration
+class UserJobConfiguration {
+
+    private final UserRepository repository;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final MongoOperations mongo;
+
+    UserJobConfiguration(UserRepository repository, JobRepository jobRepository, PlatformTransactionManager transactionManager, MongoOperations mongo) {
+        this.repository = repository;
+        this.jobRepository = jobRepository;
+        this.transactionManager = transactionManager;
+        this.mongo = mongo;
+    }
+
+    @Bean
+    public Job userJob() {
+        return new JobBuilder("userJob", jobRepository).start(step()).build();
+    }
+
+    private Step step() {
+        return new StepBuilder("userStep", jobRepository)
+                .<User, User>chunk(10, transactionManager)
+                .reader(reader())
+                .writer(writer())
+                .build();
+    }
+
+    private ItemReader<User> reader() {
+        return new ItemReader<>() {
+
+            private final AtomicInteger counter = new AtomicInteger();
+            private List<User> users = new ArrayList<>();
+
+
+            @Override
+            public User read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
+                return getUser();
+            }
+
+            private User getUser() {
+                users = users.isEmpty() ? repository.findAll() : users;
+                return counter.get() < users.size() ? users.get(counter.getAndIncrement()) : null;
+            }
+
+        };
+    }
+
+    private MongoItemWriter<User> writer() {
+        return new MongoItemWriterBuilder<User>()
+                .template(mongo)
+                .build();
+    }
+
+}
+----
+
+From the code above, we can see that `ItemReader` will return `null` once it reaches the end of the list. With that the `reader` knows that
+there is no more content to read and its operation will be terminated.
+
+[source,java]
+----
+@Configuration
+class UserJobConfiguration {
+    private ItemReader<User> reader() {
+        return new ItemReader<>() {
+
+            private final AtomicInteger counter = new AtomicInteger();
+            private List<User> users = new ArrayList<>();
+
+
+            @Override
+            public User read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
+                return getUser();
+            }
+
+            private User getUser() {
+                users = users.isEmpty() ? repository.findAll() : users;
+                return counter.get() < users.size() ? users.get(counter.getAndIncrement()) : null;
+            }
+
+        };
+    }
+}
+----
+
+Now that we have implemented the `Job`, we can verify that it is working by executing an integration test.
+
+== Verification
+The following test will start the application which will automatically run the `Job` and save the result into a database. We will wait
+up to 30 seconds before verifying the result.
+
+[source,java]
+----
+@Import(TestBatchRestRepositoryApplication.class)
+@SpringBootTest(properties = "spring.batch.jdbc.initialize-schema=always")
+class UserBatchJobTests {
+
+    @Autowired
+    private MongoOperations mongo;
+
+    @Test
+    @DisplayName("Given there are 10 users returned from REST Service When the job is executed Then all users should be saved to MongoDB")
+    void launch() {
+
+        await().atMost(ofSeconds(30)).untilAsserted(() -> {
+            var persistedUsers = mongo.findAll(User.class);
+
+            assertThat(persistedUsers).hasSize(10);
+        });
+
+    }
+
+}
+----
+
+To ensure that the implementation is working as expected, we will check the database, and it should contain 10 users, which is the total
+number of users returned from the REST service.
