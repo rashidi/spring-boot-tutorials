@@ -26,11 +26,13 @@ class UserBatchJobTests {
     @Test
     @DisplayName("Given there are 10 users returned from REST Service When the job is executed Then all users should be saved to MongoDB")
     void launch() {
-        await().atMost(ofSeconds(30)).untilAsserted(() -> {
-            var users = mongo.findAll(User.class);
 
-            assertThat(users).hasSize(10);
+        await().atMost(ofSeconds(30)).untilAsserted(() -> {
+            var persistedUsers = mongo.findAll(User.class);
+
+            assertThat(persistedUsers).hasSize(10);
         });
+
     }
 
 }
