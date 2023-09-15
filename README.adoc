@@ -1,0 +1,24 @@
+= Spring Boot Guides &amp; Tutorials
+
+Collection of Spring Boot guides and tutorials for future reference and, hopefully, to help others.
+
+== About
+
+Repository contains a collection of https://spring.io/projects/spring-boot[Spring Boot] guides and tutorials. Each guide/tutorial is a
+separate project.
+
+== Topics
+
+|===
+|Topic |Description
+
+|link:batch-rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
+|link:cloud-jdbc-env-repo[Spring Cloud Environment Repository] |Store environment properties in MySQL database with Spring Cloud Environment Repository
+|link:data-domain-events[Spring Data Domain Events] |Publish Domain Events with Spring Data
+|link:data-envers-audit[Spring Data Envers Audit] |Enable with Entity Revisions using Spring Data Envers
+|link:data-jpa-audit[Spring Data JPA Audit] |Enable Audit with Spring Data JPA
+|link:data-mongodb-audit[Spring Data MongoDB Audit] |Enable Audit with Spring Data MongoDB
+|link:data-mongodb-transactional[Spring Data MongoDB: Transactional] |Enable `@Transactional` support for Spring Data MongoDB
+|link:graphql[Spring GraphQL Server] |Implement GraphQL server with Spring GrapQL Server
+|link:data-mongodb-tc-data-load[Spring Test: Load data with Testcontainers] |Load test data with Testcontainers instead of `BeforeEach`
+|===
