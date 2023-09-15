@@ -4,9 +4,9 @@ name: GitHub Pages Publish
 # events but only for the master branch
 on:
   push:
-    branches: [ gh-pages, master, main ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ gh-pages, master, main ]
+    branches: [ master, main ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v3
       
     # Includes the AsciiDoctor GitHub Pages Action to convert adoc files to html and publish to gh-pages branch
-    - name: asciidoctor-ghpages
+    - name: Ascii Doctor to GH Pages
       uses: manoelcampos/asciidoctor-ghpages-action@v2
       with:
         pdf_build: true
