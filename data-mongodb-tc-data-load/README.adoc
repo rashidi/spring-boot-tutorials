@@ -13,7 +13,8 @@ It is common that we load data programmatically. There are several approaches to
 `@BeforeEach` will be executed before each test method execution while `@AfterEach` will be executed after test method executed. In this example,
 we will use `@BeforeEach` to load data and `@AfterEach` to delete data.
 
-```java
+[source,java]
+----
 @DataMongoTest
 @Testcontainers
 class UserRepositoryTests {
@@ -53,7 +54,7 @@ class UserRepositoryTests {
         assertThat(user).isNull();
     }
 }
-```
+----
 
 While this approach works, it might be time-consuming when we have many methods to be executed. Another approach is to use `@TestExecutionListeners`
 
@@ -63,7 +64,8 @@ which can be used to execute code before and after test execution.
 
 The following `TestExecutionListener` is used to load data before executing the test class and remove all data after test class has been executed.
 
-```java
+[source,java]
+----
 class UserTestExecutionListener extends AbstractTestExecutionListener {
 
     private User user;
@@ -84,11 +86,12 @@ class UserTestExecutionListener extends AbstractTestExecutionListener {
     }
 
 }
-```
+----
 
 Then we will include it in our test class:
 
-```java
+[source,java]
+----
 @DataMongoTest
 @Import(UserRepositoryTests.TestcontainersConfiguration.class)
 @TestExecutionListeners(listeners = UserTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
@@ -130,7 +133,7 @@ class UserRepositoryTests {
 
     }
 }
-```
+----
 
 In this example, we are using `@TestExecutionListeners` to register `UserTestExecutionListener` which will be executed before and after test class execution. Alternatively, we also no longer utilise on
 helpful annotations - `@Testcontainers`, `@Container`, and `@ServiceConnection`.
@@ -138,18 +141,20 @@ helpful annotations - `@Testcontainers`, `@Container`, and `@ServiceConnection`.
 == Load Data Using Testcontainers
 Next approach is to load data using `mongo-init.js` and Testcontainers. We will start by inserting data through link:src/test/resources/mongo-init.js[mongo-init.js] file.
 
-```javascript
+[source,javascript]
+----
 db.createCollection("user");
 
 db.user.insert({
   "name": "Rashidi Zin",
   "username": "rashidi.zin"
 });
-```
+----
 
 Then we will create a `MongoDBContainer` and mount the `mongo-init.js` file into `/docker-entrypoint-initdb.d` directory.
 
-```java
+[source,java]
+----
 @DataMongoTest
 @Testcontainers
 class UserRepositoryTests {
@@ -159,12 +164,13 @@ class UserRepositoryTests {
     private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js");
 }
-```
+----
 
 Next is to inform Testcontainers on how to determine that our MongoDB is ready. This will be determined by the checking that the phrase `waiting for connections`
 appeared twice:
 
-```java
+[source,java]
+----
 @DataMongoTest
 @Testcontainers
 class UserRepositoryTests {
@@ -175,11 +181,12 @@ class UserRepositoryTests {
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
             .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2));
 }
-```
+----
 
 With that, data will be loaded into MongoDB before the test execution. Full implementation of link:src/test/java/zin/rashidi/data/mongodb/tc/dataload/user/UserRepositoryTests.java[`UserRepositoryTests`]:
 
-```java
+[source,java]
+----
 @DataMongoTest
 @Testcontainers
 class UserRepositoryTests {
@@ -212,6 +219,6 @@ class UserRepositoryTests {
         assertThat(user).isNull();
     }
 }
-```
+----
 
 This also allows us to have a single source of truth in managing data for our tests.
