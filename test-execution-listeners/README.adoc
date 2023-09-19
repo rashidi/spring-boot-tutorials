@@ -1,0 +1,62 @@
+= Spring Test: Managing Test Data with `TestExecutionListener`
+:source-highlighter: highlightjs
+:source-language: java
+Rashidi Zin <rashidi@zin.my>
+1.0, September 19, 2023
+:toc:
+:icons: font
+:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+
+We often make use of `@BeforeEach` and `@AfterEach` methods to prepare and clean up test data. However, this approach is not scalable and can be difficult to maintain. In this article, we will look at how we can use `TestExecutionListener` to manage test data.
+
+== Background
+
+Spring provides link:https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/test/context/TestExecutionListener.html[`TestExecutionListener`] interface that we can implement to hook into the test execution lifecycle. This helps us in ensuring that our test classes are concise and not cluttered with test data preparation and clean up code.
+
+In this article, we will look at how we can use `TestExecutionListener` to manage test data. We will implement listeners to create initial data, update relevant data, and clean up data after the test execution.
+
+== `TestExecutionListener` classes
+
+=== Creating initial data
+We will start by creating initial link:src/main/java/zin/rashidi/boot/test/user/User.java[User] data which consists of `name` and `username` fields.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/test/user/UserCreationTestExecutionListener.java[lines=10..24]
+----
+
+By default `getOrder` method returns `LOWEST_PRECEDENCE` which means that this listener will be executed last. Since we want this listener to always be executed first, we will set the order to `HIGHEST_PRECEDENCE`.
+
+=== Update relevant data
+Our test will focus on finding `User` with `status` `INACTIVE`. We will create a listener to update the `status` of the `User` to `INACTIVE` after the test execution.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/test/user/UserStatusUpdateTestExecutionListener.java[lines=14..29]
+----
+
+Given that we are expecting a `User` with `username` `rashidi.zin` to be returned, we will update the `status` of the `User` with `username` `rashidi.zin` to `INACTIVE`.
+
+In this listener, we will set the order to `1` as we want to ensure it will not be the last one to be executed.
+
+=== Clean up data
+Both listeners above will create and update `User` data. They will be executed _before_ test class. For data cleanup it will be executed _after_ test class is executed.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/test/user/UserDeletionTestExecutionListener.java[lines=12..25]
+----
+
+== Registering `TestExecutionListener` classes
+Finally, we will implement a test class to test the link:src/main/java/zin/rashidi/boot/test/user/UserRepository.java[UserRepository] which will be executed with the listeners above.
+We will define necessary `TestExecutionListeners` using `@TestExecutionListeners` annotation and we will also set the `mergeMode` to `MERGE_WITH_DEFAULTS` to ensure that the default listeners are also executed.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/test/user/UserRepositoryTests.java[lines=21..47]
+----
+
+While `findByStatus` will validate our implementation in `UserCreationTestExecutionListener` and `UserStatusUpdateTestExecutionListener`, a log message will be printed to indicate that `UserDeletionTestExecutionListener` is executed.
+
+== Conclusion
+With `TestExecutionListener` data can be reused across test classes. This helps us in ensuring that our test classes are concise and not cluttered with test data preparation and clean up code.
