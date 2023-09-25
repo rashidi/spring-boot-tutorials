@@ -56,7 +56,7 @@ We will perform a `POST` request to create a `Book` with an `Author` that is `IN
 [source,java]
 ----
 include::src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[lines=28..66]
-include::src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[lines=89]
+include::src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[lines=89..90]
 ----
 
 Full implementation of the test can be found in link:src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[CreateBookTests].
