@@ -25,7 +25,9 @@ class BookAvailabilityManagement {
     public void updateTotal(BookPurchaseEvent event) {
         var book = event.getSource();
 
-        repository.findByIsbn(book.getIsbn()).map(BookAvailability::reduceTotal).ifPresent(repository::save);
+        repository.findByIsbn(book.getIsbn())
+                .map(BookAvailability::reduceTotal)
+                .ifPresent(repository::save);
     }
 
 }
