@@ -57,7 +57,6 @@ class UserJobConfiguration {
             private final AtomicInteger counter = new AtomicInteger();
             private List<User> users = new ArrayList<>();
 
-
             @Override
             public User read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
                 return getUser();

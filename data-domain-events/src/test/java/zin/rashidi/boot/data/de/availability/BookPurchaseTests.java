@@ -17,7 +17,11 @@ import zin.rashidi.boot.data.de.book.BookRepository;
 /**
  * @author Rashidi Zin
  */
-@SpringBootTest(classes = TestDataDomainEventsApplication.class, properties = "spring.jpa.hibernate.ddl-auto=create", webEnvironment = RANDOM_PORT)
+@SpringBootTest(
+        classes = TestDataDomainEventsApplication.class,
+        properties = "spring.jpa.hibernate.ddl-auto=create",
+        webEnvironment = RANDOM_PORT
+)
 class BookPurchaseTests {
 
     @Autowired

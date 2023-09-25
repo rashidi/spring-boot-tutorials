@@ -1,6 +1,8 @@
 = Spring Batch: Working With REST Resources
+:source-highlighter: highlightjs
+:source-language: java
 Rashidi Zin <rashidi@zin.my>
-3.0, July 29, 2022: AsciiDoc article template
+2.0, September, 2023
 :toc:
 :icons: font
 :url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
@@ -20,12 +22,7 @@ responsible to retrieve list of link:src/main/java/zin/rashidi/boot/batch/user/U
 
 [source,java]
 ----
-interface UserRepository {
-
-    @GetExchange("/users")
-    List<User> findAll();
-
-}
+include::src/main/java/zin/rashidi/boot/batch/user/UserRepository.java[lines=10..15]
 ----
 
 This class is implemented with https://docs.spring.io/spring-framework/reference/web/webflux-http-interface-client.html[declarative HTTP].
@@ -38,61 +35,7 @@ consists of `ItemReader` and `ItemWriter`. We will implement all of them in link
 
 [source,java]
 ----
-@Configuration
-class UserJobConfiguration {
-
-    private final UserRepository repository;
-    private final JobRepository jobRepository;
-    private final PlatformTransactionManager transactionManager;
-    private final MongoOperations mongo;
-
-    UserJobConfiguration(UserRepository repository, JobRepository jobRepository, PlatformTransactionManager transactionManager, MongoOperations mongo) {
-        this.repository = repository;
-        this.jobRepository = jobRepository;
-        this.transactionManager = transactionManager;
-        this.mongo = mongo;
-    }
-
-    @Bean
-    public Job userJob() {
-        return new JobBuilder("userJob", jobRepository).start(step()).build();
-    }
-
-    private Step step() {
-        return new StepBuilder("userStep", jobRepository)
-                .<User, User>chunk(10, transactionManager)
-                .reader(reader())
-                .writer(writer())
-                .build();
-    }
-
-    private ItemReader<User> reader() {
-        return new ItemReader<>() {
-
-            private final AtomicInteger counter = new AtomicInteger();
-            private List<User> users = new ArrayList<>();
-
-
-            @Override
-            public User read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
-                return getUser();
-            }
-
-            private User getUser() {
-                users = users.isEmpty() ? repository.findAll() : users;
-                return counter.get() < users.size() ? users.get(counter.getAndIncrement()) : null;
-            }
-
-        };
-    }
-
-    private MongoItemWriter<User> writer() {
-        return new MongoItemWriterBuilder<User>()
-                .template(mongo)
-                .build();
-    }
-
-}
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=26..80]
 ----
 
 From the code above, we can see that `ItemReader` will return `null` once it reaches the end of the list. With that the `reader` knows that
@@ -100,28 +43,10 @@ there is no more content to read and its operation will be terminated.
 
 [source,java]
 ----
-@Configuration
-class UserJobConfiguration {
-    private ItemReader<User> reader() {
-        return new ItemReader<>() {
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=26..27]
 
-            private final AtomicInteger counter = new AtomicInteger();
-            private List<User> users = new ArrayList<>();
-
-
-            @Override
-            public User read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
-                return getUser();
-            }
-
-            private User getUser() {
-                users = users.isEmpty() ? repository.findAll() : users;
-                return counter.get() < users.size() ? users.get(counter.getAndIncrement()) : null;
-            }
-
-        };
-    }
-}
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=54..72]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=79..80]
 ----
 
 Now that we have implemented the `Job`, we can verify that it is working by executing an integration test.
@@ -132,26 +57,7 @@ up to 30 seconds before verifying the result.
 
 [source,java]
 ----
-@Import(TestBatchRestRepositoryApplication.class)
-@SpringBootTest(properties = "spring.batch.jdbc.initialize-schema=always")
-class UserBatchJobTests {
-
-    @Autowired
-    private MongoOperations mongo;
-
-    @Test
-    @DisplayName("Given there are 10 users returned from REST Service When the job is executed Then all users should be saved to MongoDB")
-    void launch() {
-
-        await().atMost(ofSeconds(30)).untilAsserted(() -> {
-            var persistedUsers = mongo.findAll(User.class);
-
-            assertThat(persistedUsers).hasSize(10);
-        });
-
-    }
-
-}
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=19..38]
 ----
 
 To ensure that the implementation is working as expected, we will check the database, and it should contain 10 users, which is the total
