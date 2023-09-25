@@ -15,7 +15,10 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 /**
  * @author Rashidi Zin
  */
-@GraphQlTest(controllers = BookResource.class, includeFilters = @Filter(type = ANNOTATION, classes = {Configuration.class, Repository.class}))
+@GraphQlTest(
+        controllers = BookResource.class,
+        includeFilters = @Filter(type = ANNOTATION, classes = { Configuration.class, Repository.class })
+)
 class BookResourceTests {
 
     @Autowired
