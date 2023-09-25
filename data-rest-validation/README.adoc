@@ -1,0 +1,62 @@
+= Spring Data REST: Validation
+:source-highlighter: highlightjs
+:source-language: java
+Rashidi Zin <rashidi@zin.my>
+1.0, September 25, 2023
+:toc:
+:icons: font
+:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+
+Implement validation in Spring Data REST.
+
+== Background
+
+link:https://spring.io/projects/spring-data-rest[Spring Data REST] is a framework that helps developers to build hypermedia-driven REST web services. It is built on top of the Spring Data project and makes it easy to build hypermedia-driven REST web services that connect to Spring Data repositories – all using HAL as the driving hypermedia type.
+
+In this article, we will look at how to implement validation in Spring Data REST.
+
+== Domain Classes
+
+There are two `@Entity` classes, link:src/main/java/zin/rashidi/boot/data/rest/book/Author.java[Author] and link:src/main/java/zin/rashidi/boot/data/rest/book/Book.java[Book]. Both classes are accompanied by `JpaRepository` classes - link:src/main/java/zin/rashidi/boot/data/rest/book/AuthorRepository.java[AuthorRepository] and link:src/main/java/zin/rashidi/boot/data/rest/book/BookRepository.java[BookRepository].
+
+While `Author` and `Book` are standard JPA entities, their repositories are annotated with `@RepositoryRestResource` to expose them as REST resources.
+
+[source,java]
+----
+include::src/main/java/zin/rashidi/boot/data/rest/book/AuthorRepository.java[lines=11..14]
+----
+
+[source,java]
+----
+include::src/main/java/zin/rashidi/boot/data/rest/book/BookRepository.java[lines=11..14]
+----
+
+== Validation
+
+We will implement a validation that ensures that `Author` in `Book` is not `INACTIVE`. To do this, we will create a custom validator class, link:src/main/java/zin/rashidi/boot/data/rest/book/BeforeCreateBookValidator.java[BeforeCreateBookValidator].
+
+[source,java]
+----
+include::src/main/java/zin/rashidi/boot/data/rest/book/BeforeCreateBookValidator.java[lines=11..28]
+----
+
+As we can see, the validator class implements `Validator` interface and overrides `supports` and `validate` methods. The `supports` method checks if the class is `Book` and the `validate` method checks if the `Author` is `INACTIVE`. Next we will inform Spring about our `Validator` through link:src/main/java/zin/rashidi/boot/data/rest/book/BookValidatorConfiguration.java[BookValidatorConfiguration].
+
+[source,java]
+----
+include::src/main/java/zin/rashidi/boot/data/rest/book/BookValidatorConfiguration.java[lines=10..18]
+----
+
+Now, Spring is aware that the `Validator` will be executed before creating a `Book`.
+
+== Verify Implementation
+
+We will perform a `POST` request to create a `Book` with an `Author` that is `INACTIVE`. The request will be rejected with `400 Bad Request` response.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[lines=28..66]
+include::src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[lines=89]
+----
+
+Full implementation of the test can be found in link:src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[CreateBookTests].
