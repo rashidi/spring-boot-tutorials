@@ -2,7 +2,7 @@
 :source-highlighter: highlightjs
 :source-language: java
 Rashidi Zin <rashidi@zin.my>
-2.0, September, 2023
+2.0, September 27, 2023
 :toc:
 :icons: font
 :url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
