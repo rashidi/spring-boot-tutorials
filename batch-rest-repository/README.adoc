@@ -38,13 +38,15 @@ include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lin
 Now that we have implemented the `Job`, we can verify that it is working by executing an integration test.
 
 == Verification
-The following test will start the application which will automatically run the `Job` and save the result into a database. We will wait
-up to 30 seconds before verifying the result.
+We will launch `userJob` which will retrieve list of `User` from https://jsonplaceholder.typicode.com/users[JSON Placeholder] and save them into a database.
+Once completed then we will verify that the database contains the expected number of users.
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=19..38]
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=38..41]
+
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=52..71]
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=107..108]
 ----
 
-To ensure that the implementation is working as expected, we will check the database, and it should contain 10 users, which is the total
-number of users returned from the REST service.
+Full implementation can be found in link:src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[UserBatchJobTests].
