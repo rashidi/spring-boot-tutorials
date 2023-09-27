@@ -2,7 +2,7 @@
 :source-highlighter: highlightjs
 :source-language: java
 Rashidi Zin <rashidi@zin.my>
-2.0, September, 2023
+2.0, September 27, 2023
 :toc:
 :icons: font
 :url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
@@ -12,22 +12,9 @@ Implement batch operation for REST resources with https://spring.io/projects/spr
 == Background
 Spring Batch allows us to perform large volumes of records from several resources such as https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/item/file/FlatFileItemReader.html[File],
 https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/item/database/JpaPagingItemReader.html[Relational Database], and,
-https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/item/json/JsonItemReader.html[JSON file] to name a few. However, there is no options for reading from REST API.
+https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/item/json/JsonItemReader.html[JSON file] to name a few.
 
-In this article, we will explore how to implement batch operation that reads from REST resources with Spring Batch. We will retrieve a list of users from https://jsonplaceholder.typicode.com/users[JSON Placeholder] and save them into a database.
-
-== REST Repository
-We will implement link:src/main/java/zin/rashidi/boot/batch/user/UserRepository.java[UserRepository], a REST repository that will be
-responsible to retrieve list of link:src/main/java/zin/rashidi/boot/batch/user/User.java[User] from JSON Placeholder.
-
-[source,java]
-----
-include::src/main/java/zin/rashidi/boot/batch/user/UserRepository.java[lines=10..15]
-----
-
-This class is implemented with https://docs.spring.io/spring-framework/reference/web/webflux-http-interface-client.html[declarative HTTP].
-For details on its implementation please look into link:src/main/java/zin/rashidi/boot/batch/web/WebClientConfiguration.java[WebClientConfiguration]
-and link:src/main/java/zin/rashidi/boot/batch/user/UserWebClientConfiguration.java[UserWebClientConfiguration].
+In this article, we will explore how to implement batch operation that reads from REST resources with Spring Batch through `JsonItemReader`. We will retrieve a list of users from https://jsonplaceholder.typicode.com/users[JSON Placeholder] and save them into a database.
 
 == Job Configuration
 Next is to implement the job that will be responsible to read from REST resource and save them into a database. `Job` consists of `Step` and `Step`
@@ -35,18 +22,17 @@ consists of `ItemReader` and `ItemWriter`. We will implement all of them in link
 
 [source,java]
 ----
-include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=26..80]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=26..70]
 ----
 
-From the code above, we can see that `ItemReader` will return `null` once it reaches the end of the list. With that the `reader` knows that
-there is no more content to read and its operation will be terminated.
+From the code above, we can see that a `URL` form of `Resource` is assigned to `JsonItemReader`. We will depend on `JacksonJsonObjectRader` to convert response from link:https://jsonplaceholder.typicode.com/users[JSON Placeholder] to `User` object.
 
 [source,java]
 ----
 include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=26..27]
 
-include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=54..72]
-include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=79..80]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=52..62]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=69..70]
 ----
 
 Now that we have implemented the `Job`, we can verify that it is working by executing an integration test.
