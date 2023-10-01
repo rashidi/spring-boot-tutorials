@@ -27,12 +27,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.batch.core.ExitStatus.COMPLETED;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
+import static zin.rashidi.boot.batch.user.UserBatchJobTests.BatchTestConfiguration;
+import static zin.rashidi.boot.batch.user.UserBatchJobTests.JdbcTestConfiguration;
+
 /**
  * @author Rashidi Zin
  */
 @Testcontainers
 @SpringBatchTest
-@SpringJUnitConfig({ UserBatchJobTests.BatchTestConfiguration.class, UserBatchJobTests.JdbcTestConfiguration.class, UserJobConfiguration.class })
+@SpringJUnitConfig({
+        BatchTestConfiguration.class,
+        JdbcTestConfiguration.class,
+        UserJobConfiguration.class
+})
 @Sql(
         scripts = {
                 "classpath:org/springframework/batch/core/schema-drop-mysql.sql",
@@ -82,6 +89,21 @@ class UserBatchJobTests {
 
     }
 
+    @Test
+    @DisplayName("Given the username is allowed, When job is executed, Then user is inserted into database")
+    void usernameIsAllowed() {
+
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            var execution = launcher.launchJob();
+            assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
+        });
+
+        var existsByUsername = jdbc.queryForObject("SELECT EXISTS(SELECT * FROM users WHERE username = 'Moriah.Stanton')", Boolean.class);
+
+        assertThat(existsByUsername).isTrue();
+
+    }
+
     @AfterEach
     void truncateUsers() {
         jdbc.execute("TRUNCATE TABLE users");
@@ -117,4 +139,5 @@ class UserBatchJobTests {
             }
 
     }
+
 }

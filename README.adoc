@@ -13,7 +13,7 @@ separate project.
 |Topic |Description
 
 |link:batch-rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
-|link:batch-skip-step[Spring Batch: Skip Data Processing] |Skip processing particular data based on business logic in Spring Batch
+|link:batch-skip-step[Spring Batch: Skip Specific Data] |Skip processing specific data based on business logic in Spring Batch
 |link:cloud-jdbc-env-repo[Spring Cloud Environment Repository] |Store environment properties in MySQL database with Spring Cloud Environment Repository
 |link:data-domain-events[Spring Data Domain Events] |Publish Domain Events with Spring Data
 |link:data-envers-audit[Spring Data Envers Audit] |Enable with Entity Revisions using Spring Data Envers
