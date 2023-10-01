@@ -35,6 +35,7 @@ require additional configuration.
 include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=28..30]
 include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=43..45]
 include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=48..49]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=89..90]
 ----
 
 With that, when the `Job` detected that the `ItemProcessor` returns `null`, it will skip the data and continue to the next.
@@ -52,6 +53,7 @@ include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lin
 include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=43..44]
 include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=46]
 include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=48..49]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=89..90]
 ----
 
 Next is to inform `Step` to skip `UsernameNotAllowedException`:
@@ -76,8 +78,8 @@ We will implement integration tests to verify that our implementation is working
 [source,java]
 ----
 include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=36..51]
-include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=56..105]
-include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=142..143]
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=56..106]
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=143..144]
 ----
 
 By executing our tests in link:src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[UserBatchJobTests.java],

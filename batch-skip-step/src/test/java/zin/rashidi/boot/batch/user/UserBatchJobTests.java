@@ -90,18 +90,19 @@ class UserBatchJobTests {
     }
 
     @Test
-    @DisplayName("Given the username is allowed, When job is executed, Then user is inserted into database")
-    void usernameIsAllowed() {
+    @DisplayName("Given the username Elwyn.Skiles and Maxime_Nienow are skipped, When job is executed, Then users are not inserted into database")
+    void findAll() {
 
         await().atMost(10, SECONDS).untilAsserted(() -> {
             var execution = launcher.launchJob();
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });
 
-        var existsByUsername = jdbc.queryForObject("SELECT EXISTS(SELECT * FROM users WHERE username = 'Moriah.Stanton')", Boolean.class);
+        var users = jdbc.query("SELECT * FROM users", (rs, rowNum) ->
+                new User(rs.getLong("id"), rs.getString("name"), rs.getString("username"))
+        );
 
-        assertThat(existsByUsername).isTrue();
-
+        assertThat(users).extracting("username").doesNotContain("Elwyn.Skiles", "Maxime_Nienow");
     }
 
     @AfterEach
