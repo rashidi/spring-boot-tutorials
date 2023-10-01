@@ -15,6 +15,7 @@ gradleEnterprise {
 rootProject.name = 'spring-boot-tutorials'
 
 include('batch-rest-repository')
+include('batch-skip-step')
 include('cloud-jdbc-env-repo')
 include('data-domain-events')
 include('data-envers-audit')

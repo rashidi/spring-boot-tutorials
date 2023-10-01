@@ -1,0 +1,84 @@
+= Spring Batch: Skip Specific Data
+:source-highlighter: highlightjs
+:source-language: java
+Rashidi Zin <author@asciidoctor.org>
+1.0, October 1, 2023
+:toc:
+:icons: font
+:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+
+Skip processing specific data through business logic in Spring Batch.
+
+== Background
+
+Spring Batch is a framework for batch processing – execution of a series of jobs. A job is composed of a series of steps.
+Each step consists of a reader, a processor, and a writer. The reader reads data from a data source, the processor
+processes the data, and the writer writes the processed data to a data source.
+
+There are scenarios where we want to skip processing specific data through business logic. For example, in this guide,
+we want to skip data where `username` are either `Elwyn.Skiles` or `Maxime_Nienow`. We will look into two approaches;
+one by returning `null` and another by throwing `RuntimeException`. Both approaches will be implemented in the same
+`ItemProcessor`.
+
+Our application will process data from link:src/main/resources/users.json[users.json] file and write the processed data
+into MySQL database. Content of `users.json` is taken from link:https://jsonplaceholder.typicode.com/users[JSONPlaceholder].
+
+== Implement Logics to Skip Data
+
+=== Returning `null`
+
+First approach is to return `null` from `ItemProcessor` implementation. This approach is straight forward and does not
+require additional configuration.
+
+[source,java]
+----
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=28..30]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=43..45]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=48..49]
+----
+
+With that, when the `Job` detected that the `ItemProcessor` returns `null`, it will skip the data and continue to the next.
+
+=== Throwing `RuntimeException`
+
+Second approach is to throw `RuntimeException` from `ItemProcessor` implementation. This approach requires additional
+configuration to be done when defining `Step`.
+
+Implementation in `ItemProcessor` is as follows:
+
+[source,java]
+----
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=28..30]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=43..44]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=46]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=48..49]
+----
+
+Next is to inform `Step` to skip `UsernameNotAllowedException`:
+
+[source,java]
+----
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=28..30]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=63..65]
+include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=69..73]
+----
+
+With that, when the `Job` detected that the `ItemProcessor` throws `UsernameNotAllowedException`, it will skip the data.
+Full definition of the `Job` can be found in link:src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[UserJobConfiguration.java].
+
+== Verification
+
+We will implement integration tests to verify that our implementation is working as intended:
+
+1. Verify that data with `username` `Elwyn.Skiles` and `Maxime_Nienow` are skipped.
+2. Verify that data with `username` `Moriah.Stanton` is processed.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=36..51]
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=56..105]
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=142..143]
+----
+
+By executing our tests in link:src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[UserBatchJobTests.java],
+we will see that all users are processed except `Elwyn.Skiles` and `Maxime_Nienow`.
