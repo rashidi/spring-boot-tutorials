@@ -60,6 +60,22 @@ class UserBatchJobTests {
     private JdbcTemplate jdbc;
 
     @Test
+    @DisplayName("Given the username Elwyn.Skiles and Maxime_Nienow are skipped, When job is executed, Then users are not inserted into database")
+    void findAll() {
+
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            var execution = launcher.launchJob();
+            assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
+        });
+
+        var users = jdbc.query("SELECT * FROM users", (rs, rowNum) ->
+                new User(rs.getLong("id"), rs.getString("name"), rs.getString("username"))
+        );
+
+        assertThat(users).extracting("username").doesNotContain("Elwyn.Skiles", "Maxime_Nienow");
+    }
+
+    @Test
     @DisplayName("Given username Elwyn.Skiles is skipped, When job is executed, Then user is not inserted into database")
     void skipByNullOutput() {
 
@@ -87,22 +103,6 @@ class UserBatchJobTests {
 
         assertThat(existsByUsername).isFalse();
 
-    }
-
-    @Test
-    @DisplayName("Given the username Elwyn.Skiles and Maxime_Nienow are skipped, When job is executed, Then users are not inserted into database")
-    void findAll() {
-
-        await().atMost(10, SECONDS).untilAsserted(() -> {
-            var execution = launcher.launchJob();
-            assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
-        });
-
-        var users = jdbc.query("SELECT * FROM users", (rs, rowNum) ->
-                new User(rs.getLong("id"), rs.getString("name"), rs.getString("username"))
-        );
-
-        assertThat(users).extracting("username").doesNotContain("Elwyn.Skiles", "Maxime_Nienow");
     }
 
     @AfterEach

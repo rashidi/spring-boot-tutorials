@@ -1,11 +1,11 @@
 = Spring Batch: Skip Specific Data
 :source-highlighter: highlightjs
 :source-language: java
-Rashidi Zin <author@asciidoctor.org>
-1.0, October 1, 2023
+Rashidi Zin <rashidi@zin.my>
+2.0, October 1, 2023
 :toc:
 :icons: font
-:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch-skip-step
 
 Skip processing specific data through business logic in Spring Batch.
 
@@ -70,15 +70,13 @@ Full definition of the `Job` can be found in link:src/main/java/zin/rashidi/boot
 
 == Verification
 
-We will implement integration tests to verify that our implementation is working as intended:
-
-1. Verify that data with `username` `Elwyn.Skiles` and `Maxime_Nienow` are skipped.
-2. Verify that data with `username` `Moriah.Stanton` is processed.
+We will implement integration tests to verify that our implementation is working as intended whereby `Elwyn.Skiles` and
+`Maxime_Nienow` are skipped thus will not be available in the database.
 
 [source,java]
 ----
 include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=36..51]
-include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=56..106]
+include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=56..76]
 include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=143..144]
 ----
 
