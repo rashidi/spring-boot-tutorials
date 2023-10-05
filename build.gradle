@@ -18,3 +18,7 @@ dependencyManagement {
         mavenBom SpringBootPlugin.BOM_COORDINATES
     }
 }
+
+java {
+    sourceCompatibility = '17'
+}
