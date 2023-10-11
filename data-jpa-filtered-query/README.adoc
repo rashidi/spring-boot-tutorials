@@ -1,0 +1,39 @@
+= Spring Data Jpa: Global Filter Query
+Rashidi Zin <rashidi@zin.my>
+1.0, October 11, 2023 | link:https://github.com/rashidi/spring-boot-tutorials/tree/master[Source Code]
+:toc:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-filtered-query
+
+Implement global filter query which involves several `Entity` with Spring Data Jpa.
+
+== Background
+
+It is common that we need to implement similar filter query in our application. For example, we have `User` and `Post` entities whereby both
+contains `status` field. We would want to ensure that when these `Entity` is retrieved, only `ACTIVE` ones will be returned.
+
+In this tutorial we will implement a global filter by utilising Spring Data Jpa `repositoryBaseClass`.
+
+== Integration Tests
+
+There are two tests which involves two entities - `User` and `Country`. `User` contains a `status` field while `Country` does not.
+
+When `findAll` is triggered for `User` then only `ACTIVE` users will be returned.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/data/jpa/user/UserRepositoryTests.java[lines=33..34]
+include::src/test/java/zin/rashidi/boot/data/jpa/user/UserRepositoryTests.java[lines=39..58]
+----
+
+However, when `findAll` is triggered for `Country` then all countries will be returned.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/data/jpa/country/CountryRepositoryTests.java[lines=31..32]
+include::src/test/java/zin/rashidi/boot/data/jpa/country/CountryRepositoryTests.java[lines=37..57]
+----
+
+== Configuration Class
+
+We will start by defining `repositoryBaseClass`

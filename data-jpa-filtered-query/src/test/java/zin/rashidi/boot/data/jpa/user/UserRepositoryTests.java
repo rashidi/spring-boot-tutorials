@@ -50,9 +50,9 @@ class UserRepositoryTests {
     @Test
     @DisplayName("Given there are two users with status ACTIVE and INACTIVE, when findAll is invoked, then only ACTIVE users are returned")
     void findAll() {
-        var activeUsers = users.findAll();
-
-        assertThat(activeUsers).extracting("status").containsOnly(ACTIVE);
+        assertThat(users.findAll())
+                .extracting("status")
+                .containsOnly(ACTIVE);
     }
 
 }
