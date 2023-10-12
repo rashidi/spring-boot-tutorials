@@ -1,4 +1,11 @@
 = Spring Data Envers: Audit With Entity Revisions
+:source-highlighter: highlightjs
+:source-language: java
+Rashidi Zin <rashidi@zin.my>
+2.0, October 12, 2023
+:toc:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-envers-audit
 
 Sample application that demonstrates entity revisions with http://projects.spring.io/spring-data-envers/[Spring Data Envers].
 
@@ -22,7 +29,7 @@ implementation 'org.springframework.data:spring-data-envers'
 Next is to inform Spring Boot that we would like do enable Envers' features. This can be done by annotating a `@Configuration`
 class with `@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)`.
 
-Example can be seen in link:src/main/java/zin/rashidi/boot/data/envers/repository/RepositoryConfiguration.java[RepositoryConfiguration]:
+Example can be seen in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/envers/repository/RepositoryConfiguration.java[RepositoryConfiguration]:
 
 [source,java]
 ----
@@ -35,7 +42,7 @@ class RepositoryConfiguration {
 === Enable Entity Audit
 
 By annotating an `@Entity` with `@Audited`, we are informing Spring that we would like respective entity to be audited.
-The following example shows that we want all activities related to link:src/main/java/zin/rashidi/boot/data/envers/book/Book.java[Book] to be audited:
+The following example shows that we want all activities related to link:{url-quickref}/src/main/java/zin/rashidi/boot/data/envers/book/Book.java[Book] to be audited:
 
 [source,java]
 ----
@@ -54,7 +61,7 @@ public class Book {
 ----
 
 Next is to extend a `Repository` class in order to allow us to utilise audit revision features. This can be done by extending
-https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/history/RevisionRepository.java[RevisionRepository] interface to our `Repository` class. An example can be seen in link:src/main/java/zin/rashidi/boot/data/envers/book/BookRepository.java[BookRepository]:
+https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/history/RevisionRepository.java[RevisionRepository] interface to our `Repository` class. An example can be seen in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/envers/book/BookRepository.java[BookRepository]:
 
 [source,java]
 ----
@@ -183,4 +190,4 @@ class BookAuditRevisionTests {
 }
 ----
 
-All tests above can be found in link:src/test/java/zin/rashidi/boot/data/envers/BookAuditRevisionTests.java[BookAuditRevisionTests].
+All tests above can be found in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/envers/BookAuditRevisionTests.java[BookAuditRevisionTests].

@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 1.0, September 25, 2023
 :toc:
 :icons: font
-:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-rest-validation
 
 Implement validation in Spring Data REST.
 
@@ -17,7 +17,7 @@ In this article, we will look at how to implement validation in Spring Data REST
 
 == Domain Classes
 
-There are two `@Entity` classes, link:src/main/java/zin/rashidi/boot/data/rest/book/Author.java[Author] and link:src/main/java/zin/rashidi/boot/data/rest/book/Book.java[Book]. Both classes are accompanied by `JpaRepository` classes - link:src/main/java/zin/rashidi/boot/data/rest/book/AuthorRepository.java[AuthorRepository] and link:src/main/java/zin/rashidi/boot/data/rest/book/BookRepository.java[BookRepository].
+There are two `@Entity` classes, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/rest/book/Author.java[Author] and link:{url-quickref}/src/main/java/zin/rashidi/boot/data/rest/book/Book.java[Book]. Both classes are accompanied by `JpaRepository` classes - link:{url-quickref}/src/main/java/zin/rashidi/boot/data/rest/book/AuthorRepository.java[AuthorRepository] and link:{url-quickref}/src/main/java/zin/rashidi/boot/data/rest/book/BookRepository.java[BookRepository].
 
 While `Author` and `Book` are standard JPA entities, their repositories are annotated with `@RepositoryRestResource` to expose them as REST resources.
 
@@ -33,14 +33,14 @@ include::src/main/java/zin/rashidi/boot/data/rest/book/BookRepository.java[lines
 
 == Validation
 
-We will implement a validation that ensures that `Author` in `Book` is not `INACTIVE`. To do this, we will create a custom validator class, link:src/main/java/zin/rashidi/boot/data/rest/book/BeforeCreateBookValidator.java[BeforeCreateBookValidator].
+We will implement a validation that ensures that `Author` in `Book` is not `INACTIVE`. To do this, we will create a custom validator class, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/rest/book/BeforeCreateBookValidator.java[BeforeCreateBookValidator].
 
 [source,java]
 ----
 include::src/main/java/zin/rashidi/boot/data/rest/book/BeforeCreateBookValidator.java[lines=11..28]
 ----
 
-As we can see, the validator class implements `Validator` interface and overrides `supports` and `validate` methods. The `supports` method checks if the class is `Book` and the `validate` method checks if the `Author` is `INACTIVE`. Next we will inform Spring about our `Validator` through link:src/main/java/zin/rashidi/boot/data/rest/book/BookValidatorConfiguration.java[BookValidatorConfiguration].
+As we can see, the validator class implements `Validator` interface and overrides `supports` and `validate` methods. The `supports` method checks if the class is `Book` and the `validate` method checks if the `Author` is `INACTIVE`. Next we will inform Spring about our `Validator` through link:{url-quickref}/src/main/java/zin/rashidi/boot/data/rest/book/BookValidatorConfiguration.java[BookValidatorConfiguration].
 
 [source,java]
 ----
@@ -59,4 +59,4 @@ include::src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[line
 include::src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[lines=89..90]
 ----
 
-Full implementation of the test can be found in link:src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[CreateBookTests].
+Full implementation of the test can be found in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/rest/book/CreateBookTests.java[CreateBookTests].

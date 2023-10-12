@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 2.0, September 25, 2023
 :toc:
 :icons: font
-:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/cloud-jdbc-env-repo
 
 Sample of https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html#_spring_cloud_config_server[Spring Cloud Config Server] embedded application that uses database as backend for configuration properties.
 
@@ -24,7 +24,7 @@ include `jdbc` as one of its active profiles.
 
 === Include JDBC as dependency
 
-This can be seen in link:build.gradle[build.gradle].
+This can be seen in link:{url-quickref}/build.gradle[build.gradle].
 
 [source,groovy]
 ----
@@ -33,7 +33,7 @@ implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 
 === Include `jdbc` as active profile
 
-This can be seen in link:src/main/resources/bootstrap.yml[bootstrap.yml].
+This can be seen in link:{url-quickref}/src/main/resources/bootstrap.yml[bootstrap.yml].
 
 [source,yaml]
 ----
@@ -54,7 +54,7 @@ By default the https://cloud.spring.io/spring-cloud-config/single/spring-cloud-c
 
 === Create table schema
 
-Schema to create the table can found in link:src/test/resources/init-script.sql[init-script.sql]:
+Schema to create the table can found in link:{url-quickref}/src/test/resources/init-script.sql[init-script.sql]:
 
 [source,sql]
 ----
@@ -66,7 +66,7 @@ In the script above KEY, APPLICATION, PROFILE, and LABEL are marked as composite
 === Populate table
 
 For this demonstration will we have a configuration called `app.greet.name` and this will be populated upon start-up.
-Its script can be found in link:src/test/resources/init-script.sql[init-script.sql].
+Its script can be found in link:{url-quickref}/src/test/resources/init-script.sql[init-script.sql].
 
 [source,sql]
 ----
@@ -82,7 +82,7 @@ The script above explains that the configuration `app.greet.name` belongs to:
 == Configure Application Properties
 
 In order for https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html#_jdbc_backend[JdbcEnvironmentRepository] to retrieve properties for this application it will need to be informed on
-its name, profile, and label. This configurations can be found in link:src/main/resources/bootstrap.yml[bootstrap.yml]
+its name, profile, and label. This configurations can be found in link:{url-quickref}/src/main/resources/bootstrap.yml[bootstrap.yml]
 
 [source,yaml]
 ----
@@ -96,7 +96,7 @@ We are not configuring `spring.cloud.profile` because its default value is `defa
 == Create Bootstrap Application Context
 
 Finally, we will need to inform Spring Cloud on what are the classes needed in order to build the
-bootstrap application context. This can found in link:src/main/resources/META-INF/spring.factories[spring.factories]:
+bootstrap application context. This can found in link:{url-quickref}/src/main/resources/META-INF/spring.factories[spring.factories]:
 
 [source,text]
 ----
@@ -109,7 +109,7 @@ These two classes will help us to build https://docs.spring.io/spring/docs/curre
 
 == Verify Configuration Properties
 
-In order to ensure that the application will use configurations from database we will create same configuration in link:src/main/resources/application.yml[application.yml]:
+In order to ensure that the application will use configurations from database we will create same configuration in link:{url-quickref}/src/main/resources/application.yml[application.yml]:
 
 [source,yaml]
 ----
@@ -121,7 +121,7 @@ app:
 == Configure Environment Properties Retrieval SQL
 
 By default, https://github.com/spring-cloud/spring-cloud-config/blob/main/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/JdbcEnvironmentProperties.java#L30[there are two SQL statements that are used to retrieve properties from database].
-However, these queries need to be modified to follow MySQL requirement and implemented in link:src/main/resources/bootstrap.yml[bootstrap.yml]:
+However, these queries need to be modified to follow MySQL requirement and implemented in link:{url-quickref}/src/main/resources/bootstrap.yml[bootstrap.yml]:
 
 [source,yaml]
 ----
@@ -134,14 +134,14 @@ spring:
           sql-without-profile: SELECT `KEY`, `VALUE` from PROPERTIES where APPLICATION=? and PROFILE='default' and LABEL=?
 ----
 
-We will have link:src/main/java/zin/rashidi/boot/cloud/jdbcenvrepo/greet/GreetResource.java[GreetResource] which will retrieve the value of `app.greet.name` from link:src/main/java/zin/rashidi/boot/cloud/jdbcenvrepo/greet/GreetProperties.java[GreetProperties].
+We will have link:{url-quickref}/src/main/java/zin/rashidi/boot/cloud/jdbcenvrepo/greet/GreetResource.java[GreetResource] which will retrieve the value of `app.greet.name` from link:{url-quickref}/src/main/java/zin/rashidi/boot/cloud/jdbcenvrepo/greet/GreetProperties.java[GreetProperties].
 
 [source,java]
 ----
 include::src/main/java/zin/rashidi/boot/cloud/jdbcenvrepo/greet/GreetResource.java[lines=10..24]
 ----
 
-Next we will have link:src/test/java/zin/rashidi/boot/cloud/jdbcenvrepo/CloudJdbcEnvRepoApplicationTests.java[CloudJdbcEnvRepoApplicationTests] class that verifies that the value for `app.greet.name` is *Demo* and not *Default*:
+Next we will have link:{url-quickref}/src/test/java/zin/rashidi/boot/cloud/jdbcenvrepo/CloudJdbcEnvRepoApplicationTests.java[CloudJdbcEnvRepoApplicationTests] class that verifies that the value for `app.greet.name` is *Demo* and not *Default*:
 
 [source,java]
 ----

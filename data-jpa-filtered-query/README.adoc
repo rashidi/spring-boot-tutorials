@@ -48,12 +48,12 @@ include::src/main/java/zin/rashidi/boot/data/jpa/jpa/JpaCustomBaseRepository.jav
 In `JpaCustomBaseRepository` we will define a method `findAll` which will be used by all `Entity` to retrieve data. This method will filter
 any `Entity` with `status` field and return only `ACTIVE` ones.
 
-To recap, link:src/main/java/zin/rashidi/boot/data/jpa/user/User.java[`User`] contains `status`  field while
-link:src/main/java/zin/rashidi/boot/data/jpa/country/Country.java[`Country`] does not. Therefore, when `findAll` is triggered for `User` then
+To recap, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/user/User.java[`User`] contains `status`  field while
+link:{url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/country/Country.java[`Country`] does not. Therefore, when `findAll` is triggered for `User` then
 only `ACTIVE` users will be returned. However, when `findAll` is triggered for `Country` then all countries will be returned.
 
 Next we will inform Spring Data Jpa to use `JpaCustomBaseRepository` as the base class for all `Entity` by defining `@EnableJpaRepositories`
-in link:src/main/java/zin/rashidi/boot/data/jpa/jpa/JpaConfiguration.java[`JpaConfiguration`].
+in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/jpa/JpaConfiguration.java[`JpaConfiguration`].
 
 [source,java]
 ----
@@ -62,6 +62,6 @@ include::src/main/java/zin/rashidi/boot/data/jpa/jpa/JpaConfiguration.java[lines
 
 == Verification
 
-To ensure that our implementation is working as expected, we will execute tests defined in link:src/test/java/zin/rashidi/boot/data/jpa/user/UserRepositoryTests.java[`UserRepositoryTests`] and link:src/test/java/zin/rashidi/boot/data/jpa/country/CountryRepositoryTests.java[`CountryRepositoryTests`].
+To ensure that our implementation is working as expected, we will execute tests defined in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/jpa/user/UserRepositoryTests.java[`UserRepositoryTests`] and link:{url-quickref}/src/test/java/zin/rashidi/boot/data/jpa/country/CountryRepositoryTests.java[`CountryRepositoryTests`].
 
 Both tests should pass.

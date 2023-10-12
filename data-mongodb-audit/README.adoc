@@ -1,9 +1,11 @@
 = Spring Data MongoDB Audit Example
+:source-highlighter: highlightjs
+:source-language: java
 Rashidi Zin <rashidi@zin.my>
-3.0, July 29, 2022: AsciiDoc article template
+3.0, July 29, 2022
 :toc:
 :icons: font
-:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-mongodb-audit
 
 Enable auditing with Spring Data MongoDB. For example with Spring Data JPA, visit link:../data-jpa-audit/[Spring Data JPA Audit Example].
 
@@ -14,7 +16,7 @@ https://spring.io/projects/spring-data-mongodb[Spring Data MongoDB] provides aud
 In this example, we will create a simple Spring Boot application that uses Spring Data MongoDB to persist and retrieve data from MongoDB. We will also enable auditing to track changes to entities.
 
 == Document Class
-We will have a `Document` called link:src/main/java/zin/rashidi/boot/data/mongodb/user/User.java[User]:
+We will have a `Document` called link:{url-quickref}/src/main/java/zin/rashidi/boot/data/mongodb/user/User.java[User]:
 
 [source,java]
 ----
@@ -47,7 +49,7 @@ class User {
 Fields that are marked with `@CreatedBy`, `@CreatedDate`, `@LastModifiedBy` and `@LastModifiedDate`  are meant for auditing and will be populated by Spring Data MongoDB.
 
 == Enable Mongo Audit
-To enable auditing, we need to add `@EnableMongoAuditing` annotation to our `@Configuration` class - link:src/main/java/zin/rashidi/boot/data/mongodb/audit/MongoAuditConfiguration.java[MongoAuditConfiguration]:
+To enable auditing, we need to add `@EnableMongoAuditing` annotation to our `@Configuration` class - link:{url-quickref}/src/main/java/zin/rashidi/boot/data/mongodb/audit/MongoAuditConfiguration.java[MongoAuditConfiguration]:
 
 [source,java]
 ----
@@ -122,4 +124,4 @@ class UserAuditTests {
 }
 ----
 
-Full implementation can be found in link:src/test/java/zin/rashidi/boot/data/mongodb/user/UserAuditTests.java[UserAuditTests].
+Full implementation can be found in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/mongodb/user/UserAuditTests.java[UserAuditTests].

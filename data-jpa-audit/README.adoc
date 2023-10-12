@@ -1,4 +1,11 @@
 = Spring Data Jpa Audit Example
+:source-highlighter: highlightjs
+:source-language: java
+Rashidi Zin <rashidi@zin.my>
+2.0, October 12, 2023
+:toc:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-audit
 
 Enable auditing with Spring Data Jpa's `@CreatedDate` and `@LastModified`. For example with Spring Data MongoDB, please check out link:../data-mongodb-audit[Spring Data MongoDB Audit Example].
 
@@ -9,7 +16,7 @@ and `@LastModifiedBy`. In this example we will see how it can be implemented wit
 
 == Entity Class
 
-In this example we have an entity class, link:src/main/java/zin/rashidi/boot/data/user/User.java[User] which contains information about the table structure. Initial
+In this example we have an entity class, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/user/User.java[User] which contains information about the table structure. Initial
 structure is as follows:
 
 [source,java]
@@ -92,7 +99,7 @@ with `@CreatedDate`, `@CreatedBy`, `@LastModifiedDate`, and `@LastModifiedBy`. `
 if https://projects.spring.io/spring-security/[Spring Security] is available in the project path. Alternatively we wil implement our own https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/domain/AuditorAware.html[AuditorAware] in order to inform Spring who
 is the current auditor.
 
-We will do so in link:src/main/java/zin/rashidi/boot/data/audit/AuditConfiguration.java[AuditConfiguration] class. In this class, we will also inform Spring to enable JPA auditing by annotating it with
+We will do so in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/audit/AuditConfiguration.java[AuditConfiguration] class. In this class, we will also inform Spring to enable JPA auditing by annotating it with
 `@EnableJpaAuditing` annotation.
 
 [source,java]
@@ -109,7 +116,7 @@ class AuditConfiguration {
 }
 ----
 
-That's it! Our application has JPA Auditing feature enabled. The result can be seen in link:src/test/java/zin/rashidi/boot/data/user/UserAuditTests.java[UserAuditTests].
+That's it! Our application has JPA Auditing feature enabled. The result can be seen in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/user/UserAuditTests.java[UserAuditTests].
 
 == Verify Audit Implementation
 
