@@ -20,7 +20,7 @@ we want to skip data where `username` are either `Elwyn.Skiles` or `Maxime_Nieno
 one by returning `null` and another by throwing `RuntimeException`. Both approaches will be implemented in the same
 `ItemProcessor`.
 
-Our application will process data from link:src/main/resources/users.json[users.json] file and write the processed data
+Our application will process data from link:{url-quickref}/src/main/resources/users.json[users.json] file and write the processed data
 into MySQL database. Content of `users.json` is taken from link:https://jsonplaceholder.typicode.com/users[JSONPlaceholder].
 
 == Implement Logics to Skip Data
@@ -66,7 +66,7 @@ include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lin
 ----
 
 With that, when the `Job` detected that the `ItemProcessor` throws `UsernameNotAllowedException`, it will skip the data.
-Full definition of the `Job` can be found in link:src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[UserJobConfiguration.java].
+Full definition of the `Job` can be found in link:{url-quickref}/src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[UserJobConfiguration.java].
 
 == Verification
 
@@ -80,5 +80,5 @@ include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=
 include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=143..144]
 ----
 
-By executing our tests in link:src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[UserBatchJobTests.java],
+By executing our tests in link:{url-quickref}src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[UserBatchJobTests.java],
 we will see that all users are processed except `Elwyn.Skiles` and `Maxime_Nienow`.
