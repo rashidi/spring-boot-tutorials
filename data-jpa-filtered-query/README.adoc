@@ -1,6 +1,8 @@
 = Spring Data Jpa: Global Filter Query
+:source-highlighter: highlightjs
+:source-language: java
 Rashidi Zin <rashidi@zin.my>
-1.0, October 11, 2023 | link:https://github.com/rashidi/spring-boot-tutorials/tree/master[Source Code]
+1.0, October 12, 2023
 :toc:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-filtered-query
