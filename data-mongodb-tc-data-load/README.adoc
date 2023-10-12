@@ -1,4 +1,11 @@
 = Spring Data MongoDb with Testcontainers
+:source-highlighter: highlightjs
+:source-language: java
+Rashidi Zin <rashidi@zin.my>
+2.0, October 12, 2023
+:toc:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-mongodb-tc-data-load
 
 Preloaded data for testing.
 
@@ -139,7 +146,7 @@ In this example, we are using `@TestExecutionListeners` to register `UserTestExe
 helpful annotations - `@Testcontainers`, `@Container`, and `@ServiceConnection`.
 
 == Load Data Using Testcontainers
-Next approach is to load data using `mongo-init.js` and Testcontainers. We will start by inserting data through link:src/test/resources/mongo-init.js[mongo-init.js] file.
+Next approach is to load data using `mongo-init.js` and Testcontainers. We will start by inserting data through link:{url-quickref}/src/test/resources/mongo-init.js[mongo-init.js] file.
 
 [source,javascript]
 ----
@@ -183,7 +190,7 @@ class UserRepositoryTests {
 }
 ----
 
-With that, data will be loaded into MongoDB before the test execution. Full implementation of link:src/test/java/zin/rashidi/data/mongodb/tc/dataload/user/UserRepositoryTests.java[`UserRepositoryTests`]:
+With that, data will be loaded into MongoDB before the test execution. Full implementation of link:{url-quickref}/src/test/java/zin/rashidi/data/mongodb/tc/dataload/user/UserRepositoryTests.java[`UserRepositoryTests`]:
 
 [source,java]
 ----

@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 1.0, September 25, 2023
 :toc:
 :icons: font
-:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-mongodb-full-text-search
 
 Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with link:https://spring.io/projects/spring-data-mongodb[Spring Data MongoDB].
 
@@ -14,7 +14,7 @@ Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Se
 MongoDB full text search provides the flexibility to perform search entries through multiple fields. In this example we will explore how to implement full text search with Spring Data MongoDB.
 
 == Verification
-Given we have the following entries in link:src/main/java/zin/rashidi/boot/data/mongodb/character/Character.java[Character]:
+Given we have the following entries in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/mongodb/character/Character.java[Character]:
 
 .Characters
 |===
@@ -43,7 +43,7 @@ When searching for `captain marvel` then the following results should be returne
 |Marvel
 |===
 
-This is demonstrated in link:src/test/java/zin/rashidi/boot/data/mongodb/character/CharacterRepositoryTests.java[CharacterRepositoryTests].
+This is demonstrated in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/mongodb/character/CharacterRepositoryTests.java[CharacterRepositoryTests].
 
 == Implementation
 We will start by defining the `Character` entity.
@@ -72,14 +72,14 @@ include::src/test/java/zin/rashidi/boot/data/mongodb/character/CharacterReposito
 ----
 
 === Without Predefined Index
-Without predefined index, we will need to implement a custom repository implementation. We will start by defining a custom repository interface, link:src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepository.java[CharacterSearchRepository]:
+Without predefined index, we will need to implement a custom repository implementation. We will start by defining a custom repository interface, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepository.java[CharacterSearchRepository]:
 
 [source,java]
 ----
 include::src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepository.java[lines=10..14]
 ----
 
-Next, implement the custom repository interface in link:src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepositoryImpl.java[CharacterSearchRepositoryImpl]:
+Next, implement the custom repository interface in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepositoryImpl.java[CharacterSearchRepositoryImpl]:
 
 [source,java]
 ----

@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 1.0, July 30, 2023
 :toc:
 :icons: font
-:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-domain-events
 
 Reduce method complexity by utilising `@DomainEvents` from link:https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.domain-events[Spring Data JPA].
 
@@ -30,11 +30,11 @@ include::src/test/java/zin/rashidi/boot/data/de/availability/BookPurchaseTests.j
 include::src/test/java/zin/rashidi/boot/data/de/availability/BookPurchaseTests.java[lines=75..76]
 ----
 
-Full implementation can be found in link:src/test/java/zin/rashidi/boot/data/de/availability/BookPurchaseTests.java[BookPurchaseTests.java].
+Full implementation can be found in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/de/availability/BookPurchaseTests.java[BookPurchaseTests.java].
 
 === Domain and Repository class
 
-Our domain class, link:src/main/java/zin/rashidi/boot/data/de/book/Book.java[Book.java], will hold information about the event that will be published.
+Our domain class, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/book/Book.java[Book.java], will hold information about the event that will be published.
 
 [source,java]
 ----
@@ -45,9 +45,9 @@ include::src/main/java/zin/rashidi/boot/data/de/book/Book.java[lines=12..20]
 include::src/main/java/zin/rashidi/boot/data/de/book/Book.java[lines=54..59]
 ----
 
-The class will publish link:src/main/java/zin/rashidi/boot/data/de/book/BookPurchaseEvent.java[BookPurchaseEvent.java] when a book is purchased.
+The class will publish link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/book/BookPurchaseEvent.java[BookPurchaseEvent.java] when a book is purchased.
 
-Next is to implement a repository classes for `Book` and link:src/main/java/zin/rashidi/boot/data/de/availability/BookAvailability.java[BookAvailability.java].
+Next is to implement a repository classes for `Book` and link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/availability/BookAvailability.java[BookAvailability.java].
 
 [source,java]
 ----
@@ -61,7 +61,7 @@ include::src/main/java/zin/rashidi/boot/data/de/availability/BookAvailabilityRep
 
 ==== REST Resource Class
 
-link:src/main/java/zin/rashidi/boot/data/de/book/BookResource.java[BookResource] is a typical `@RestController` class which will trigger `Book.purchase`.
+link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/book/BookResource.java[BookResource] is a typical `@RestController` class which will trigger `Book.purchase`.
 
 [source,java]
 ----
@@ -70,7 +70,7 @@ include::src/main/java/zin/rashidi/boot/data/de/book/BookResource.java[lines=11.
 
 ==== Event Listener Class
 
-Finally, we will implement a `@Service` class that will observe link:src/main/java/zin/rashidi/boot/data/de/book/BookPurchaseEvent.java[BookPurchaseEvent] and reduce the total availability of the book.
+Finally, we will implement a `@Service` class that will observe link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/book/BookPurchaseEvent.java[BookPurchaseEvent] and reduce the total availability of the book.
 
 [source,java]
 ----
