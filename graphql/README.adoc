@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 1.0, September 3, 2023
 :toc:
 :icons: font
-:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/graphql
 
 Implementing https://graphql.org/[GraphQL] server with https://spring.io/guides/gs/graphql-server/[Spring Boot GraphQL Server].
 
@@ -33,7 +33,7 @@ handle all requests.
 include::src/main/java/zin/rashidi/boot/graphql/book/BookResource.java[lines=12..31]
 ----
 
-link:src/main/java/zin/rashidi/boot/graphql/book/BookResource.java[BookResource] implements two types of services -
+link:{url-quickref}/src/main/java/zin/rashidi/boot/graphql/book/BookResource.java[BookResource] implements two types of services -
 `findAll`, a service without parameter and `findByTitle`, a service with a parameter. Both services are annotated with
 `@QueryMapping` to indicate that they are GraphQL queries.
 
@@ -50,11 +50,11 @@ include::src/test/java/zin/rashidi/boot/graphql/book/BookResourceTests.java[line
 
 === Client schema definition
 
-In order to map the response to a Java object, we need to define the schema of the response. This is done in link:src/test/resources/graphql-test/books.graphql[books.graphl].
+In order to map the response to a Java object, we need to define the schema of the response. This is done in link:{url-quickref}/src/test/resources/graphql-test/books.graphql[books.graphl].
 
 [source, graphql]
 ----
 include::src/test/resources/graphql-test/books.graphql[]
 ----
 
-By executing tests implemented in link:src/test/java/zin/rashidi/boot/graphql/book/BookResourceTests.java[BookResourceTests], we can verify that our implementation is working as expected.
+By executing tests implemented in link:{url-quickref}/src/test/java/zin/rashidi/boot/graphql/book/BookResourceTests.java[BookResourceTests], we can verify that our implementation is working as expected.

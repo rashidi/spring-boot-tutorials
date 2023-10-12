@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 1.0, September 19, 2023
 :toc:
 :icons: font
-:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-execution-listeners
 
 We often make use of `@BeforeEach` and `@AfterEach` methods to prepare and clean up test data. However, this approach is not scalable and can be difficult to maintain. In this article, we will look at how we can use `TestExecutionListener` to manage test data.
 
@@ -18,7 +18,7 @@ In this article, we will look at how we can use `TestExecutionListener` to manag
 == `TestExecutionListener` classes
 
 === Creating initial data
-We will start by creating initial link:src/main/java/zin/rashidi/boot/test/user/User.java[User] data which consists of `name` and `username` fields.
+We will start by creating initial link:{url-quickref}/src/main/java/zin/rashidi/boot/test/user/User.java[User] data which consists of `name` and `username` fields.
 
 [source,java]
 ----
@@ -48,7 +48,7 @@ include::src/test/java/zin/rashidi/boot/test/user/UserDeletionTestExecutionListe
 ----
 
 == Registering `TestExecutionListener` classes
-Finally, we will implement a test class to test the link:src/main/java/zin/rashidi/boot/test/user/UserRepository.java[UserRepository] which will be executed with the listeners above.
+Finally, we will implement a test class to test the link:{url-quickref}/src/main/java/zin/rashidi/boot/test/user/UserRepository.java[UserRepository] which will be executed with the listeners above.
 We will define necessary `TestExecutionListeners` using `@TestExecutionListeners` annotation and we will also set the `mergeMode` to `MERGE_WITH_DEFAULTS` to ensure that the default listeners are also executed.
 
 [source,java]
