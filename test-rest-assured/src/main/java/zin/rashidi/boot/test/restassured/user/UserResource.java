@@ -3,9 +3,12 @@ package zin.rashidi.boot.test.restassured.user;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 import java.util.NoSuchElementException;
 
+import org.bson.types.ObjectId;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +42,12 @@ class UserResource {
     @GetMapping("/users/{username}")
     public UserReadOnly findByUsername(@PathVariable String username) {
         return repository.findByUsername(username).orElseThrow();
+    }
+
+    @DeleteMapping("/users/{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void deleteById(@PathVariable ObjectId id) {
+        repository.findById(id).ifPresentOrElse(repository::delete, () -> { throw new NoSuchElementException(); });
     }
 
     @ExceptionHandler
