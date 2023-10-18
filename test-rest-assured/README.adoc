@@ -147,7 +147,21 @@ As you can see, `findByExistingUsername` validates the response body as well as 
 
 While in the event requested `username` does not exist then the HTTP response should be `404 Not Found`.
 
-We will implement the API to fix the scenarios above. We will start with the first scenario - find with an available username.
+We will start by implementing a `Repository` method which will retrieve requested username.
+
+[source,java]
+----
+interface UserRepository extends MongoRepository<User, ObjectId> {
+
+    Optional<UserReadOnly> findByUsername(String username);
+
+}
+----
+
+link:{url-quickref}}/src/main/java/zin/rashidi/boot/test/restassured/user/UserReadOnly.java[UserReadOnly] is a read-only projection of
+`User` which will be used to retrieve the user's name and username.
+
+Then we will implement the API to fix the scenarios above. We will start with the first scenario - find with an available username.
 
 [source,java]
 ----
@@ -170,3 +184,71 @@ include::src/main/java/zin/rashidi/boot/test/restassured/user/UserResource.java[
 
 Now we will run link:{url-quickref}/src/test/java/zin/rashidi/boot/test/restassured/user/FindUserByUsernameTests.java[FindUserByUsernameTests]
 again to ensure that both scenarios pass. Next, we will follow the same approach to implement the API for user deletion.
+
+== User Deletion
+
+For User Deletion, the action requires a valid `id`. However, since we are going to utilise data stored by `Testcontainers`, we are required
+to retrieve the existing user's `id` first. Then we will perform the deletion.
+
+We will implement two scenarios - delete with an available `id` and delete with an non-existing `id`.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=28..65]
+----
+
+As you can see, in `deleteWithValidId` we are retrieving the existing user's `id` first.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=28..31]
+    //remove for brevity
+
+include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=44..47]
+
+        //remove for brevity
+
+include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=53..54]
+----
+
+Once we have the `id`, we will perform the deletion. Next, we will implement the API to fix the scenarios above. We will start with the first scenario - delete with an available `id`.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @DeleteMapping("/users/{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void deleteById(@PathVariable ObjectId id) {
+        repository.findById(id).ifPresent(repository::delete);
+    }
+
+}
+----
+
+The implementation above should be sufficient to fix our first scenario. We will run the test again to ensure that it passes. Next is to fix our second scenario - delete with an non-existing `id`. We're expecting `404 Not Found` in this scenario. We can achieve this with slight modification to `deleteById` method.
+
+[source,java]
+----
+include::src/main/java/zin/rashidi/boot/test/restassured/user/UserResource.java[lines=23..31]
+include::src/main/java/zin/rashidi/boot/test/restassured/user/UserResource.java[lines=47..51]
+include::src/main/java/zin/rashidi/boot/test/restassured/user/UserResource.java[lines=62..63]
+----
+
+Since we have already implement `@ExceptionHandler` to handle `NoSuchElementException`, this implementation should be sufficient to fix our
+second scenario. We will run the test again to ensure that it passes.
+
+== Conclusion
+
+I have always preferred RestAssured as it allows me to test API implementation in BDD style. Given that I can decouple my tests with the
+production code, I can ensure that my tests are not affected by the implementation details.
+
+As you can see from tests above. None of the tests uses production code. This is very useful when I need to refactor my
+code. I can refactor my code without worrying that my tests will break. As long as the API contract remains the same, my tests will pass.
