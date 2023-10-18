@@ -28,6 +28,7 @@ class UserRepositoryTests {
     private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
             .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2))
+            .withStartupAttempts(10)
             .withStartupTimeout(ofMinutes(10));
 
     @Autowired

@@ -34,6 +34,7 @@ class FindUserByUsernameTests {
     private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest")
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
             .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2))
+            .withStartupAttempts(10)
             .withStartupTimeout(ofMinutes(10));
 
     @BeforeAll
