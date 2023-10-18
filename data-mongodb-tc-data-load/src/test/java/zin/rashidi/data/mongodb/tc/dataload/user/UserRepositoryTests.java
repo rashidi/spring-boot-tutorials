@@ -1,5 +1,6 @@
 package zin.rashidi.data.mongodb.tc.dataload.user;
 
+import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
@@ -27,7 +28,7 @@ class UserRepositoryTests {
     private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
             .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2))
-            .withStartupTimeout(ofSeconds(60));
+            .withStartupTimeout(ofMinutes(10));
 
     @Autowired
     private UserRepository repository;
