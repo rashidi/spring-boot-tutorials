@@ -1,0 +1,134 @@
+= Spring Test: Implement BDD with RestAssured
+:source-highlighter: highlightjs
+:source-language: java
+Rashidi Zin <rashidi@zin.my>
+1.0, October 18, 2023
+:toc:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-rest-assured
+
+Verify API implementation through https://www.browserstack.com/guide/what-is-bdd[Behaviour Driven Development (BDD)] with Spring Boot and https://rest-assured.io/[RestAssured].
+
+== Background
+
+RestAssured provide the convenience to test REST API in BDD style. It is very useful to test API implementation in Spring Boot application.
+Provided that its API involved common BDD keywords such as `given`, `when` and `then`.
+
+In this example we will implement three features:
+
+[start=1]
+. User creation
+. User retrieval by username
+. User deletion
+
+We will implement test scenarios before implementing the actual API.
+
+== User Creation
+
+We will implement two scenarios - create with an available username and create with an unavailable username.
+
+[source,java]
+----
+include::src/test/java/zin/rashidi/boot/test/restassured/user/CreateUserTests.java[lines=28..82]
+----
+
+In the implementation above. https://testcontainers.com/[Testcontainers] is used to simulate actual MongoDB. It will also load data from
+link:src/test/resources/mongo-init.js[mongo-init.js] to the database. The data will be used to validate the second scenario.
+
+Next we will implement the API which will ensure that scenarios above will pass. We will start our implementation to fix the first failing
+scenario - create with an available username.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping("/users")
+    @ResponseStatus(CREATED)
+    public void create(@RequestBody UserRequest request) {
+        repository.save(new User(request.name(), request.username()));
+    }
+
+}
+----
+
+The implementation above should be sufficient to fix our first scenario. We will run the test again to ensure that it passes. Next is to
+fix our second scenario - create with an unavailable username.
+
+Given that we do not have any validation in place, the second scenario will fail. We will add validation to ensure that the username is
+unique. We will start by implementing a `Repository` method to validate if the username exists.
+
+[source,java]
+----
+interface UserRepository extends MongoRepository<User, ObjectId> {
+
+    boolean existsByUsername(String username);
+
+}
+----
+
+Next, we will use `existsByUsername` to validate if the username exists before saving the user.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping("/users")
+    @ResponseStatus(CREATED)
+    public void create(@RequestBody UserRequest request) {
+        if (repository.existsByUsername(request.username())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        repository.save(new User(request.name(), request.username()));
+    }
+
+}
+----
+
+This, however, is insufficient as the server will throw `500 Internal Server Error` when the username already exists. We will add
+`@ExceptionHandler` to handle the exception which converts it to `BAD REQUEST`.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping("/users")
+    @ResponseStatus(CREATED)
+    public void create(@RequestBody UserRequest request) {
+        if (repository.existsByUsername(request.username())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        repository.save(new User(request.name(), request.username()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(BAD_REQUEST)
+    public void handleIllegalArgumentException(IllegalArgumentException ignored) {
+    }
+
+}
+----
+
+Now we will run the test again to ensure that both scenarios pass.
