@@ -30,7 +30,7 @@ We will implement two scenarios - create with an available username and create w
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/test/restassured/user/CreateUserTests.java[lines=28..82]
+include::src/test/java/zin/rashidi/boot/test/restassured/user/CreateUserTests.java[lines=28..84]
 ----
 
 In the implementation above. Testcontainers is used to simulate actual MongoDB. It will also load data from
@@ -140,7 +140,7 @@ In link:{url-quickref}/src/test/java/zin/rashidi/boot/test/restassured/user/Find
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/test/restassured/user/FindUserByUsernameTests.java[lines=28..68]
+include::src/test/java/zin/rashidi/boot/test/restassured/user/FindUserByUsernameTests.java[lines=28..70]
 ----
 
 As you can see, `findByExistingUsername` validates the response body as well as HTTP response. Given that the user exists then the response body should contain the user's name and username. The HTTP response should be `200 OK`.
@@ -194,7 +194,7 @@ We will implement two scenarios - delete with an available `id` and delete with 
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=28..65]
+include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=28..66]
 ----
 
 As you can see, in `deleteWithValidId` we are retrieving the existing user's `id` first.
@@ -204,11 +204,11 @@ As you can see, in `deleteWithValidId` we are retrieving the existing user's `id
 include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=28..31]
     //remove for brevity
 
-include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=44..47]
+include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=45..48]
 
         //remove for brevity
 
-include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=53..54]
+include::src/test/java/zin/rashidi/boot/test/restassured/user/DeleteUserTests.java[lines=54..55]
 ----
 
 Once we have the `id`, we will perform the deletion. Next, we will implement the API to fix the scenarios above. We will start with the first scenario - delete with an available `id`.
