@@ -13,7 +13,7 @@ public class TestLangchain4jApplication {
 	@Bean
 	@ServiceConnection
 	ElasticsearchContainer elasticsearchContainer() {
-		return new ElasticsearchContainer(DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.17.10"));
+		return new ElasticsearchContainer(DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.10.2"));
 	}
 
 	public static void main(String[] args) {

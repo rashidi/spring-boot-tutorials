@@ -11,6 +11,7 @@ import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchEmbeddingStore
 import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 import static dev.langchain4j.memory.chat.MessageWindowChatMemory.withMaxMessages;
 
@@ -35,9 +36,9 @@ class TranslationConfiguration {
     }
 
     @Bean
-    EmbeddingStore<TextSegment> embeddingStore(ElasticsearchProperties elastic) {
+    EmbeddingStore<TextSegment> embeddingStore(Environment environment) {
         return ElasticsearchEmbeddingStore.builder()
-                .serverUrl(elastic.getUris().get(0))
+                .serverUrl(environment.getProperty("app.elasticsearch.uri"))
                 .indexName("translation")
                 .build();
     }
