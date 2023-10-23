@@ -1,5 +1,10 @@
 package zin.rashidi.boot.langchain4j.translate;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+
+import java.io.IOException;
+
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RestClient;
@@ -14,11 +19,6 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 
 /**
  * @author Rashidi Zin
@@ -40,8 +40,9 @@ class TranslationServiceTests {
 
     @BeforeAll
     static void createIndex() throws IOException {
-        var client = RestClient.builder(HttpHost.create(elastic.getHttpHostAddress())).build();
-        client.performRequest(new Request("PUT", "/translation"));
+        try (var client = RestClient.builder(HttpHost.create(elastic.getHttpHostAddress())).build()) {
+            client.performRequest(new Request("PUT", "/translation"));
+        }
     }
 
     @Autowired
@@ -55,12 +56,8 @@ class TranslationServiceTests {
         assertThat(result).satisfies(translate -> {
 
             assertThat(translate)
-                    .extracting("language.source", "language.target")
-                    .containsExactly("es", "en");
-
-            assertThat(translate)
-                    .extracting("text.source", "text.target")
-                    .containsExactly("Yo soy un salsero", "I am a salsa dancer");
+                    .extracting("language.source", "language.target", "text.source", "text.target")
+                    .containsExactly("es", "en", "Yo soy un salsero", "I am a salsa dancer");
 
             assertThat(translate)
                     .extracting("text.breakdowns").asList()
