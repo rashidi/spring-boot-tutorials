@@ -1,9 +1,4 @@
-package zin.rashidi.boot.langchain4j.translate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-
-import java.io.IOException;
+package zin.rashidi.boot.langchain4j.history;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.Request;
@@ -20,12 +15,18 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.io.IOException;
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 /**
  * @author Rashidi Zin
  */
 @Testcontainers
 @SpringBootTest
-class TranslationServiceTests {
+class HistorianTests {
 
     @Container
     private static final ElasticsearchContainer elastic = new ElasticsearchContainer(
@@ -41,35 +42,39 @@ class TranslationServiceTests {
     @BeforeAll
     static void createIndex() throws IOException {
         try (var client = RestClient.builder(HttpHost.create(elastic.getHttpHostAddress())).build()) {
-            client.performRequest(new Request("PUT", "/translation"));
+            client.performRequest(new Request("PUT", "/history"));
         }
     }
 
     @Autowired
-    private TranslationService service;
+    private Historian historian;
 
     @Test
-    @DisplayName("When I request to translate a phrase from Spanish to English Then the translation should consists of source and target language, translated text, and word breakdowns")
-    void translate() {
-        var result = service.translate("spanish", "english", "Yo soy un salsero");
+    @DisplayName("When I ask the Historian about the history of Malaysia in 1957, Then I should get information about Hari Merdeka")
+    void chat() {
+        var message = historian.chat("Malaysia", 1957);
 
-        assertThat(result).satisfies(translate -> {
+        assertThat(message)
+                .extracting("country", "year", "person")
+                .containsExactly("Malaysia", 1957, "Tunku Abdul Rahman");
 
-            assertThat(translate)
-                    .extracting("language.source", "language.target", "text.source", "text.target")
-                    .containsExactly("es", "en", "Yo soy un salsero", "I am a salsa dancer");
+        assertThat(message)
+                .extracting("event").asString()
+                .contains("Hari Merdeka");
+    }
 
-            assertThat(translate)
-                    .extracting("text.breakdowns").asList()
-                    .extracting("source", "target")
-                    .containsExactly(
-                            tuple("Yo", "I"),
-                            tuple("soy", "am"),
-                            tuple("un", "a"),
-                            tuple("salsero", "salsa dancer")
-                    );
-        });
+    @Test
+    @DisplayName("When I ask the Historian about event after 2021, Then an error message should be returned")
+    void unsupportedYear() {
+        var message = historian.chat("Malaysia", 2022);
 
+        assertThat(message)
+                .extracting("country", "year", "error")
+                .containsExactly("Malaysia", 2022, "Year must be less than 2021");
+
+        assertThat(message)
+                .extracting("person", "event").asString()
+                .containsWhitespaces();
     }
 
 }
