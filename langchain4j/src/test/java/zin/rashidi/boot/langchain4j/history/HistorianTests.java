@@ -17,6 +17,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 
+import static java.lang.System.getenv;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -36,8 +37,8 @@ class HistorianTests {
     static void properties(DynamicPropertyRegistry registry) {
         registry.add("app.elasticsearch.uri", elastic::getHttpHostAddress);
 
-        if (System.getProperty("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY") != null) {
-            registry.add("langchain4j.chat-model.openai.api-key", () -> System.getProperty("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY"));
+        if (getenv("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY") != null) {
+            registry.add("langchain4j.chat-model.openai.api-key", () -> getenv("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY"));
         }
     }
 
