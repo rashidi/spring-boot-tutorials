@@ -33,10 +33,8 @@ jobs:
     - name: Run build with Gradle wrapper
       id: gradle
       env:
-        LANGCHAIN4J_CHAT-MODEL_OPENAI_API-KEY: ${{ secrets.LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY }}
-      run: |
-        ./gradlew build --scan
-        echo $LANGCHAIN4J_CHAT-MODEL_OPENAI_API-KEY
+        LANGCHAIN4J_CHAT-MODEL_OPENAI_API-KEY: "${{ secrets.LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY }}"
+      run: ./gradlew build --scan
     - name: "Add Build Scan URL as PR comment"
       uses: actions/github-script@v6
       if: github.event_name == 'pull_request' && failure()
