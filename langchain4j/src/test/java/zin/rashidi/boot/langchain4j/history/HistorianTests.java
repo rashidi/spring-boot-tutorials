@@ -16,10 +16,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Rashidi Zin
@@ -37,6 +35,10 @@ class HistorianTests {
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         registry.add("app.elasticsearch.uri", elastic::getHttpHostAddress);
+
+        if (System.getProperty("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY") != null) {
+            registry.add("langchain4j.chat-model.openai.api-key", () -> System.getProperty("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY"));
+        }
     }
 
     @BeforeAll
