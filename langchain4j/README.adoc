@@ -1,0 +1,232 @@
+= LangChain4J Spring Boot Starter: Implement a Historian Service Powered by OpenAI
+:source-highlighter: highlightjs
+:source-language: java
+Rashidi Zin <rashidi@zin.my>
+1.0, November 01, 2023: Initial version
+:toc:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/langchain4j
+
+Meet a historian who is able to provide you a brief history of a specific country and year. The historian is powered by OpenAI.
+
+== Background
+
+https://github.com/langchain4j[LangChain for Java(LangChain4J)] provides an interface for us to communicate with several
+LLM services.
+
+In this tutorial, we will implement a historian service that will be powered by https://openai.com/[OpenAI] by using
+https://github.com/langchain4j/langchain4j/tree/main/langchain4j-spring-boot-starter[LangChain4J Spring Boot Starter]
+and https://github.com/langchain4j/langchain4j/tree/main/langchain4j-elasticsearch[LangChain4J with Elasticsearch].
+
+Users will provide a country name and a year to the historian. The historian will then provide a brief history of
+the country in that year. However, the historian only have knowledge up to the year 2021. Therefore, for any year after
+2021, the historian will provide an error message.
+
+== The Historian
+
+link:{url-quickref}/src/main/java/zin/rashidi/boot/langchain4j/history/Historian.java[Historian] is the Assistant that
+will be responsible to retrieve requested information. We will use `@System` to provide context to the Assistant.
+While `@User` represents the user's input.
+
+In the following implementation, response from OpenAI will be extracted to
+link:src/main/java/zin/rashidi/boot/langchain4j/history/History.java[History]. `LangChain` will help us to map the
+response to respective fields in `History`.
+
+[source,java]
+----
+interface Historian {
+
+    @SystemMessage("""
+            You are a historian who is an expert for {{country}}.
+            Given provided year is supported, you will provide historical events that occurred within the year.
+            You will also include detail about the event.
+            """)
+    @UserMessage("{{year}}")
+    History chat(@V("country") String country, @V("year") int year);
+
+}
+----
+
+=== Tool
+
+`@Tool` is referring to OpenAI Function which allows us to perform subsequent action based on response provided by the
+Assistant. In this case, link:{url-quickref}/src/main/java/zin/rashidi/boot/langchain4j/history/HistorianTool.java[HistorianTool]
+to check if the year is supported by the historian.
+
+[source,java]
+----
+@Component
+class HistorianTool {
+
+    @Tool("Validate year is supported")
+    public void assertYear(int year) {
+        Assert.isTrue(year < 2021, "Year must be less than 2021");
+    }
+
+}
+----
+
+=== `@Configuration` class
+
+Finally, we will inform Spring Boot to create the `Historian` bean. We will start by defining `EmbeddingStore` which
+stores the embedding of the Assistant. We will use `ElasticsearchEmbeddingStore` which will store the embedding in
+Elasticsearch.
+
+[source,java]
+----
+@Configuration
+class HistorianConfiguration {
+
+    @Bean
+    EmbeddingStore<TextSegment> embeddingStore(Environment environment) {
+        return ElasticsearchEmbeddingStore.builder()
+                .serverUrl(environment.getProperty("app.elasticsearch.uri"))
+                .indexName("history")
+                .build();
+    }
+
+}
+----
+
+Next is to define `Retriever` which will be responsible to retrieve information first in the `EmbeddingStore` before
+retrieving from the Assistant.
+
+Once that is defined, we will proceed to define `Historian` bean.
+
+[source,java]
+----
+@Configuration
+class HistorianConfiguration {
+
+    @Bean
+    Historian historian(ChatLanguageModel model, Retriever<TextSegment> retriever, HistorianTool tool) {
+        return AiServices.builder(Historian.class)
+                .chatLanguageModel(model)
+                .chatMemory(withMaxMessages(10))
+                .retriever(retriever)
+                .tools(tool)
+                .build();
+    }
+
+    @Bean
+    Retriever<TextSegment> retriever(EmbeddingStore<TextSegment> embeddingStore) {
+        return EmbeddingStoreRetriever.from(embeddingStore, new AllMiniLmL6V2EmbeddingModel(), 1, 0.6);
+    }
+
+}
+----
+
+Full implementation can be found in link:{url-quickref}/src/main/java/zin/rashidi/boot/langchain4j/history/HistorianConfiguration.java[HistorianConfiguration].
+
+== Verification
+
+As always, we will use end-to-end integration tests to verify our implementation. We will utilise `@Testcontainers` to
+run Elasticsearch in a container.
+
+=== Request for information about Malaysia in 1957
+
+In this scenario, we are expecting the historian to provide information about Malaysia in 1957. The historian should
+provide information about "Hari Merdeka" and "Tunku Abdul Rahman".
+
+[source,java]
+----
+@Testcontainers
+@SpringBootTest
+class HistorianTests {
+
+    @Container
+    private static final ElasticsearchContainer elastic = new ElasticsearchContainer(
+            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.10.2")
+    )
+            .withEnv("xpack.security.enabled", "false");
+
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        registry.add("app.elasticsearch.uri", elastic::getHttpHostAddress);
+
+        if (getenv("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY") != null) {
+            registry.add("langchain4j.chat-model.openai.api-key", () -> getenv("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY"));
+        }
+    }
+
+    @BeforeAll
+    static void createIndex() throws IOException {
+        try (var client = RestClient.builder(HttpHost.create(elastic.getHttpHostAddress())).build()) {
+            client.performRequest(new Request("PUT", "/history"));
+        }
+    }
+
+    @Autowired
+    private Historian historian;
+
+    @Test
+    @DisplayName("When I ask the Historian about the history of Malaysia in 1957, Then I should get information about Hari Merdeka")
+    void chat() {
+        var message = historian.chat("Malaysia", 1957);
+
+        assertThat(message)
+                .extracting("country", "year", "person")
+                .containsExactly("Malaysia", 1957, "Tunku Abdul Rahman");
+
+        assertThat(message)
+                .extracting("event").asString()
+                .contains("Hari Merdeka");
+    }
+
+}
+----
+
+=== Request for information about Malaysia in 2022
+
+Given that our Historian only have knowledge up to 2021. Therefore, we are expecting the historian to provide an error message.
+
+[source,java]
+----
+@Testcontainers
+@SpringBootTest
+class HistorianTests {
+
+    @Container
+    private static final ElasticsearchContainer elastic = new ElasticsearchContainer(
+            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.10.2")
+    )
+            .withEnv("xpack.security.enabled", "false");
+
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        registry.add("app.elasticsearch.uri", elastic::getHttpHostAddress);
+
+        if (getenv("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY") != null) {
+            registry.add("langchain4j.chat-model.openai.api-key", () -> getenv("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY"));
+        }
+    }
+
+    @BeforeAll
+    static void createIndex() throws IOException {
+        try (var client = RestClient.builder(HttpHost.create(elastic.getHttpHostAddress())).build()) {
+            client.performRequest(new Request("PUT", "/history"));
+        }
+    }
+
+    @Autowired
+    private Historian historian;
+
+    @Test
+    @DisplayName("When I ask the Historian about event after 2021, Then an error message should be returned")
+    void unsupportedYear() {
+        var message = historian.chat("Malaysia", 2022);
+
+        assertThat(message)
+                .extracting("country", "year", "error")
+                .containsExactly("Malaysia", 2022, "Year must be less than 2021");
+
+        assertThat(message)
+                .extracting("person", "event").asString()
+                .containsWhitespaces();
+    }
+
+}
+----
+
+By executing the tests in link:src/test/java/zin/rashidi/boot/langchain4j/history/HistorianTests.java[HistorianTests], we
+will verify that our implementation is working as expected.
