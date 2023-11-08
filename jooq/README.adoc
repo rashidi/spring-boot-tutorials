@@ -1,0 +1,188 @@
+= jOOQ: Implement jOOQ with Spring Boot and Gradle
+:source-highlighter: highlightjs
+:source-language: java
+Rashidi Zin <rashidi@zin.my>
+1.0, November 08, 2023: Initial version
+:toc:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/jooq
+
+While JPA is commonly used in Java applications, it is not the only option. In this tutorial, we will look at how to use jOOQ with Spring Boot and Gradle.
+
+== Background
+
+https://www.jooq.org/[jOOQ] is a Java library that allows for fluent SQL query construction and typesafe database querying. It supports a
+wide range of databases including MySQL, PostgreSQL, Oracle, Microsoft SQL Server, H2, HSQLDB, and SQLite.
+
+It is also a good alternative to JPA / Hibernate. For more information on that, please refer to an article by Lukas Eder -
+https://blog.jooq.org/jooq-vs-hibernate-when-to-choose-which/[jOOQ vs. Hibernate: When to Choose Which].
+
+While most jOOQ examples and tutorials are using maven, we will explore the option of using Gradle by utilising
+https://github.com/etiennestuder/gradle-jooq-plugin[Gradle jOOQ Plugin].
+
+== Gradle Configuration
+
+In order to enable jOOQ code generation with gradle we will need to include `nu.studer.jooq` plugin in link:{url-quickref}/build.gradle[build.gradle].
+
+[source, groovy]
+----
+plugins {
+	id 'nu.studer.jooq' version '8.2'
+}
+----
+
+Instead of generating the code based on existing database, we will https://www.jooq.org/doc/latest/manual/code-generation/codegen-ddl/[generate them based on schema]
+defined in link:{url-quickref}/src/main/resources/mysql-schema.sql[mysql-schema.sql] file. In order to do so, we will need to include `org.jooq.meta.extensions.ddl.DDLDatabase`
+
+[source, groovy]
+----
+dependencies {
+	jooqGenerator 'org.jooq:jooq-meta-extensions:'  + dependencyManagement.importedProperties['jooq.version']
+	jooqGenerator 'com.mysql:mysql-connector-j'
+}
+----
+
+Next we will use `org.jooq.meta.extensions.ddl.DDLDatabase` in our configuration
+
+[source, groovy]
+----
+jooq {
+	version = dependencyManagement.importedProperties['jooq.version']
+	edition = JooqEdition.OSS
+
+	configurations {
+		main {
+			generationTool {
+				generator {
+					database {
+						name = 'org.jooq.meta.extensions.ddl.DDLDatabase'
+						properties {
+							property {
+								key = 'scripts'
+								value = 'src/main/resources/mysql-schema.sql'
+							}
+						}
+					}
+					target {
+						packageName = 'zin.rashidi.boot.jooq'
+					}
+					strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+				}
+			}
+		}
+	}
+}
+----
+
+Now our Gradle setup is completed, we will proceed to `Repository` implementation.
+
+== Repository Implementation
+
+We will start by defining an `interface` which will be used by the clients such as `Service` and `Controller` class.
+
+[source, java]
+----
+interface UserRepository {
+
+   Optional<User> findByUsername(String username);
+
+}
+----
+
+As you can see, link:{url-quickref}/src/main/java/zin/rashidi/boot/jooq/user/UserRepository.java[UserRepository] implementation is similar
+to standard Spring Data's implementation. We will implement this interface using jOOQ in link:src/main/java/zin/rashidi/boot/jooq/user/UserJooqRepository.java[UserJooqRepository].
+
+[source, java]
+----
+@Repository
+class UserJooqRepository implements UserRepository {
+
+    private final DSLContext dsl;
+
+    UserJooqRepository(DSLContext dsl) {
+        this.dsl = dsl;
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return dsl.selectFrom(USERS).where(USERS.USERNAME.eq(username))
+                .withReadOnly()
+                .maxRows(1)
+                .stream()
+                .map(record -> new User(record.getId(), record.getName(), record.getUsername()))
+                .findFirst();
+    }
+
+}
+----
+
+Now that is done, let's write a test to validate our implementation.
+
+== Integration Test
+
+We will utilise `Testcontainers` and `JooqTest` to write an integration test for our `UserRepository` implementation. There will be two
+scenarios:
+
+* `findByUsername` returns `Optional<User>` when user exists
+* `findByUsername` returns empty `Optional<User>` when user does not exist
+
+We will create `USERS` table and populate with test data prior to test execution. This is done by using `@Sql` annotation.
+
+=== Find by username with existing username
+
+[source, java]
+----
+@Testcontainers
+@Sql(scripts = "classpath:mysql-schema.sql", statements = "INSERT INTO USERS (name, username) VALUES ('Rashidi Zin', 'rashidi')")
+@JooqTest(includeFilters = @Filter(classes = Repository.class))
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final MySQLContainer<?> container = new MySQLContainer<>("mysql:latest");
+
+    @Autowired
+    private UserRepository repository;
+
+    @Test
+    @DisplayName("Given username rashidi is available, when findByUsername, then return User")
+    void findByUsername() {
+        var user = repository.findByUsername("rashidi");
+
+        assertThat(user).get()
+                .extracting("name", "username")
+                .containsOnly("Rashidi Zin", "rashidi");
+    }
+
+}
+----
+
+=== Find by username with non-existing username
+
+[source, java]
+----
+@Testcontainers
+@Sql(scripts = "classpath:mysql-schema.sql", statements = "INSERT INTO USERS (name, username) VALUES ('Rashidi Zin', 'rashidi')")
+@JooqTest(includeFilters = @Filter(classes = Repository.class))
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final MySQLContainer<?> container = new MySQLContainer<>("mysql:latest");
+
+    @Autowired
+    private UserRepository repository;
+
+    @Test
+    @DisplayName("Given there is no user with username zaid.zin, when findByUsername, then return empty Optional")
+    void findByUsernameWithNonExistingUsername() {
+        var user = repository.findByUsername("zaid.zin");
+
+        assertThat(user).isEmpty();
+    }
+
+}
+----
+
+Once done, execute the tests in link:{url-quickref}/src/test/java/zin/rashidi/boot/jooq/user/UserRepositoryTests.java[UserRepositoryTests]
+to ensure our implementation is working as expected.
