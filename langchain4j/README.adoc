@@ -1,6 +1,5 @@
 = LangChain4J Spring Boot Starter: Implement a Historian Service Powered by OpenAI
-:source-highlighter: highlightjs
-:source-language: java
+:source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, November 01, 2023: Initial version
 :toc:

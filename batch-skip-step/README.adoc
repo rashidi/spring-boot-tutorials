@@ -1,6 +1,5 @@
 = Spring Batch: Skip Specific Data
-:source-highlighter: highlightjs
-:source-language: java
+:source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.0, October 1, 2023
 :toc:

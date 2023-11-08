@@ -1,6 +1,5 @@
 = Spring Batch: Working With REST Resources
-:source-highlighter: highlightjs
-:source-language: java
+:source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.0, September 27, 2023
 :toc:

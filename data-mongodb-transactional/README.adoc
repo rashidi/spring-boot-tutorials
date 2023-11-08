@@ -1,6 +1,5 @@
 = @Transactional with Spring Data MongoDB
-:source-highlighter: highlightjs
-:source-language: java
+:source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.0, October 12, 2023
 :toc:
