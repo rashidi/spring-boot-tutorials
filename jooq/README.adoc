@@ -4,6 +4,7 @@
 Rashidi Zin <rashidi@zin.my>
 1.0, November 08, 2023: Initial version
 :toc:
+:nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/jooq
 
