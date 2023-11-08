@@ -24,6 +24,7 @@ separate project.
 |link:data-mongodb-transactional[Spring Data MongoDB: Transactional] |Enable `@Transactional` support for Spring Data MongoDB
 |link:data-rest-validation[Spring Data REST: Validation] |Perform validation with Spring Data REST
 |link:graphql[Spring GraphQL Server] |Implement GraphQL server with Spring GrapQL Server
+|link:jooq[jOOQ] | Implement an alternative to Jpa using https://www.jooq.org/[jOOQ] and Gradle
 |link:langchain4j[LangChain4J] | Implement a Historian powered by OpenAI using https://github.com/langchain4j[LangChain4J]
 |link:data-mongodb-tc-data-load[Spring Test: Load data with Testcontainers] |Load test data with Testcontainers instead of `BeforeEach`
 |link:test-execution-listeners[Spring Test: Test Execution Listeners] |Implement custom `TestExecutionListener` to manage data in tests
