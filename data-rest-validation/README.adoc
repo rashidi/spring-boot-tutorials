@@ -1,6 +1,5 @@
 = Spring Data REST: Validation
 :source-highlighter: highlight.js
-:source-language: java
 Rashidi Zin <rashidi@zin.my>
 1.0, September 25, 2023
 :toc:

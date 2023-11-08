@@ -1,6 +1,5 @@
 = Spring Data MongoDB Audit Example
 :source-highlighter: highlight.js
-:source-language: java
 Rashidi Zin <rashidi@zin.my>
 3.0, July 29, 2022
 :toc:

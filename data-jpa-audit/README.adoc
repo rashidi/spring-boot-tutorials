@@ -1,6 +1,5 @@
 = Spring Data Jpa Audit Example
 :source-highlighter: highlight.js
-:source-language: java
 Rashidi Zin <rashidi@zin.my>
 2.0, October 12, 2023
 :toc:
