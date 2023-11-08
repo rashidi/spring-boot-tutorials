@@ -3,6 +3,7 @@
 Rashidi Zin <rashidi@zin.my>
 1.0, September 19, 2023
 :toc:
+:nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-execution-listeners
 
