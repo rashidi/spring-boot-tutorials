@@ -1,5 +1,5 @@
 = Spring Test: Implement BDD with RestAssured
-:source-highlighter: highlightjs
+:source-highlighter: highlight.js
 :source-language: java
 Rashidi Zin <rashidi@zin.my>
 1.0, October 18, 2023: Initial version

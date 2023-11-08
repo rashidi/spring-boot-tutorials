@@ -1,5 +1,5 @@
 = Spring Data: Domain Events Example
-:source-highlighter: highlightjs
+:source-highlighter: highlight.js
 :source-language: java
 Rashidi Zin <rashidi@zin.my>
 1.0, July 30, 2023

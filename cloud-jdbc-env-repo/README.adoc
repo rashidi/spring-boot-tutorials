@@ -1,5 +1,5 @@
 = Spring Cloud: JDBCEnvironmentRepository Sample Application
-:source-highlighter: highlightjs
+:source-highlighter: highlight.js
 :source-language: java
 Rashidi Zin <rashidi@zin.my>
 2.0, September 25, 2023

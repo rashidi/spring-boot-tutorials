@@ -1,5 +1,5 @@
 = Spring Data Jpa: Global Filter Query
-:source-highlighter: highlightjs
+:source-highlighter: highlight.js
 :source-language: java
 Rashidi Zin <rashidi@zin.my>
 1.0, October 12, 2023

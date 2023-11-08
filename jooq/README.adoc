@@ -1,6 +1,6 @@
 = jOOQ: Implement jOOQ with Spring Boot and Gradle
-:source-highlighter: highlightjs
-:source-language: java
+:source-highlighter: highlight.js
+:highlightjs-languages: java, groovy
 Rashidi Zin <rashidi@zin.my>
 1.0, November 08, 2023: Initial version
 :toc:
