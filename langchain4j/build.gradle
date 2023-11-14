@@ -33,7 +33,7 @@ dependencies {
 
 dependencyManagement {
 	dependencies {
-		dependencySet(group: 'dev.langchain4j', version: '0.23.0') {
+		dependencySet(group: 'dev.langchain4j', version: '0.24.0') {
 			entry 'langchain4j-elasticsearch'
 			entry 'langchain4j-embeddings-all-minilm-l6-v2'
 			entry 'langchain4j-spring-boot-starter'
