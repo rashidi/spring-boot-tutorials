@@ -35,7 +35,7 @@ jobs:
       env:
         LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY: "${{ secrets.LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY }}"
       run: |
-        ./gradlew build -x :cloud-jdbc-env-repo:test --scan
+        ./gradlew build -x :cloud-jdbc-env-repo:test :langchain4j --scan
     - name: "Add Build Scan URL as PR comment"
       uses: actions/github-script@v7
       if: github.event_name == 'pull_request' && failure()
