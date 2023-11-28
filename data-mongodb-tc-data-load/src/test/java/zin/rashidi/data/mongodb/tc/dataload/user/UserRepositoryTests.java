@@ -1,11 +1,5 @@
 package zin.rashidi.data.mongodb.tc.dataload.user;
 
-import static java.time.Duration.ofMinutes;
-import static java.time.Duration.ofSeconds;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
-import static org.testcontainers.utility.MountableFile.forClasspathResource;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +9,11 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import static java.time.Duration.ofMinutes;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
+import static org.testcontainers.utility.MountableFile.forClasspathResource;
 
 /**
  * @author Rashidi Zin
@@ -27,9 +26,9 @@ class UserRepositoryTests {
     @ServiceConnection
     private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
-            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2))
-            .withStartupAttempts(10)
-            .withStartupTimeout(ofMinutes(10));
+            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 1))
+            .withStartupAttempts(2)
+            .withStartupTimeout(ofMinutes(1));
 
     @Autowired
     private UserRepository repository;
