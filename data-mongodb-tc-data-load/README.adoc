@@ -186,7 +186,7 @@ class UserRepositoryTests {
     @ServiceConnection
     private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
-            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2));
+            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 1));
 }
 ----
 
@@ -202,8 +202,9 @@ class UserRepositoryTests {
     @ServiceConnection
     private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
-            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2))
-            .withStartupTimeout(ofSeconds(60));
+            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 1))
+            .withStartupAttempts(2)
+            .withStartupTimeout(ofMinutes(1));
 
     @Autowired
     private UserRepository repository;
