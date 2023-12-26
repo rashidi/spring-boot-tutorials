@@ -24,7 +24,7 @@ repositories {
 dependencies {
 	implementation 'dev.langchain4j:langchain4j-elasticsearch'
 	implementation 'dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2'
-	implementation 'dev.langchain4j:langchain4j-spring-boot-starter'
+	implementation 'dev.langchain4j:langchain4j-open-ai-spring-boot-starter'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:elasticsearch'
