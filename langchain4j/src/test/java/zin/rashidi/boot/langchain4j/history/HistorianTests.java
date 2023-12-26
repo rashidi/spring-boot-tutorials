@@ -36,10 +36,6 @@ class HistorianTests {
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         registry.add("app.elasticsearch.uri", elastic::getHttpHostAddress);
-
-        if (getenv("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY") != null) {
-            registry.add("langchain4j.open-ai.chat-model.api-key", () -> getenv("LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY"));
-        }
     }
 
     @BeforeAll
