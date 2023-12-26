@@ -1,15 +1,6 @@
 package zin.rashidi.boot.test.restassured.user;
 
-import static io.restassured.RestAssured.get;
-import static io.restassured.RestAssured.when;
-import static java.time.Duration.ofMinutes;
-import static org.apache.http.HttpStatus.SC_NOT_FOUND;
-import static org.apache.http.HttpStatus.SC_NO_CONTENT;
-import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
-import static org.testcontainers.utility.MountableFile.forClasspathResource;
-
+import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +11,14 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import io.restassured.RestAssured;
+import static io.restassured.RestAssured.get;
+import static io.restassured.RestAssured.when;
+import static java.time.Duration.ofMinutes;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+import static org.apache.http.HttpStatus.SC_NO_CONTENT;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.testcontainers.utility.MountableFile.forClasspathResource;
 
 /**
  * @author Rashidi Zin
@@ -33,8 +31,7 @@ class DeleteUserTests {
     @ServiceConnection
     private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest")
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
-            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 2))
-            .withStartupAttempts(10)
+            .withStartupAttempts(2)
             .withStartupTimeout(ofMinutes(10));
 
     @BeforeAll
