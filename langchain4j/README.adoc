@@ -135,11 +135,15 @@ provide information about "Hari Merdeka" and "Tunku Abdul Rahman".
 class HistorianTests {
 
     @Container
-    @ServiceConnection
     private static final ElasticsearchContainer elastic = new ElasticsearchContainer(
-            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.10.2")
+            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.11.3")
     )
             .withEnv("xpack.security.enabled", "false");
+
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        registry.add("app.elasticsearch.uri", elastic::getHttpHostAddress);
+    }
 
     @BeforeAll
     static void createIndex() throws IOException {
@@ -179,11 +183,15 @@ Given that our Historian only have knowledge up to 2021. Therefore, we are expec
 class HistorianTests {
 
     @Container
-    @ServiceConnection
     private static final ElasticsearchContainer elastic = new ElasticsearchContainer(
-            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.10.2")
+            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.11.3")
     )
             .withEnv("xpack.security.enabled", "false");
+
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        registry.add("app.elasticsearch.uri", elastic::getHttpHostAddress);
+    }
 
     @BeforeAll
     static void createIndex() throws IOException {
