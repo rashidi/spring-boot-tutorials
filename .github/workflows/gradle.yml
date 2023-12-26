@@ -32,6 +32,8 @@ jobs:
       uses: gradle/gradle-build-action@v2
     - name: Run build with Gradle wrapper
       id: gradle
+      env:
+        LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY: "${{ secrets.LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY }}"      
       run: |
         ./gradlew build --scan
     - name: "Add Build Scan URL as PR comment"
