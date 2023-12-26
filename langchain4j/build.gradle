@@ -36,7 +36,7 @@ dependencyManagement {
 		dependencySet(group: 'dev.langchain4j', version: '0.25.0') {
 			entry 'langchain4j-elasticsearch'
 			entry 'langchain4j-embeddings-all-minilm-l6-v2'
-			entry 'langchain4j-spring-boot-starter'
+			entry 'langchain4j-open-ai-spring-boot-starter'
 		}
 	}
 }
