@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.2.0'
+	id 'org.springframework.boot' version '3.2.1'
 	id 'io.spring.dependency-management' version '1.1.4'
 }
 
@@ -22,9 +22,10 @@ repositories {
 }
 
 dependencies {
+	implementation 'dev.langchain4j:langchain4j'
 	implementation 'dev.langchain4j:langchain4j-elasticsearch'
 	implementation 'dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2'
-	implementation 'dev.langchain4j:langchain4j-spring-boot-starter'
+	implementation 'dev.langchain4j:langchain4j-open-ai-spring-boot-starter'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:elasticsearch'
@@ -33,10 +34,11 @@ dependencies {
 
 dependencyManagement {
 	dependencies {
-		dependencySet(group: 'dev.langchain4j', version: '0.24.0') {
+		dependencySet(group: 'dev.langchain4j', version: '0.25.0') {
+			entry 'langchain4j'
 			entry 'langchain4j-elasticsearch'
 			entry 'langchain4j-embeddings-all-minilm-l6-v2'
-			entry 'langchain4j-spring-boot-starter'
+			entry 'langchain4j-open-ai-spring-boot-starter'
 		}
 	}
 }
