@@ -32,9 +32,3 @@ jacocoTestReport {
         xml.required = true
     }
 }
-
-sonar {
-    gradle {
-        skipCompile = true
-    }
-}
