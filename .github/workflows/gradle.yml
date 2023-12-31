@@ -35,7 +35,8 @@ jobs:
       env:
         LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY: "${{ secrets.LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY }}"      
       run: |
-        ./gradlew build jacocoTestReport sonarqube --scan
+        ./gradlew test jacocoTestReport sonarqube
+        ./gradlew build --scan
     - name: "Add Build Scan URL as PR comment"
       uses: actions/github-script@v7
       if: github.event_name == 'pull_request' && failure()
