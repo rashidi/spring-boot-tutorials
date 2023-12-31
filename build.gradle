@@ -22,7 +22,12 @@ dependencyManagement {
     }
 }
 
+test {
+    finalizedBy jacocoTestReport
+} 
+
 jacocoTestReport {
+    dependsOn test
     reports {
         xml.required = true
     }
