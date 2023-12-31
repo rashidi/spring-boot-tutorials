@@ -6,21 +6,22 @@
 :img-build-status: https://github.com/rashidi/spring-boot-tutorials/actions/workflows/gradle.yml/badge.svg
 
 Samples and tutorials for https://spring.io/projects/spring-boot[Spring Boot] modules such as, but not limited to,
-Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial are equipped
+Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial is equipped
 with source code in individual submodules and can be found on {url-quickref}[GitHub].
 
 image:{img-build-status}[Build Status Badge,link={uri-build-status}]
 
 == Motivation
 
-While it is common to find https://spring.io/projects/spring-boot[Spring Boot] tutorials on the internet, it is
+While it is common to find https://spring.io/projects/spring-boot[Spring Boot] tutorials on the Internet, it is
 challenging to find tutorials that are up-to-date and include automated tests to demonstrate the implementation and
 ensure stability.
 
 == Commitment
 
-Tutorials in this repository are written with those issues in mind. Each tutorial is equipped with automated tests and
-follows recommended and best practices.
+Continual improvement is fundamental in software development. This repository is committed in ensuring adherence to
+best practices and keeping all dependencies up-to-date. The quality of these tutorials and the knowledge imparted is,
+and always will be, my primary goal.
 
 With the help of https://github.com/dependabot[Dependabot], each tutorial is also kept up-to-date with the latest
 dependencies. Currently, we are using Java https://adoptium.net/en-GB/temurin/releases/?version=21[Temurin 21]
