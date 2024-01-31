@@ -1,11 +1,13 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.1'
+    id 'org.springframework.boot' version '3.2.2'
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
 group = 'zin.rashidi.boot'
 version = '0.0.1-SNAPSHOT'
+
+ext['testcontainers.version'] = '1.19.4'
 
 java {
     sourceCompatibility = '21'
