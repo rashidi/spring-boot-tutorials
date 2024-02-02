@@ -28,7 +28,7 @@ class HistorianTests {
 
     @Container
     private static final ElasticsearchContainer elastic = new ElasticsearchContainer(
-            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.11.3")
+            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.10.4")
     )
             .withEnv("xpack.security.enabled", "false");
 
