@@ -1,12 +1,10 @@
 package zin.rashidi.boot.langchain4j.history;
 
 import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.memory.ChatMemory;
-import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
+import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.retriever.EmbeddingStoreRetriever;
-import dev.langchain4j.retriever.Retriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchEmbeddingStore;
@@ -23,18 +21,19 @@ import static dev.langchain4j.memory.chat.MessageWindowChatMemory.withMaxMessage
 class HistorianConfiguration {
 
     @Bean
-    Historian historian(ChatLanguageModel model, Retriever<TextSegment> retriever, HistorianTool tool) {
+    Historian historian(ChatLanguageModel model, ContentRetriever retriever, HistorianTool tool) {
         return AiServices.builder(Historian.class)
                 .chatLanguageModel(model)
                 .chatMemory(withMaxMessages(10))
-                .retriever(retriever)
+                .contentRetriever(retriever)
                 .tools(tool)
                 .build();
     }
 
     @Bean
-    Retriever<TextSegment> retriever(EmbeddingStore<TextSegment> embeddingStore) {
-        return EmbeddingStoreRetriever.from(embeddingStore, new AllMiniLmL6V2EmbeddingModel(), 1, 0.6);
+    ContentRetriever retriever(EmbeddingStore<TextSegment> embeddingStore) {
+        return EmbeddingStoreRetriever.from(embeddingStore, new AllMiniLmL6V2EmbeddingModel(), 1, 0.6)
+                .toContentRetriever();
     }
 
     @Bean

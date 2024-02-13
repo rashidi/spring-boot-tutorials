@@ -88,7 +88,7 @@ class HistorianConfiguration {
 }
 ----
 
-Next is to define `Retriever` which will be responsible to retrieve information first in the `EmbeddingStore` before
+Next is to define `ContentRetriever` which will be responsible to retrieve information first in the `EmbeddingStore` before
 retrieving from the Assistant.
 
 Once that is defined, we will proceed to define `Historian` bean.
@@ -99,18 +99,19 @@ Once that is defined, we will proceed to define `Historian` bean.
 class HistorianConfiguration {
 
     @Bean
-    Historian historian(ChatLanguageModel model, Retriever<TextSegment> retriever, HistorianTool tool) {
+    Historian historian(ChatLanguageModel model, ContentRetriever retriever, HistorianTool tool) {
         return AiServices.builder(Historian.class)
                 .chatLanguageModel(model)
                 .chatMemory(withMaxMessages(10))
-                .retriever(retriever)
+                .contentRetriever(retriever)
                 .tools(tool)
                 .build();
     }
 
     @Bean
-    Retriever<TextSegment> retriever(EmbeddingStore<TextSegment> embeddingStore) {
-        return EmbeddingStoreRetriever.from(embeddingStore, new AllMiniLmL6V2EmbeddingModel(), 1, 0.6);
+    ContentRetriever retriever(EmbeddingStore<TextSegment> embeddingStore) {
+        return EmbeddingStoreRetriever.from(embeddingStore, new AllMiniLmL6V2EmbeddingModel(), 1, 0.6)
+                .toContentRetriever();
     }
 
 }
