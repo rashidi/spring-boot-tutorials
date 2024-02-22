@@ -6,7 +6,6 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.embedding.EmbeddingClient;
 import org.springframework.ai.parser.BeanOutputParser;
 import org.springframework.stereotype.Repository;
 
@@ -21,12 +20,10 @@ import java.util.Map;
 @Repository
 class ChatHistoryRepository implements HistoryRepository {
 
-    private final EmbeddingClient embedding;
     private final ChatClient client;
     private final ObjectMapper mapper;
 
-    ChatHistoryRepository(EmbeddingClient embedding, ChatClient client, ObjectMapper mapper) {
-        this.embedding = embedding;
+    ChatHistoryRepository(ChatClient client, ObjectMapper mapper) {
         this.client = client;
         this.mapper = mapper;
     }
@@ -40,7 +37,6 @@ class ChatHistoryRepository implements HistoryRepository {
         );
 
         var prompt = new Prompt(messages);
-        var embedded = embedding.embedForResponse(messages.stream().map(Message::getContent).toList());
         return parser.parse(client.call(prompt).getResult().getOutput().getContent());
     }
 
