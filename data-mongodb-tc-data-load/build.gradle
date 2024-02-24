@@ -7,8 +7,6 @@ plugins {
 group = 'zin.rashidi'
 version = '0.0.1-SNAPSHOT'
 
-ext['testcontainers.version'] = '1.19.4'
-
 java {
     sourceCompatibility = '21'
 }
