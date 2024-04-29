@@ -1,10 +1,10 @@
 # Submits a dependency graph on every push to 'main'
-name: Dependency Submission
+name: Gradle Dependency Submission
 
 on:
   push:
     branches:
-    - main
+    - master
 
 permissions:
   contents: write
