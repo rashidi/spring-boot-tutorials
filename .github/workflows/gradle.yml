@@ -30,10 +30,6 @@ jobs:
         distribution: 'temurin'
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
-      with:
-        build-scan-publish: true
-        build-scan-terms-of-service-url: "https://gradle.com/terms-of-service"
-        build-scan-terms-of-service-agree: "yes"
     - name: Run build with Gradle wrapper
       id: gradle
       env:
