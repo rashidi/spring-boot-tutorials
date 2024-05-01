@@ -1,7 +1,19 @@
 rootProject.name = 'spring-boot-tutorials'
 
-file('.').eachDir { directory ->
-    def ignored = ['.git', '.github', '.gradle', '.idea', 'build', 'gradle']
-
-    if (!ignored.contains(directory.name)) include(directory.name)
-}
+include('batch-rest-repository')
+include('batch-skip-step')
+include('cloud-jdbc-env-repo')
+include('data-domain-events')
+include('data-envers-audit')
+include('data-jpa-audit')
+include('data-jpa-filtered-query')
+include('data-mongodb-audit')
+include('data-mongodb-full-text-search')
+include('data-mongodb-tc-data-load')
+include('data-mongodb-transactional')
+include('data-rest-validation')
+include('graphql')
+include('jooq')
+include('langchain4j')
+include('test-execution-listeners')
+include('test-rest-assured')
