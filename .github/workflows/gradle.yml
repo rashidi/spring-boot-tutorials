@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   gradle-build:
@@ -29,22 +30,15 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     - name: Setup Gradle
-      uses: gradle/gradle-build-action@v3
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        add-job-summary-as-pr-comment: always
+        build-scan-publish: true
+        build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+        build-scan-terms-of-use-agree: "yes"
+        dependency-graph: generate-and-submit
     - name: Run build with Gradle wrapper
       id: gradle
       env:
         LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY: "${{ secrets.LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY }}"      
-      run: |
-        ./gradlew build
-    - name: "Add Build Scan URL as PR comment"
-      uses: actions/github-script@v7
-      if: github.event_name == 'pull_request' && failure()
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN}}
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: '❌ ${{ github.workflow }} failed: ${{ steps.gradle.outputs.build-scan-url }}'
-          })
+      run: ./gradlew build
