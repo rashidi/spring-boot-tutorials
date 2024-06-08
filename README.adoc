@@ -25,7 +25,7 @@ and always will be, my primary goal.
 
 With the help of https://github.com/dependabot[Dependabot], each tutorial is also kept up-to-date with the latest
 dependencies. Currently, we are using Java https://adoptium.net/en-GB/temurin/releases/?version=21[Temurin 21]
-with https://plugins.gradle.org/plugin/org.springframework.boot/3.2.3[Spring Boot 3.2.3].
+with https://plugins.gradle.org/plugin/org.springframework.boot/3.3.0[Spring Boot 3.3.0].
 
 == Topics
 
