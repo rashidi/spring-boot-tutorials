@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.0' apply false
+    id 'org.springframework.boot' version '3.3.1' apply false
     id 'io.spring.dependency-management' version '1.1.5'
 }
 
