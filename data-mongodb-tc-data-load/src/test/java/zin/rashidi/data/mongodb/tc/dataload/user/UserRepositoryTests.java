@@ -12,7 +12,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import static java.time.Duration.ofMinutes;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
 import static org.testcontainers.utility.MountableFile.forClasspathResource;
 
 /**
@@ -24,9 +23,8 @@ class UserRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
+    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("latest"))
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
-            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 1))
             .withStartupAttempts(2)
             .withStartupTimeout(ofMinutes(1));
 
