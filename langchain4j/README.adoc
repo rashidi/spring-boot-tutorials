@@ -78,9 +78,9 @@ Elasticsearch.
 class HistorianConfiguration {
 
     @Bean
-    EmbeddingStore<TextSegment> embeddingStore(Environment environment) {
+    EmbeddingStore<TextSegment> embeddingStore(RestClient restClient) {
         return ElasticsearchEmbeddingStore.builder()
-                .serverUrl(environment.getProperty("app.elasticsearch.uri"))
+                .restClient(restClient)
                 .indexName("history")
                 .build();
     }
@@ -110,8 +110,7 @@ class HistorianConfiguration {
 
     @Bean
     ContentRetriever retriever(EmbeddingStore<TextSegment> embeddingStore) {
-        return EmbeddingStoreRetriever.from(embeddingStore, new AllMiniLmL6V2EmbeddingModel(), 1, 0.6)
-                .toContentRetriever();
+        return EmbeddingStoreContentRetriever.from(embeddingStore);
     }
 
 }
@@ -137,7 +136,7 @@ class HistorianTests {
 
     @Container
     private static final ElasticsearchContainer elastic = new ElasticsearchContainer(
-            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.11.3")
+            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.15.2")
     )
             .withEnv("xpack.security.enabled", "false");
 

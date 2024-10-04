@@ -1,5 +1,8 @@
 package zin.rashidi.boot.langchain4j.history;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RestClient;
@@ -8,16 +11,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rashidi Zin
@@ -27,8 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HistorianTests {
 
     @Container
+    @ServiceConnection
     private static final ElasticsearchContainer elastic = new ElasticsearchContainer(
-            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.10.4")
+            DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.15.2")
     )
             .withEnv("xpack.security.enabled", "false");
 
