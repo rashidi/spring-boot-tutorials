@@ -16,7 +16,7 @@ class UserValidation {
     }
 
     @EventListener
-    public void usernameIsUnique(UserBeforeSaveEvent event) {
+    void usernameIsUnique(UserBeforeSaveEvent event) {
         var usernameExisted = repository.existsByUsername(event.getSource().getUsername());
 
         if (usernameExisted) {
