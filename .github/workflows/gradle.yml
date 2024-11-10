@@ -34,3 +34,9 @@ jobs:
     uses: ./.github/workflows/gradle-reusable-build.yml
     with:
       submodule: cloud-jdbc-env-repo
+
+  data-domain-events:
+    name: Build data-domain-events
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-domain-events

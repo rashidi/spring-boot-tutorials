@@ -23,6 +23,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           add-job-summary-as-pr-comment: always
-      - name: Build batch-rest-repository
-        id: gradle-batch-rest-repository
+      - name: Gradle Build ${{ inputs.submodule }}
+        id: gradle-build-${{ inputs.submodule }}
         run: ./gradlew ${{ inputs.submodule }}:build
