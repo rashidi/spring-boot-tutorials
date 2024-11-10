@@ -1,0 +1,31 @@
+name: Gradle Reusable Build
+
+on:
+  workflow_call:
+    inputs:
+      submodule:
+        required: true
+        type: string
+
+jobs:
+  reusable-gradle-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          add-job-summary-as-pr-comment: always
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes"
+          dependency-graph: generate-and-submit
+      - name: Build batch-rest-repository
+        id: gradle-batch-rest-repository
+        run: ./gradlew ${{ inputs.submodule }}:build
