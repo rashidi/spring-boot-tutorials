@@ -22,3 +22,7 @@ jobs:
     uses: ./.github/workflows/gradle-reusable-build.yml
     with:
       submodule: batch-rest-repository
+  build-batch-skip-step:
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: batch-skip-step
