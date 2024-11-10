@@ -40,3 +40,48 @@ jobs:
     uses: ./.github/workflows/gradle-reusable-build.yml
     with:
       submodule: data-domain-events
+  data-envers-audit:
+    name: Build data-envers-audit
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-envers-audit
+  data-jpa-audit:
+    name: Build data-jpa-audit
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-jpa-audit
+  data-jpa-event:
+    name: Build data-jpa-event
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-jpa-event
+  data-jpa-filtered-query:
+    name: Build data-jpa-filtered-query
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-jpa-filtered-query
+  data-mongodb-audit:
+    name: Build data-mongodb-audit
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-mongodb-audit
+  data-mongodb-full-text-search:
+    name: Build data-mongodb-full-text-search
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-mongodb-full-text-search
+  data-mongodb-tc-data-load:
+    name: Build data-mongodb-tc-data-load
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-mongodb-tc-data-load
+  data-mongodb-transactional:
+    name: Build data-mongodb-transactional
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-mongodb-transactional
+  data-rest-validation:
+    name: Build data-rest-validation
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: data-rest-validation
