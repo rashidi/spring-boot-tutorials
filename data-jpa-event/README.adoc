@@ -22,7 +22,7 @@ In this tutorial we will implement the validation at `repository` level while fo
 
 == Entity and Repository Classes
 
-We will start by implementing link:{url-quickref}/data-jpa-event/src/main/java/zin/rashidi/data/event/user/User.java[User] and link:{url-quickref}/data-jpa-event/src/main/java/zin/rashidi/data/event/user/UserRepository.java[UserRepository] classes:
+We will start by implementing link:{url-quickref}/src/main/java/zin/rashidi/data/event/user/User.java[User] and link:{url-quickref}/src/main/java/zin/rashidi/data/event/user/UserRepository.java[UserRepository] classes:
 
 [source, java]
 ----
@@ -62,7 +62,7 @@ The method `existsByUsername` will be used to perform validation against newly c
 
 == Event Classes
 
-We will create a custom `ApplicationEvent` class, link:{url-quickref}/data-jpa-event/src/main/java/zin/rashidi/data/event/user/UserBeforeSaveEvent.java[UserBeforeSaveEvent],
+We will create a custom `ApplicationEvent` class, link:{url-quickref}/src/main/java/zin/rashidi/data/event/user/UserBeforeSaveEvent.java[UserBeforeSaveEvent],
 that will be triggered before `repository.save` is executed.
 
 [source, java]
@@ -119,7 +119,7 @@ class User {
 
 == Validator Class
 
-`User.username` unique validation will be implemented in link:{url-quickref}/data-jpa-event/src/main/java/zin/rashidi/data/event/user/UserValidation.java[UserValidation]. This will be done by utilising `@EventListener`
+`User.username` unique validation will be implemented in link:{url-quickref}/src/main/java/zin/rashidi/data/event/user/UserValidation.java[UserValidation]. This will be done by utilising `@EventListener`
 that will be observing `UserBeforeSaveEvent`.
 
 [source, java]
@@ -181,4 +181,4 @@ class UserRepositoryTests {
 }
 ----
 
-Once done, execute the test in link:{url-quickref}/data-jpa-event/src/test/java/zin/rashidi/data/event/user/UserRepositoryTests.java[UserRepositoryTests] UserRepositoryTeststo ensure our implementation is working as expected.
+Once done, execute the test in link:{url-quickref}/src/test/java/zin/rashidi/data/event/user/UserRepositoryTests.java[UserRepositoryTests] to ensure our implementation is working as expected. The full implementation can be found in {url-quickref}[Github].
