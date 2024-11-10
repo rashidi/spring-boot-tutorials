@@ -23,6 +23,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           add-job-summary-as-pr-comment: on-failure
-      - name: Build Submodule
+      - name: Build ${{ inputs.submodule }}
         id: gradle-build-submodule
         run: ./gradlew ${{ inputs.submodule }}:build
