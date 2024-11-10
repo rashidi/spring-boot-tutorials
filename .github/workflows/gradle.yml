@@ -18,8 +18,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  gradle-build:
-
+  build-batch-rest-repository:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,8 +36,6 @@ jobs:
         build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
         build-scan-terms-of-use-agree: "yes"
         dependency-graph: generate-and-submit
-    - name: Run build with Gradle wrapper
-      id: gradle
-      env:
-        LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY: "${{ secrets.LANGCHAIN4J_CHAT_MODEL_OPENAI_API_KEY }}"      
-      run: ./gradlew build
+    - name: Build batch-rest-repository
+      id: gradle-batch-rest-repository
+      run: ./gradlew batch-rest-repository:build
