@@ -85,3 +85,30 @@ jobs:
     uses: ./.github/workflows/gradle-reusable-build.yml
     with:
       submodule: data-rest-validation
+
+  graphql:
+    name: Build graphql
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: graphql
+  jooq:
+    name: Build jooq
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: jooq
+  langchain4j:
+    name: Build langchain4j
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: langchain4j
+
+  test-execution-listeners:
+    name: Build test-execution-listeners
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: test-execution-listeners
+  test-rest-assured:
+    name: Build test-rest-assured
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: test-rest-assured
