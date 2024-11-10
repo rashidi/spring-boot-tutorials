@@ -18,11 +18,19 @@ permissions:
   pull-requests: write
 
 jobs:
-  build-batch-rest-repository:
+  batch-rest-repository:
+    name: Build batch-rest-repository
     uses: ./.github/workflows/gradle-reusable-build.yml
     with:
       submodule: batch-rest-repository
-  build-batch-skip-step:
+  batch-skip-step:
+    name: Build batch-skip-step
     uses: ./.github/workflows/gradle-reusable-build.yml
     with:
       submodule: batch-skip-step
+
+  cloud-jdbc-env-repo:
+    name: Build cloud-jdbc-env-repo
+    uses: ./.github/workflows/gradle-reusable-build.yml
+    with:
+      submodule: cloud-jdbc-env-repo
