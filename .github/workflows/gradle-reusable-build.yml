@@ -22,7 +22,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          add-job-summary-as-pr-comment: always
+          add-job-summary-as-pr-comment: on-failure
       - name: Build Submodule
         id: gradle-build-submodule
         run: ./gradlew ${{ inputs.submodule }}:build
