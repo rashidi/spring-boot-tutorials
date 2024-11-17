@@ -3,7 +3,7 @@
 Rashidi Zin <rashidi@zin.my>
 1.1, November 16, 2024: Fix broken build
 :toc:
-:nofooter:
+:navtitle:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-rest-assured
 
