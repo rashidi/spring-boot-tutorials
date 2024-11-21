@@ -96,11 +96,6 @@ jobs:
     uses: ./.github/workflows/gradle-reusable-build.yml
     with:
       submodule: jooq
-  langchain4j:
-    name: Build langchain4j
-    uses: ./.github/workflows/gradle-reusable-build.yml
-    with:
-      submodule: langchain4j
 
   test-execution-listeners:
     name: Build test-execution-listeners
