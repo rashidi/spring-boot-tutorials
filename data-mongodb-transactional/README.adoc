@@ -9,6 +9,8 @@ Rashidi Zin <rashidi@zin.my>
 
 Guide to utilise `@Transactional` with Spring Data MongoDB.
 
+include::../docs/badges.adoc[]
+
 == Background
 
 Unlike Spring Data JPA, Spring Data MongoDB does not support `@Transactional` out of the box. In this guide, we will explore how to implement `@Transactional` with Spring Data MongoDB.

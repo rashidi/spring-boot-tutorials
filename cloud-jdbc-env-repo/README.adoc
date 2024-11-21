@@ -9,6 +9,8 @@ Rashidi Zin <rashidi@zin.my>
 
 Sample of https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html#_spring_cloud_config_server[Spring Cloud Config Server] embedded application that uses database as backend for configuration properties.
 
+include::../docs/badges.adoc[]
+
 == Background
 
 https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html#_spring_cloud_config_server[Spring Cloud Config Server] provides several options to store configuration for an application. In general it is handled

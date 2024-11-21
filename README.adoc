@@ -2,14 +2,12 @@
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials
-:uri-build-status: https://github.com/rashidi/spring-boot-tutorials/actions/workflows/gradle.yml
-:img-build-status: https://github.com/rashidi/spring-boot-tutorials/actions/workflows/gradle.yml/badge.svg
 
 Samples and tutorials for https://spring.io/projects/spring-boot[Spring Boot] modules such as, but not limited to,
 Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial is equipped
 with source code in individual submodules and can be found on {url-quickref}[GitHub].
 
-image:{img-build-status}[Build Status Badge,link={uri-build-status}]
+include::docs/badges.adoc[]
 
 == Motivation
 
