@@ -9,6 +9,8 @@ Rashidi Zin <rashidi@zin.my>
 
 Enable auditing with Spring Data MongoDB. For example with Spring Data JPA, visit link:../data-jpa-audit/[Spring Data JPA Audit Example].
 
+include::../docs/badges.adoc[]
+
 == Background
 
 https://spring.io/projects/spring-data-mongodb[Spring Data MongoDB] provides auditing support for MongoDB. Auditing is a common requirement for most applications. It is used to track changes to entities, such as who created or modified an entity and when the change occurred.

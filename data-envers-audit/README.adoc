@@ -9,6 +9,8 @@ Rashidi Zin <rashidi@zin.my>
 
 Sample application that demonstrates entity revisions with http://projects.spring.io/spring-data-envers/[Spring Data Envers].
 
+include::../docs/badges.adoc[]
+
 == Background
 
 https://projects.spring.io/spring-data-jpa/[Spring Data Jpa] provides rough audit information. However if you are looking for what are the exact changes being
