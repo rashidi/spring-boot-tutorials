@@ -10,6 +10,7 @@ Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Sp
 with source code in individual submodules and can be found on {url-quickref}[GitHub].
 
 image:{img-build-status}[Build Status Badge,link={uri-build-status}]
+image:https://img.shields.io/badge/license-Unlicense-blue.svg[link=http://unlicense.org/]
 
 == Motivation
 
