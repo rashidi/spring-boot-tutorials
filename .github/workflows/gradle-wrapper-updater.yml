@@ -11,8 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
       - name: Update Gradle Wrapper
         uses: gradle-update/update-gradle-wrapper-action@v2
         with:
-          set-distribution-checksum: false
+          labels: dependencies
           merge-method: SQUASH
