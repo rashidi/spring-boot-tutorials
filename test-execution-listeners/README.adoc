@@ -24,7 +24,21 @@ We will start by creating initial link:{url-quickref}/src/main/java/zin/rashidi/
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/test/user/UserCreationTestExecutionListener.java[lines=10..24]
+class UserCreationTestExecutionListener extends AbstractTestExecutionListener {
+
+    @Override
+    public void beforeTestClass(TestContext testContext) {
+        var mongo = testContext.getApplicationContext().getBean(MongoOperations.class);
+
+        mongo.save(new User("Rashidi Zin", "rashidi.zin"));
+    }
+
+    @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE;
+    }
+
+}
 ----
 
 By default `getOrder` method returns `LOWEST_PRECEDENCE` which means that this listener will be executed last. Since we want this listener to always be executed first, we will set the order to `HIGHEST_PRECEDENCE`.
@@ -34,7 +48,22 @@ Our test will focus on finding `User` with `status` `INACTIVE`. We will create a
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/test/user/UserStatusUpdateTestExecutionListener.java[lines=14..29]
+class UserStatusUpdateTestExecutionListener extends AbstractTestExecutionListener {
+
+    @Override
+    public void beforeTestClass(TestContext testContext) {
+        var mongo = testContext.getApplicationContext().getBean(MongoOperations.class);
+        var findByUsername = mongo.findOne(query(where("username").is("rashidi.zin")), User.class);
+
+        mongo.save(findByUsername.status(INACTIVE));
+    }
+
+    @Override
+    public int getOrder() {
+        return 1;
+    }
+
+}
 ----
 
 Given that we are expecting a `User` with `username` `rashidi.zin` to be returned, we will update the `status` of the `User` with `username` `rashidi.zin` to `INACTIVE`.
@@ -46,7 +75,20 @@ Both listeners above will create and update `User` data. They will be executed _
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/test/user/UserDeletionTestExecutionListener.java[lines=12..25]
+class UserDeletionTestExecutionListener extends AbstractTestExecutionListener {
+
+    private static Logger log = LoggerFactory.getLogger(UserDeletionTestExecutionListener.class);
+
+    @Override
+    public void afterTestClass(TestContext testContext) {
+        var mongo = testContext.getApplicationContext().getBean(MongoOperations.class);
+
+        mongo.dropCollection(User.class);
+
+        log.info("user collection dropped");
+    }
+
+}
 ----
 
 == Registering `TestExecutionListener` classes
@@ -55,7 +97,33 @@ We will define necessary `TestExecutionListeners` using `@TestExecutionListeners
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/test/user/UserRepositoryTests.java[lines=21..47]
+@Testcontainers
+@DataMongoTest
+@TestExecutionListeners(
+        listeners = { UserCreationTestExecutionListener.class, UserStatusUpdateTestExecutionListener.class, UserDeletionTestExecutionListener.class },
+        mergeMode = MERGE_WITH_DEFAULTS
+)
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"));
+
+    @Autowired
+    private UserRepository repository;
+
+    @Test
+    @DisplayName("Given there are users with status INACTIVE, When I search for users with status INACTIVE, Then I should get users with status INACTIVE")
+    void findByStatus() {
+        var inactiveUsers = repository.findByStatus(INACTIVE);
+
+        assertThat(inactiveUsers)
+                .hasSize(1)
+                .extracting("username")
+                .containsOnly("rashidi.zin");
+    }
+
+}
 ----
 
 While `findByStatus` will validate our implementation in `UserCreationTestExecutionListener` and `UserStatusUpdateTestExecutionListener`, a log message will be printed to indicate that `UserDeletionTestExecutionListener` is executed.

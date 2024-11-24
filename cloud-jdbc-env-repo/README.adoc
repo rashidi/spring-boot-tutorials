@@ -60,7 +60,15 @@ Schema to create the table can found in link:{url-quickref}/src/test/resources/i
 
 [source,sql]
 ----
-include::src/test/resources/init-script.sql[lines=1..9]
+CREATE TABLE `PROPERTIES`
+(
+    `KEY`         VARCHAR(128),
+    `VALUE`       VARCHAR(128),
+    `APPLICATION` VARCHAR(128),
+    `PROFILE`     VARCHAR(128),
+    `LABEL`       VARCHAR(128),
+    PRIMARY KEY (`KEY`, `APPLICATION`, `LABEL`)
+);
 ----
 
 In the script above KEY, APPLICATION, PROFILE, and LABEL are marked as composite key in order to avoid duplicated entry.
@@ -72,7 +80,8 @@ Its script can be found in link:{url-quickref}/src/test/resources/init-script.sq
 
 [source,sql]
 ----
-include::src/test/resources/init-script.sql[lines=11..13]
+INSERT INTO PROPERTIES (`APPLICATION`, `PROFILE`, `LABEL`, `KEY`, `VALUE`)
+VALUES ('demo', 'default', 'master', 'app.greet.name', 'Demo');
 ----
 
 The script above explains that the configuration `app.greet.name` belongs to:
@@ -140,14 +149,46 @@ We will have link:{url-quickref}/src/main/java/zin/rashidi/boot/cloud/jdbcenvrep
 
 [source,java]
 ----
-include::src/main/java/zin/rashidi/boot/cloud/jdbcenvrepo/greet/GreetResource.java[lines=10..24]
+@RestController
+class GreetResource {
+
+    private final GreetProperties properties;
+
+    GreetResource(GreetProperties properties) {
+        this.properties = properties;
+    }
+
+    @GetMapping("/greet")
+    public String greet(@RequestParam String greeting) {
+        return String.format("%s, my name is %s", greeting, properties.name());
+    }
+
+}
 ----
 
 Next we will have link:{url-quickref}/src/test/java/zin/rashidi/boot/cloud/jdbcenvrepo/CloudJdbcEnvRepoApplicationTests.java[CloudJdbcEnvRepoApplicationTests] class that verifies that the value for `app.greet.name` is *Demo* and not *Default*:
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/cloud/jdbcenvrepo/CloudJdbcEnvRepoApplicationTests.java[lines=15..33]
+@Testcontainers
+@SpringBootTest(properties = "spring.datasource.url=jdbc:tc:mysql:8:///test?TC_INITSCRIPT=init-script.sql", webEnvironment = RANDOM_PORT)
+class CloudJdbcEnvRepoApplicationTests {
+
+    @Container
+    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8");
+
+    @Autowired
+    private TestRestTemplate restClient;
+
+	@Test
+    @DisplayName("Given app.greet.name is configured to Demo in the database When I call greet Then I should get Hello, my name is Demo")
+	void greet() {
+        var response = restClient.getForEntity("/greet?greeting={0}", String.class, "Hello");
+
+        assertThat(response.getBody()).isEqualTo("Hello, my name is Demo");
+	}
+
+}
 ----
 
 By executing `greet()` we verify that the returned response is *Hello, my name is Demo* and not *Hello, my name is Default*.

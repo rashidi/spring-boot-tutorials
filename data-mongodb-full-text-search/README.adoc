@@ -52,7 +52,24 @@ We will start by defining the `Character` entity.
 
 [source,java]
 ----
-include::src/main/java/zin/rashidi/boot/data/mongodb/character/Character.java[lines=11..28]
+@Document
+class Character {
+
+    @Id
+    private ObjectId id;
+
+    @TextIndexed
+    private final String name;
+
+    @TextIndexed
+    private final String publisher;
+
+    public Character(String name, String publisher) {
+        this.name = name;
+        this.publisher = publisher;
+    }
+
+}
 ----
 
 === With Predefined Index
@@ -62,15 +79,47 @@ This can be done by creating a method that takes `TextCriteria` as parameter:
 
 [source,java]
 ----
-include::src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterRepository.java[lines=13..17]
+interface CharacterRepository extends MongoRepository<Character, ObjectId>, CharacterSearchRepository {
+
+    List<Character> findAllBy(TextCriteria criteria, Sort sort);
+
+}
 ----
 
 This method can then be used in the following manner:
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/data/mongodb/character/CharacterRepositoryTests.java[lines=25..52]
-include::src/test/java/zin/rashidi/boot/data/mongodb/character/CharacterRepositoryTests.java[lines=79..80]
+@Testcontainers
+@DataMongoTest
+class CharacterRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private final static MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+
+    @Autowired
+    private MongoOperations operations;
+
+    @Autowired
+    private CharacterRepository repository;
+
+    @Test
+    @DisplayName("Generated query: Search for 'captain marvel' should return 'Captain Marvel' and 'Thanos'")
+    void withGeneratedQuery() {
+        // Simulate predefined index
+        operations.indexOps(Character.class).ensureIndex(new TextIndexDefinitionBuilder().onFields("name", "publisher").build());
+
+        var characters = repository.findAllBy(new TextCriteria().matchingAny("captain", "marvel"), Sort.by("name"));
+
+        assertThat(characters)
+                .hasSize(2)
+                .extracting("name")
+                .containsOnly("Captain Marvel", "Thanos")
+                .doesNotContain("Joker");
+    }
+
+}
 ----
 
 === Without Predefined Index
@@ -78,14 +127,37 @@ Without predefined index, we will need to implement a custom repository implemen
 
 [source,java]
 ----
-include::src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepository.java[lines=10..14]
+interface CharacterSearchRepository {
+
+    List<Character> findByText(String text, Sort sort);
+
+}
 ----
 
 Next, implement the custom repository interface in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepositoryImpl.java[CharacterSearchRepositoryImpl]:
 
 [source,java]
 ----
-include::src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepositoryImpl.java[lines=14..33]
+class CharacterSearchRepositoryImpl implements CharacterSearchRepository {
+
+    private final MongoOperations operations;
+
+    CharacterSearchRepositoryImpl(MongoOperations operations) {
+        this.operations = operations;
+    }
+
+    @Override
+    public List<Character> findByText(String text, Sort sort) {
+        operations.indexOps(Character.class)
+                .ensureIndex(new TextIndexDefinitionBuilder().onFields("name", "publisher").build());
+
+        var parameters = text.split(" ");
+        var query = TextQuery.queryText(new TextCriteria().matchingAny(parameters)).with(sort);
+
+        return operations.find(query, Character.class);
+    }
+
+}
 ----
 
 This implementation will `indexed` searchable fields, i.e. `name` and `publisher` before searching the `Document`.
@@ -94,7 +166,31 @@ Finally, we will verify our custom implementation through integration test:
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/data/mongodb/character/CharacterRepositoryTests.java[lines=27..37]
+@Testcontainers
+@DataMongoTest
+class CharacterRepositoryTests {
 
-include::src/test/java/zin/rashidi/boot/data/mongodb/character/CharacterRepositoryTests.java[lines=56..64]
-include::src/test/java/zin/rashidi/boot/data/mongodb/character/CharacterRepositoryTests.java[lines=79..80]
+    @Container
+    @ServiceConnection
+    private final static MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+
+    @Autowired
+    private MongoOperations operations;
+
+    @Autowired
+    private CharacterRepository repository;
+
+    @Test
+    @DisplayName("Custom implementation: Search for 'captain marvel' should return 'Captain Marvel' and 'Thanos'")
+    void findByText() {
+        var characters = repository.findByText("captain marvel", Sort.by("name"));
+
+        assertThat(characters)
+                .hasSize(2)
+                .extracting("name")
+                .containsOnly("Captain Marvel", "Thanos")
+                .doesNotContain("Joker");
+    }
+
+}
+----

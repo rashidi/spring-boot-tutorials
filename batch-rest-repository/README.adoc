@@ -24,17 +24,73 @@ consists of `ItemReader` and `ItemWriter`. We will implement all of them in link
 
 [source,java]
 ----
-include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=26..70]
+@Configuration
+class UserJobConfiguration {
+
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final MongoOperations mongo;
+
+    UserJobConfiguration(JobRepository jobRepository, PlatformTransactionManager transactionManager, MongoOperations mongo) {
+        this.jobRepository = jobRepository;
+        this.transactionManager = transactionManager;
+        this.mongo = mongo;
+    }
+
+    @Bean
+    public Job userJob() throws MalformedURLException {
+        return new JobBuilder("userJob", jobRepository).start(step()).build();
+    }
+
+    private Step step() throws MalformedURLException {
+        return new StepBuilder("userStep", jobRepository)
+                .<User, User>chunk(10, transactionManager)
+                .reader(reader())
+                .writer(writer())
+                .build();
+    }
+
+    private JsonItemReader<User> reader() throws MalformedURLException {
+        JacksonJsonObjectReader<User> jsonObjectReader = new JacksonJsonObjectReader<>(User.class);
+
+        jsonObjectReader.setMapper(new ObjectMapper());
+
+        return new JsonItemReaderBuilder<User>()
+                .name("userReader")
+                .jsonObjectReader(jsonObjectReader)
+                .resource(new UrlResource("https://jsonplaceholder.typicode.com/users"))
+                .build();
+    }
+
+    private MongoItemWriter<User> writer() {
+        return new MongoItemWriterBuilder<User>()
+                .template(mongo)
+                .build();
+    }
+
+}
 ----
 
 From the code above, we can see that a `URL` form of `Resource` is assigned to `JsonItemReader`. We will depend on `JacksonJsonObjectRader` to convert response from link:https://jsonplaceholder.typicode.com/users[JSON Placeholder] to `User` object.
 
 [source,java]
 ----
-include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=26..27]
+@Configuration
+class UserJobConfiguration {
 
-include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=52..62]
-include::src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[lines=69..70]
+    private JsonItemReader<User> reader() throws MalformedURLException {
+        JacksonJsonObjectReader<User> jsonObjectReader = new JacksonJsonObjectReader<>(User.class);
+
+        jsonObjectReader.setMapper(new ObjectMapper());
+
+        return new JsonItemReaderBuilder<User>()
+                .name("userReader")
+                .jsonObjectReader(jsonObjectReader)
+                .resource(new UrlResource("https://jsonplaceholder.typicode.com/users"))
+                .build();
+    }
+
+}
 ----
 
 Now that we have implemented the `Job`, we can verify that it is working by executing an integration test.
@@ -45,10 +101,42 @@ Once completed then we will verify that the database contains the expected numbe
 
 [source,java]
 ----
-include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=38..41]
+@Testcontainers
+@SpringBatchTest
+@SpringJUnitConfig({ BatchTestConfiguration.class, MongoTestConfiguration.class, UserJobConfiguration.class })
+class UserBatchJobTests {
 
-include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=52..71]
-include::src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[lines=107..108]
+    @Container
+    @ServiceConnection
+    private final static MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:latest")
+            .withInitScript("org/springframework/batch/core/schema-mysql.sql");
+
+    @Container
+    @ServiceConnection
+    private final static MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
+
+    @Autowired
+    private JobLauncherTestUtils launcher;
+
+    @Autowired
+    private MongoOperations mongoOperations;
+
+    @Test
+    @DisplayName("Given there are 10 users returned from REST Service When the job is COMPLETED Then all users should be saved to MongoDB")
+    void launch() {
+
+        await().atMost(ofSeconds(30)).untilAsserted(() -> {
+            var execution = launcher.launchJob();
+
+            assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
+        });
+
+        var persistedUsers = mongoOperations.findAll(User.class);
+
+        assertThat(persistedUsers).hasSize(10);
+    }
+
+}
 ----
 
 Full implementation can be found in link:{url-quickref}/src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[UserBatchJobTests].
