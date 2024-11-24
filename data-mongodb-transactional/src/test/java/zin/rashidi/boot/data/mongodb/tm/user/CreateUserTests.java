@@ -1,11 +1,5 @@
 package zin.rashidi.boot.data.mongodb.tm.user;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static zin.rashidi.boot.data.mongodb.tm.user.User.Status.ACTIVE;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +10,12 @@ import org.springframework.http.HttpHeaders;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static zin.rashidi.boot.data.mongodb.tm.user.User.Status.ACTIVE;
 
 /**
  * @author Rashidi Zin
@@ -27,7 +26,7 @@ class CreateUserTests {
 
     @Container
     @ServiceConnection
-    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"));
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
 
     @Autowired
     private TestRestTemplate restTemplate;
