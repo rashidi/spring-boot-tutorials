@@ -8,7 +8,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import static java.time.Duration.ofMinutes;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +23,7 @@ class UserRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo").withTag("6"))
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest")
             .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
             .waitingFor(forLogMessage("(?i).*waiting for connections.*", 1))
             .withStartupAttempts(2)
