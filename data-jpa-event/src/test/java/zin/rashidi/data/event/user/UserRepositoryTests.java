@@ -3,7 +3,6 @@ package zin.rashidi.data.event.user;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -14,14 +13,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 /**
  * @author Rashidi Zin
  */
 @Testcontainers
-@AutoConfigureTestDatabase(replace = NONE)
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = { UserEventPublisher.class, UserValidation.class }))
 class UserRepositoryTests {
 

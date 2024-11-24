@@ -134,7 +134,6 @@ In the following test we will see that values for `created` and `modified` are a
 [source,java]
 ----
 @Testcontainers
-@AutoConfigureTestDatabase(replace = NONE)
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ANNOTATION, classes = EnableJpaAuditing.class))
 class UserAuditTests {
 
@@ -173,7 +172,6 @@ field will have a recent time as compare to when it was created:
 [source,java]
 ----
 @Testcontainers
-@AutoConfigureTestDatabase(replace = NONE)
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ANNOTATION, classes = EnableJpaAuditing.class))
 class UserAuditTests {
 

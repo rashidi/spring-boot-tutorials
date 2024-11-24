@@ -156,7 +156,6 @@ the username `rashidi.zin` is unique. Therefore, if a new `User` being created w
 [source, java]
 ----
 @Testcontainers
-@AutoConfigureTestDatabase(replace = NONE)
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = { UserEventPublisher.class, UserValidation.class }))
 class UserRepositoryTests {
 
