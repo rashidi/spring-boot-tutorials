@@ -1,37 +1,33 @@
 package zin.rashidi.boot.data.user;
 
-import static java.time.Duration.ofSeconds;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
-import static org.springframework.context.annotation.FilterType.ANNOTATION;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
-
-import java.time.Duration;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+
+import java.time.Instant;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.context.annotation.FilterType.ANNOTATION;
 
 /**
  * @author Rashidi Zin
  */
 @Testcontainers
-@AutoConfigureTestDatabase(replace = NONE)
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ANNOTATION, classes = EnableJpaAuditing.class))
 class UserAuditTests {
 
     @Container
     @ServiceConnection
-    private final static MySQLContainer MYSQL = new MySQLContainer("mysql:latest");
+    private final static MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:latest");
 
     @Autowired
     private UserRepository repository;
@@ -52,21 +48,13 @@ class UserAuditTests {
 
     @Test
     @DisplayName("When a user is updated Then modified field should be updated")
+    @Sql(statements = "INSERT INTO users (id, name, username, created, modified) VALUES ('84', 'Rashidi Zin', 'rashidi', now() - INTERVAL 7 DAY, now() - INTERVAL 7 DAY)")
     void update() {
-        var user = new User();
+        var modifiedUser = repository.findById(84L).map(user -> { user.setUsername("rashidi.zin"); return user; }).map(repository::saveAndFlush).orElseThrow();
 
-        user.setName("Rashidi Zin");
-        user.setUsername("rashidi");
+        var created = (Instant) ReflectionTestUtils.getField(modifiedUser, "created");
+        var modified = (Instant) ReflectionTestUtils.getField(modifiedUser, "modified");
 
-        var createdUser = repository.save(user);
-
-        await().atMost(ofSeconds(1)).untilAsserted(() -> {
-            createdUser.setUsername("rashidi.zin");
-
-            var modifiedUser = repository.save(createdUser);
-
-            assertThat(modifiedUser.getModified()).isAfter(createdUser.getModified());
-        });
+        assertThat(modified).isAfter(created);
     }
-
 }
