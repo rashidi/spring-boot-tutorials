@@ -24,7 +24,6 @@ repositories {
 dependencies {
     implementation project(':batch-rest-repository')
     implementation project(':batch-skip-step')
-    implementation project(':cloud-jdbc-env-repo')
     implementation project(':data-domain-events')
     implementation project(':data-envers-audit')
     implementation project(':data-jpa-audit')
