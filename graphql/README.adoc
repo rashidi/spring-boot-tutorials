@@ -22,7 +22,35 @@ explore how we can implement GraphQL server with Spring Boot.
 
 [source,graphql]
 ----
-include::src/main/resources/graphql/schema.graphqls[lines=1..29]
+scalar Long
+
+type Query {
+    findAll: [Book]
+    findByTitle(title: String): Book
+}
+
+type Book {
+    isbn: Isbn
+    title: String
+    author: Author
+}
+
+type Isbn {
+    ean: Long
+    registrationGroup: Int
+    registrant: Int
+    publication: Int
+    digit: Int
+}
+
+type Author {
+    name: Name
+}
+
+type Name {
+    first: String
+    last: String
+}
 ----
 
 This is the schema that inform our clients on available fields and queries. Next is to implement a `@Controller` that
@@ -32,7 +60,26 @@ handle all requests.
 
 [source, java]
 ----
-include::src/main/java/zin/rashidi/boot/graphql/book/BookResource.java[lines=12..31]
+@Controller
+class BookResource {
+
+    private final BookRepository repository;
+
+    BookResource(BookRepository repository) {
+        this.repository = repository;
+    }
+
+    @QueryMapping
+    public List<Book> findAll() {
+        return repository.findAll();
+    }
+
+    @QueryMapping
+    public Book findByTitle(@Argument String title) {
+        return repository.findByTitle(title);
+    }
+
+}
 ----
 
 link:{url-quickref}/src/main/java/zin/rashidi/boot/graphql/book/BookResource.java[BookResource] implements two types of services -
@@ -47,7 +94,69 @@ We will utilise `@GraphQlTest` to verify our implementation.
 
 [source, java]
 ----
-include::src/test/java/zin/rashidi/boot/graphql/book/BookResourceTests.java[lines=18..77]
+@GraphQlTest(
+        controllers = BookResource.class,
+        includeFilters = @Filter(type = ANNOTATION, classes = { Configuration.class, Repository.class })
+)
+class BookResourceTests {
+
+    @Autowired
+    private GraphQlTester client;
+
+    @Test
+    @DisplayName("Given there are 3 books, when findAll is invoked, then return all books")
+    void findAll() {
+        client.documentName("books")
+                .execute()
+                .path("findAll")
+                .matchesJson(
+                        """
+                                        [
+                                              {
+                                                "title": "Clean Code"
+                                              },
+                                              {
+                                                "title": "Design Patterns"
+                                              },
+                                              {
+                                                "title": "The Hobbit"
+                                              }
+                                            ]
+                                """
+                )
+        ;
+    }
+
+    @Test
+    @DisplayName("Given there is a book titled The Hobbit, when findByTitle is invoked, then return the book")
+    void findByTitle() {
+        client.documentName("books")
+                .variable("title", "The Hobbit")
+                .execute()
+                .path("findByTitle")
+                .matchesJson(
+                        """
+                                {
+                                  "title": "The Hobbit",
+                                  "isbn": {
+                                    "ean": 9780132350884,
+                                    "registrationGroup": 978,
+                                    "registrant": 0,
+                                    "publication": 13235088,
+                                    "digit": 4
+                                  },
+                                  "author": {
+                                    "name": {
+                                      "first": "J.R.R.",
+                                      "last": "Tolkien"
+                                    }
+                                  }
+                                }
+                                """
+                );
+    }
+
+}
 ----
 
 === Client schema definition
@@ -56,7 +165,29 @@ In order to map the response to a Java object, we need to define the schema of t
 
 [source, graphql]
 ----
-include::src/test/resources/graphql-test/books.graphql[]
+query books($title: String) {
+  findByTitle(title: $title) {
+    title
+    isbn {
+      ean
+      registrationGroup
+      registrant
+      publication
+      digit
+    }
+    author {
+      name {
+        first
+        last
+      }
+    }
+  }
+
+  findAll {
+    title
+  }
+
+}
 ----
 
 By executing tests implemented in link:{url-quickref}/src/test/java/zin/rashidi/boot/graphql/book/BookResourceTests.java[BookResourceTests], we can verify that our implementation is working as expected.
