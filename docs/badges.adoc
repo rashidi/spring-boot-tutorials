@@ -1,6 +1,6 @@
-:uri-build-status: https://github.com/rashidi/spring-boot-tutorials/actions/workflows/gradle.yml
-:img-build-status: https://github.com/rashidi/spring-boot-tutorials/actions/workflows/gradle.yml/badge.svg
+:uri-build-status: https://github.com/rashidi/spring-boot-tutorials/actions/workflows/build-and-publish.yml
+:img-build-status: https://github.com/rashidi/spring-boot-tutorials/actions/workflows/build-and-publish.yml/badge.svg
 
-image:{img-build-status}[Build Status Badge,link={uri-build-status}]
 image:https://img.shields.io/github/stars/rashidi/spring-boot-tutorials[GitHub Repo stars, link={url-quickref}]
+image:{img-build-status}[Build Status Badge,link={uri-build-status}]
 image:https://img.shields.io/badge/license-Unlicense-blue.svg[link=http://unlicense.org/]
