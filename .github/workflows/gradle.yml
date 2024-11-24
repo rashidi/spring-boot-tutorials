@@ -33,6 +33,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           add-job-summary-as-pr-comment: on-failure
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes"
           dependency-graph: generate-and-submit
       - name: Run CI build
         run: ./gradlew build
