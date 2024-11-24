@@ -4,30 +4,32 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.repository.init.Jackson2RepositoryPopulatorFactoryBean;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static java.time.Duration.ofMinutes;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
-import static org.testcontainers.utility.MountableFile.forClasspathResource;
+import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 /**
  * @author Rashidi Zin
  */
-@DataMongoTest
 @Testcontainers
+@DataMongoTest(includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = UserRepositoryTests.RepositoryPopulatorTestConfiguration.class))
 class UserRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest")
-            .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
-            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 1))
-            .withStartupAttempts(2)
-            .withStartupTimeout(ofMinutes(1));
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
 
     @Autowired
     private UserRepository repository;
@@ -49,4 +51,16 @@ class UserRepositoryTests {
 
         assertThat(user).isNull();
     }
+
+    @TestConfiguration
+    static class RepositoryPopulatorTestConfiguration {
+
+        @Bean
+        public Jackson2RepositoryPopulatorFactoryBean jacksonRepositoryPopulator() {
+            var populator = new Jackson2RepositoryPopulatorFactoryBean();
+            populator.setResources(new Resource[] { new ClassPathResource("users.json") });
+            return populator;
+        }
+    }
+
 }

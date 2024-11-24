@@ -1,7 +1,7 @@
 = Spring Data MongoDb with Testcontainers
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
-2.0, October 12, 2023
+3.0, November 24, 2024: Replace usage of mongo-init.js with Spring's RepositoryPopulator
 :toc:
 :nofooter:
 :icons: font
@@ -147,66 +147,106 @@ class UserRepositoryTests {
 In this example, we are using `@TestExecutionListeners` to register `UserTestExecutionListener` which will be executed before and after test class execution. Alternatively, we also no longer utilise on
 helpful annotations - `@Testcontainers`, `@Container`, and `@ServiceConnection`.
 
-== Load Data Using Testcontainers
-Next approach is to load data using `mongo-init.js` and Testcontainers. We will start by inserting data through link:{url-quickref}/src/test/resources/mongo-init.js[mongo-init.js] file.
+== Load Data Using RepositoryPopulators
+Next approach is to load data using https://docs.spring.io/spring-data/mongodb/reference/repositories/core-extensions.html#core.repository-populators[RepositoryPopulators] and Testcontainers.
+We will start by creating link:{url-quickref}/src/test/resources/users.json[users.json] and populate it with the following content.
 
-[source,javascript]
+[source,json]
 ----
-db.createCollection("user");
-
-db.user.insert({
+[{
+  "_class": "zin.rashidi.data.mongodb.tc.dataload.user.User",
   "name": "Rashidi Zin",
   "username": "rashidi.zin"
-});
+}]
 ----
 
-Then we will create a `MongoDBContainer` and mount the `mongo-init.js` file into `/docker-entrypoint-initdb.d` directory.
+First, we will have to add `jackson-databind` as our dependency in link:${url-quickref}/build.gradle[build.gradle].
 
-[source,java]
+[source,groovy]
 ----
-@DataMongoTest
-@Testcontainers
-class UserRepositoryTests {
-
-    @Container
-    @ServiceConnection
-    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest")
-            .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js");
+dependencies {
+    testImplementation "com.fasterxml.jackson.core:jackson-databind"
 }
 ----
 
-Next is to inform Testcontainers on how to determine that our MongoDB is ready. This will be determined by the checking that the phrase `waiting for connections`
-appeared twice:
+Next we will create a `@TestConfiguration` class which will define `RepositoryPopulator`.
 
 [source,java]
 ----
-@DataMongoTest
-@Testcontainers
 class UserRepositoryTests {
 
-    @Container
-    @ServiceConnection
-    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest")
-            .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
-            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 1));
+    @TestConfiguration
+    static class RepositoryPopulatorTestConfiguration {
+
+        @Bean
+        public Jackson2RepositoryPopulatorFactoryBean jacksonRepositoryPopulator() {
+            var populator = new Jackson2RepositoryPopulatorFactoryBean();
+            populator.setResources(new Resource[] { new ClassPathResource("users.json") });
+            return populator;
+        }
+    }
+
 }
 ----
 
-With that, data will be loaded into MongoDB before the test execution. Full implementation of link:{url-quickref}/src/test/java/zin/rashidi/data/mongodb/tc/dataload/user/UserRepositoryTests.java[`UserRepositoryTests`]:
+Then we will inform link:${url-quickref}/src/test/java/zin/rashidi/data/mongodb/tc/dataload/user/UserRepositoryTests.java[UserRepositoryTests] to include `RepositoryPopulatorTestConfiguration`.
 
 [source,java]
 ----
-@DataMongoTest
+@DataMongoTest(includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = UserRepositoryTests.RepositoryPopulatorTestConfiguration.class))
+class UserRepositoryTests {
+
+    @TestConfiguration
+    static class RepositoryPopulatorTestConfiguration {
+
+        @Bean
+        public Jackson2RepositoryPopulatorFactoryBean jacksonRepositoryPopulator() {
+            var populator = new Jackson2RepositoryPopulatorFactoryBean();
+            populator.setResources(new Resource[] { new ClassPathResource("users.json") });
+            return populator;
+        }
+    }
+
+}
+----
+
+Finally, the usual setup to include `@TestContainers` and `MongoDBContainer`.
+
+[source,java]
+----
 @Testcontainers
+@DataMongoTest(includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = UserRepositoryTests.RepositoryPopulatorTestConfiguration.class))
 class UserRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest")
-            .withCopyToContainer(forClasspathResource("mongo-init.js"), "/docker-entrypoint-initdb.d/mongo-init.js")
-            .waitingFor(forLogMessage("(?i).*waiting for connections.*", 1))
-            .withStartupAttempts(2)
-            .withStartupTimeout(ofMinutes(1));
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+
+    @TestConfiguration
+    static class RepositoryPopulatorTestConfiguration {
+
+        @Bean
+        public Jackson2RepositoryPopulatorFactoryBean jacksonRepositoryPopulator() {
+            var populator = new Jackson2RepositoryPopulatorFactoryBean();
+            populator.setResources(new Resource[] { new ClassPathResource("users.json") });
+            return populator;
+        }
+    }
+
+}
+----
+
+Once everything is ready, we will add our tests.
+
+[source,java]
+----
+@Testcontainers
+@DataMongoTest(includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = UserRepositoryTests.RepositoryPopulatorTestConfiguration.class))
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
 
     @Autowired
     private UserRepository repository;
@@ -228,7 +268,21 @@ class UserRepositoryTests {
 
         assertThat(user).isNull();
     }
+
+    @TestConfiguration
+    static class RepositoryPopulatorTestConfiguration {
+
+        @Bean
+        public Jackson2RepositoryPopulatorFactoryBean jacksonRepositoryPopulator() {
+            var populator = new Jackson2RepositoryPopulatorFactoryBean();
+            populator.setResources(new Resource[] { new ClassPathResource("users.json") });
+            return populator;
+        }
+    }
+
 }
 ----
+
+With that, data will be loaded into MongoDB before the test execution. Full implementation of link:{url-quickref}/src/test/java/zin/rashidi/data/mongodb/tc/dataload/user/UserRepositoryTests.java[`UserRepositoryTests`]:
 
 This also allows us to have a single source of truth in managing data for our tests.
