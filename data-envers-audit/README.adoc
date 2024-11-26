@@ -1,7 +1,7 @@
 = Spring Data Envers: Audit With Entity Revisions
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
-2.0, October 12, 2023
+2.1, November 26, 2024
 :toc:
 :nofooter:
 :icons: font
@@ -13,7 +13,7 @@ include::../docs/badges.adoc[]
 
 == Background
 
-https://projects.spring.io/spring-data-jpa/[Spring Data Jpa] provides rough audit information. However if you are looking for what are the exact changes being
+https://projects.spring.io/spring-data-jpa/[Spring Data Jpa] provides rough audit information. However, if you are looking for what are the exact changes being
 made to an entity you can do so with http://projects.spring.io/spring-data-envers/[Spring Data Envers].
 
 As the name has suggested http://projects.spring.io/spring-data-envers/[Spring Data Envers] utilises and simplifies the usage of http://hibernate.org/orm/envers/[Hibernate Envers].
@@ -26,19 +26,6 @@ In order to enable Envers features we will first include *spring-data-envers* as
 ----
 implementation 'org.springframework.data:spring-data-envers'
 
-----
-
-Next is to inform Spring Boot that we would like do enable Envers' features. This can be done by annotating a `@Configuration`
-class with `@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)`.
-
-Example can be seen in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/envers/repository/RepositoryConfiguration.java[RepositoryConfiguration]:
-
-[source,java]
-----
-@Configuration
-@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class, basePackages = "zin.rashidi.boot.data.envers")
-class RepositoryConfiguration {
-}
 ----
 
 === Enable Entity Audit
