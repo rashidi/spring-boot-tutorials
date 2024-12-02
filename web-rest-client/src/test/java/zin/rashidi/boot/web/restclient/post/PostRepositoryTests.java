@@ -2,6 +2,7 @@ package zin.rashidi.boot.web.restclient.post;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
@@ -34,6 +35,7 @@ class PostRepositoryTests {
     private ObjectMapper mapper;
 
     @Test
+    @DisplayName("When requesting for all posts then response should contain all posts available")
     void findAll() throws JsonProcessingException {
         var content = mapper.writeValueAsString(posts());
 
@@ -45,6 +47,7 @@ class PostRepositoryTests {
     }
 
     @Test
+    @DisplayName("Given a post with requested id is available When requested Then a post with the id should be returned")
     void findById() throws JsonProcessingException {
         var content = mapper.writeValueAsString(new Post(1L, 84L, "Spring Web: REST Clients Example with RESTClient", "An example of using RESTClient"));
 
@@ -56,6 +59,7 @@ class PostRepositoryTests {
     }
 
     @Test
+    @DisplayName("When requesting with an invalid post id Then an error PostNotFoundException will be thrown")
     void findByInvalidId() {
         mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/posts/10101011")).andRespond(withResourceNotFound());
 
