@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.test.web.client.MockRestServiceServer;
-import zin.rashidi.boot.web.restclient.post.PostRepositoryConfiguration.PostNotFoundException;
+import zin.rashidi.boot.web.restclient.post.PostRepositoryConfiguration.PostErrorResponseHandler.PostNotFoundException;
 
 import java.util.List;
 
