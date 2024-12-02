@@ -10,9 +10,7 @@ import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler;
 
 import java.io.IOException;
 
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.client.support.RestClientAdapter.create;
 import static org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor;
 
@@ -26,7 +24,6 @@ class PostRepositoryConfiguration {
     public PostRepository postRepository(RestClient.Builder restClientBuilder) {
         var restClient = restClientBuilder
                 .baseUrl("https://jsonplaceholder.typicode.com")
-                .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .defaultStatusHandler(HttpStatusCode::is4xxClientError, new PostErrorResponseHandler())
                 .build();
 

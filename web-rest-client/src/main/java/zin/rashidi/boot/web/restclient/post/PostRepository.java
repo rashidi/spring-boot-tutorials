@@ -6,10 +6,12 @@ import org.springframework.web.service.annotation.HttpExchange;
 
 import java.util.List;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 /**
  * @author Rashidi Zin
  */
-@HttpExchange("/posts")
+@HttpExchange(url = "/posts", accept = APPLICATION_JSON_VALUE)
 interface PostRepository {
 
     @GetExchange
