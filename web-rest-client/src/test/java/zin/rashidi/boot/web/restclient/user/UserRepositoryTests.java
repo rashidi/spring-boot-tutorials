@@ -2,7 +2,6 @@ package zin.rashidi.boot.web.restclient.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withResourceNotFound;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
@@ -67,7 +66,7 @@ class UserRepositoryTests {
     @Test
     @DisplayName("When an invalid user id is provided Then UserNotFoundException will be thrown")
     void findByInvalidId() {
-        mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/users/84")).andRespond(withBadRequest());
+        mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/users/84")).andRespond(withResourceNotFound());
 
         assertThatThrownBy(() -> repository.findById(84L)).isInstanceOf(UserNotFoundException.class);
 
