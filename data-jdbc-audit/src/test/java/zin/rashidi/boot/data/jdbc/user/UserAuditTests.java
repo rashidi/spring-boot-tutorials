@@ -47,7 +47,7 @@ class UserAuditTests {
     }
 
     @Test
-    @DisplayName("When a user is updated Then lastModified field should be updated")
+    @DisplayName("Given there is a user When I update its username Then lastModified field should be updated")
     @Sql(statements = "INSERT INTO users (id, created, created_by, last_modified, last_modified_by, name, username) VALUES (84, CURRENT_TIMESTAMP - INTERVAL '7 days', 'Mr. Auditor', CURRENT_TIMESTAMP - INTERVAL '7 days', 'Mr. Auditor', 'Rashidi Zin', 'rashidi');")
     void update() {
         var modifiedUser = repository.findById(84L).map(user -> { user.username("rashidi.zin"); return user; }).map(repository::save).orElseThrow();
