@@ -1,9 +1,7 @@
 package zin.rashidi.boot.data.jdbc.user;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -30,7 +28,6 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
         executionPhase = BEFORE_TEST_CLASS,
         statements = "CREATE TABLE users (id BIGSERIAL PRIMARY KEY, created TIMESTAMP WITH TIME ZONE NOT NULL, created_by TEXT NOT NULL, last_modified TIMESTAMP WITH TIME ZONE NOT NULL, last_modified_by TEXT NOT NULL, name TEXT NOT NULL, username TEXT NOT NULL)"
 )
-@TestMethodOrder(MethodOrderer.MethodName.class)
 class UserAuditTests {
 
     @Container
