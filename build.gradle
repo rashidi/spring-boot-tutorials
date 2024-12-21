@@ -4,6 +4,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.1' apply false
     id 'io.spring.dependency-management' version '1.1.7'
+    id "org.sonarqube" version '6.0.1.5171'
 }
 
 group = 'zin.rashidi'
@@ -22,5 +23,13 @@ repositories {
 dependencyManagement {
     imports {
         mavenBom SpringBootPlugin.BOM_COORDINATES
+    }
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "rashidi_spring-boot-tutorials"
+        property "sonar.organization", "rashidi-github"
+        property "sonar.host.url", "https://sonarcloud.io"
     }
 }
