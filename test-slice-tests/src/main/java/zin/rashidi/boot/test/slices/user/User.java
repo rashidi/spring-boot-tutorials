@@ -31,8 +31,17 @@ class User {
         this.status = ACTIVE;
     }
 
-    @Embeddable
-    record Name(String first, String last) {}
+    public Name name() {
+        return name;
+    }
+
+    public String username() {
+        return username;
+    }
+
+    public Status status() {
+        return status;
+    }
 
     enum Status {
         ACTIVE, DORMANT

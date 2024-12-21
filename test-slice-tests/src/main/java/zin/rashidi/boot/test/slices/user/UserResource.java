@@ -1,7 +1,6 @@
 package zin.rashidi.boot.test.slices.user;
 
 import org.springframework.web.bind.annotation.*;
-import zin.rashidi.boot.test.slices.user.User.Name;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
