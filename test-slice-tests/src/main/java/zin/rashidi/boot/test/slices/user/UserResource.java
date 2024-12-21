@@ -1,9 +1,8 @@
 package zin.rashidi.boot.test.slices.user;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -20,7 +19,13 @@ class UserResource {
 
     @GetMapping(value = "/users/{username}", produces = APPLICATION_JSON_VALUE)
     public UserWithoutId findByUsername(@PathVariable String username) {
-        return repository.findByUsername(username).orElseThrow();
+        return repository.findByUsername(username).orElseThrow(InvalidUserException::new);
     }
+
+    @ExceptionHandler(InvalidUserException.class)
+    @ResponseStatus(NOT_FOUND)
+    public void handleInvalidUserException() {}
+
+    static class InvalidUserException extends RuntimeException {}
 
 }
