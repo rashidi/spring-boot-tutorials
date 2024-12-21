@@ -39,4 +39,12 @@ class UserRepositoryTests {
                 .containsExactly("Rashidi Zin", "rashidi.zin", ACTIVE);
     }
 
+    @Test
+    @DisplayName("Given there the username zaid.zin does not exist When I find by the username Then I should receive empty optional")
+    void findByNonExistingUsername() {
+        var user = repository.findByUsername("zaid.zin");
+
+        assertThat(user).isEmpty();
+    }
+
 }
