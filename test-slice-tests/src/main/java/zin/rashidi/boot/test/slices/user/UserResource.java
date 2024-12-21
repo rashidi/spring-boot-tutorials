@@ -1,8 +1,10 @@
 package zin.rashidi.boot.test.slices.user;
 
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * @author Rashidi Zin
@@ -16,18 +18,9 @@ class UserResource {
         this.repository = repository;
     }
 
-    @PostMapping("/users")
-    @ResponseStatus(CREATED)
-    public User add(@RequestBody UserRequest request) {
-        return repository.save(new User(request.name(), request.username()));
-    }
-
-    @GetMapping("/users/{id}")
-    public User read(@PathVariable Long id) {
-        return repository.findById(id).orElseThrow();
-    }
-
-    record UserRequest(Name name, String username) {
+    @GetMapping(value = "/users/{username}", produces = APPLICATION_JSON_VALUE)
+    public UserWithoutId findByUsername(@PathVariable String username) {
+        return repository.findByUsername(username).orElseThrow();
     }
 
 }
