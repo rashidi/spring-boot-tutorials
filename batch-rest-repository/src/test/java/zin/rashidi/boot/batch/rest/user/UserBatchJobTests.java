@@ -1,11 +1,11 @@
-package zin.rashidi.boot.batch.user;
+package zin.rashidi.boot.batch.rest.user;
 
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.batch.core.ExitStatus.COMPLETED;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
-import static zin.rashidi.boot.batch.user.UserBatchJobTests.BatchTestConfiguration;
-import static zin.rashidi.boot.batch.user.UserBatchJobTests.MongoTestConfiguration;
+import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.BatchTestConfiguration;
+import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.MongoTestConfiguration;
 
 import javax.sql.DataSource;
 

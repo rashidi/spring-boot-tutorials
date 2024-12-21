@@ -1,4 +1,4 @@
-package zin.rashidi.boot.batch;
+package zin.rashidi.boot.batch.rest;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

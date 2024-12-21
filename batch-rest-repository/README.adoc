@@ -20,7 +20,7 @@ In this article, we will explore how to implement batch operation that reads fro
 
 == Job Configuration
 Next is to implement the job that will be responsible to read from REST resource and save them into a database. `Job` consists of `Step` and `Step`
-consists of `ItemReader` and `ItemWriter`. We will implement all of them in link:{url-quickref}/src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[UserJobConfiguration].
+consists of `ItemReader` and `ItemWriter`. We will implement all of them in link:{url-quickref}/src/main/java/zin/rashidi/boot/batch/rest/user/UserJobConfiguration.java[UserJobConfiguration].
 
 [source,java]
 ----
@@ -139,4 +139,4 @@ class UserBatchJobTests {
 }
 ----
 
-Full implementation can be found in link:{url-quickref}/src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[UserBatchJobTests].
+Full implementation can be found in link:{url-quickref}/src/test/java/zin/rashidi/boot/batch/rest/user/UserBatchJobTests.java[UserBatchJobTests].

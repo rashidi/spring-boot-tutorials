@@ -53,6 +53,10 @@ subprojects {
     apply {
         plugin('jacoco')
     }
+
+    test {
+        finalizedBy jacocoTestReport
+    }
 }
 
 tasks.named('check') {
