@@ -38,18 +38,6 @@ class User {
         this.status = ACTIVE;
     }
 
-    public Name name() {
-        return name;
-    }
-
-    public String username() {
-        return username;
-    }
-
-    public Status status() {
-        return status;
-    }
-
     enum Status {
         ACTIVE, DORMANT
     }

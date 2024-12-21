@@ -35,7 +35,7 @@ class UserRepositoryTests {
         var user = repository.findByUsername("rashidi.zin");
 
         assertThat(user).get()
-                .extracting(UserWithoutId::name, UserWithoutId::username, UserWithoutId::status)
+                .extracting("name", "username", "status")
                 .containsExactly("Rashidi Zin", "rashidi.zin", ACTIVE);
     }
 
