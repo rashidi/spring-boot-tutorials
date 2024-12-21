@@ -2,8 +2,6 @@ package zin.rashidi.boot.test.slices.user;
 
 import jakarta.persistence.*;
 
-import static zin.rashidi.boot.test.slices.user.User.Status.ACTIVE;
-
 /**
  * @author Rashidi Zin
  */
@@ -29,14 +27,6 @@ class User {
     private Name name;
     private String username;
     private Status status;
-
-    protected User() {}
-
-    User(Name name, String username) {
-        this.name = name;
-        this.username = username;
-        this.status = ACTIVE;
-    }
 
     enum Status {
         ACTIVE, DORMANT
