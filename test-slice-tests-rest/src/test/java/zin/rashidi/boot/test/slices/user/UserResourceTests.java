@@ -1,6 +1,6 @@
 package zin.rashidi.boot.test.slices.user;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +29,13 @@ import static zin.rashidi.boot.test.slices.user.User.Status.ACTIVE;
 @WebMvcTest(controllers = UserResource.class, includeFilters = @Filter(EnableWebSecurity.class))
 class UserResourceTests {
 
-    private MockMvc mvc;
+    private static MockMvc mvc;
 
     @MockitoBean
     private UserRepository repository;
 
-    @BeforeEach
-    void setup(@Autowired WebApplicationContext context) {
+    @BeforeAll
+    static void setup(@Autowired WebApplicationContext context) {
         mvc = webAppContextSetup(context).apply(springSecurity()).build();
     }
 
