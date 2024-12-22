@@ -11,8 +11,7 @@ import zin.rashidi.boot.test.slices.TestcontainersConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_CLASS;
 import static zin.rashidi.boot.test.slices.user.User.Status.ACTIVE;
 
@@ -55,6 +54,14 @@ class FindByUsernameTests {
                 .getForEntity("/users/{username}", UserWithoutId.class, "zaid.zin");
 
         assertThat(response.getStatusCode()).isEqualTo(NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Given there is no authentication When I request for the username Then response status should be UNAUTHORIZED")
+    void withoutAuthentication() {
+        var response = restClient.getForEntity("/users/{username}", UserWithoutId.class, "rashidi.zin");
+
+        assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED);
     }
 
 }

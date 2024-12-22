@@ -15,8 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.Optional;
 
 import static java.util.Optional.empty;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,6 +66,17 @@ class UserResourceTests {
                 .andExpect(status().isNotFound());
 
         verify(repository).findByUsername("rashidi.zin");
+    }
+
+    @Test
+    @DisplayName("Given there is no authentication When I request for the username Then the response status should be UNAUTHORIZED")
+    void findByUsernameWithoutAuthentication() throws Exception {
+        mvc.perform(
+                get("/users/{username}", "rashidi.zin")
+        )
+                .andExpect(status().isUnauthorized());
+
+        verify(repository, never()).findByUsername("rashidi.zin");
     }
 
 }
