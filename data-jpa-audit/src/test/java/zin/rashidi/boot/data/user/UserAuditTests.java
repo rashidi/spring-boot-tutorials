@@ -16,13 +16,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.context.annotation.FilterType.ANNOTATION;
 
 /**
  * @author Rashidi Zin
  */
 @Testcontainers
-@DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ANNOTATION, classes = EnableJpaAuditing.class))
+@DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(EnableJpaAuditing.class))
 class UserAuditTests {
 
     @Container
@@ -35,10 +34,7 @@ class UserAuditTests {
     @Test
     @DisplayName("When a user is saved Then created and modified fields are set And createdBy and modifiedBy fields are set to Mr. Auditor")
     void create() {
-        var user = new User();
-
-        user.setName("Rashidi Zin");
-        user.setUsername("rashidi");
+        var user = new User("Rashidi Zin", "rashidi");
 
         var createdUser = repository.save(user);
 
