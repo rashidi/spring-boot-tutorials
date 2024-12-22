@@ -36,8 +36,11 @@ class User {
     @LastModifiedDate
     private Instant modified;
 
-    public void setName(String name) {
+    protected User() {}
+
+    User(String name, String username) {
         this.name = name;
+        this.username = username;
     }
 
     public void setUsername(String username) {
