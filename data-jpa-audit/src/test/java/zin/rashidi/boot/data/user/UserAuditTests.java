@@ -22,7 +22,7 @@ import static org.springframework.context.annotation.FilterType.ANNOTATION;
  * @author Rashidi Zin
  */
 @Testcontainers
-@DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ANNOTATION, classes = EnableJpaAuditing.class))
+@DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(EnableJpaAuditing.class))
 class UserAuditTests {
 
     @Container
