@@ -47,6 +47,7 @@ with https://plugins.gradle.org/plugin/org.springframework.boot/3.4.1[Spring Boo
 |link:jooq[jOOQ] | Implement an alternative to Jpa using https://www.jooq.org/[jOOQ] and Gradle
 |link:data-mongodb-tc-data-load[Spring Test: Load data with Testcontainers] |Load test data with Testcontainers instead of `BeforeEach`
 |link:test-execution-listeners[Spring Test: Test Execution Listeners] |Implement custom `TestExecutionListener` to manage data in tests
-|link:test-rest-assured[Spring Test: Integration with RestAssured] | Implement Behaviour Driven Development with https://rest-assured.io/[RestAssured]|:link:test-slice-tests-rest[Spring Test: Implementing Slice Tests for REST application] | Dive into available options to implement tests with Spring Boot's test components
+|link:test-rest-assured[Spring Test: Integration with RestAssured] | Implement Behaviour Driven Development with https://rest-assured.io/[RestAssured]
+|link:test-slice-tests-rest[Spring Test: Implementing Slice Tests for REST application] | Dive into available options to implement tests with Spring Boot's test components
 |link:web-rest-client[Spring Web: REST Clients for calling Synchronous API] | Implement REST client to perform synchronous API calls
 |===
