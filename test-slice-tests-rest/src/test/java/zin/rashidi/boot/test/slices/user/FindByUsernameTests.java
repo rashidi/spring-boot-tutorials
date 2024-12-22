@@ -20,7 +20,11 @@ import static zin.rashidi.boot.test.slices.user.User.Status.ACTIVE;
  * @author Rashidi Zin
  */
 @Import(TestcontainersConfiguration.class)
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = "spring.jpa.hibernate.ddl-auto=create-drop")
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.security.user.name=rashidi.zin",
+        "spring.security.user.password=jU$7d3m0pL3a$eRe|ax"
+})
 @Sql(executionPhase = BEFORE_TEST_CLASS, statements = "INSERT INTO users (id, first, last, username, status) VALUES (1, 'Rashidi', 'Zin', 'rashidi.zin', 0)")
 class FindByUsernameTests {
 
@@ -30,7 +34,9 @@ class FindByUsernameTests {
     @Test
     @DisplayName("Given username rashidi.zin exists When I request for the username Then response status should be OK and it should contain the summary of the user")
     void withExistingUsername() {
-        var response = restClient.getForEntity("/users/{username}", UserWithoutId.class, "rashidi.zin");
+        var response = restClient
+                .withBasicAuth("rashidi.zin", "jU$7d3m0pL3a$eRe|ax")
+                .getForEntity("/users/{username}", UserWithoutId.class, "rashidi.zin");
 
         assertThat(response.getStatusCode()).isEqualTo(OK);
 
@@ -44,7 +50,9 @@ class FindByUsernameTests {
     @Test
     @DisplayName("Given username zaid.zin does not exist When I request for the username Then response status should be NOT_FOUND")
     void withNonExistingUsername() {
-        var response = restClient.getForEntity("/users/{username}", UserWithoutId.class, "zaid.zin");
+        var response = restClient
+                .withBasicAuth("rashidi.zin", "jU$7d3m0pL3a$eRe|ax")
+                .getForEntity("/users/{username}", UserWithoutId.class, "zaid.zin");
 
         assertThat(response.getStatusCode()).isEqualTo(NOT_FOUND);
     }
