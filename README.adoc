@@ -7,7 +7,12 @@ Samples and tutorials for https://spring.io/projects/spring-boot[Spring Boot] mo
 Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial is equipped
 with source code in individual submodules and can be found on {url-quickref}[GitHub].
 
-include::docs/badges.adoc[]
+image:https://img.shields.io/badge/Java_-21-blue?style=flat-square[Static Badge]
+image:https://img.shields.io/gradle-plugin-portal/v/org.springframework.boot?style=flat-square&logo=springboot&label=Spring%20Boot[Gradle Plugin Portal Version]
+image:https://img.shields.io/github/license/rashidi/spring-boot-tutorials?style=flat-square&color=blue[GitHub License]
+image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/build-and-publish.yml?style=flat-square&logo=githubactions&color=blue[GitHub Actions Workflow Status]
+image:https://img.shields.io/sonar/coverage/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Coverage]
+image:https://img.shields.io/github/stars/rashidi/spring-boot-tutorials?style=flat-square&logo=github[GitHub Repo stars, link={url-quickref}]
 
 == Motivation
 
