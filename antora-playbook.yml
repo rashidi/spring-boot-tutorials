@@ -4,9 +4,8 @@ site:
   start_page: root::README.adoc
 content:
   sources:
-    - url: https://example.com/docs-repo.git
-      branches: [ main ]
-      start_path: docs
+    - url: https://github.com/rashidi/spring-boot-tutorials.git
+      branches: [ master ]
 ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
