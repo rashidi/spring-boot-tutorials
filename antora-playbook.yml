@@ -1,0 +1,11 @@
+site:
+  title: Spring Boot Tutorials by Rashidi Zin
+  url: https://rashidi.github.io/spring-boot-tutorials/
+  start_page: root::README.adoc
+content:
+  sources:
+    - url: https://example.com/docs-repo.git
+      branches: [ main ]
+      start_path: docs
+runtime:
+  fetch: true
