@@ -9,17 +9,16 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Optional;
 
 import static java.util.Optional.empty;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.springframework.test.web.servlet.assertj.MockMvcTester.from;
 import static zin.rashidi.boot.test.slices.user.User.Status.ACTIVE;
 
 /**
@@ -28,28 +27,28 @@ import static zin.rashidi.boot.test.slices.user.User.Status.ACTIVE;
 @WebMvcTest(controllers = UserResource.class, includeFilters = @Filter(EnableWebSecurity.class))
 class UserResourceTests {
 
-    private static MockMvc mvc;
+    private static MockMvcTester mvc;
 
     @MockitoBean
     private UserRepository repository;
 
     @BeforeAll
     static void setup(@Autowired WebApplicationContext context) {
-        mvc = webAppContextSetup(context).apply(springSecurity()).build();
+        mvc = from(context, builder -> builder.apply(springSecurity()).build());
     }
 
     @Test
     @WithMockUser
     @DisplayName("Given username rashidi.zin exists When when I request for the username Then the response status should be OK")
-    void findByUsername() throws Exception {
+    void findByUsername() {
         var fakeUser = Optional.of(new UserWithoutId("Rashidi Zin", "rashidi.zin", ACTIVE));
 
         doReturn(fakeUser).when(repository).findByUsername("rashidi.zin");
 
-        mvc.perform(
-                get("/users/{username}", "rashidi.zin")
-        )
-                .andExpect(status().isOk());
+        mvc
+                .get().uri("/users/{username}", "rashidi.zin")
+                .assertThat()
+                .hasStatus(OK);
 
         verify(repository).findByUsername("rashidi.zin");
     }
@@ -57,24 +56,23 @@ class UserResourceTests {
     @Test
     @WithMockUser
     @DisplayName("Given username rashidi.zin does not exist When when I request for the username Then the response status should be NOT_FOUND")
-    void findByNonExistingUsername() throws Exception {
+    void findByNonExistingUsername() {
         doReturn(empty()).when(repository).findByUsername("rashidi.zin");
 
-        mvc.perform(
-                get("/users/{username}", "rashidi.zin")
-        )
-                .andExpect(status().isNotFound());
+        mvc
+                .get().uri("/users/{username}", "rashidi.zin")
+                .assertThat()
+                .hasStatus(NOT_FOUND);
 
         verify(repository).findByUsername("rashidi.zin");
     }
 
     @Test
     @DisplayName("Given there is no authentication When I request for the username Then the response status should be UNAUTHORIZED")
-    void findByUsernameWithoutAuthentication() throws Exception {
-        mvc.perform(
-                get("/users/{username}", "rashidi.zin")
-        )
-                .andExpect(status().isUnauthorized());
+    void findByUsernameWithoutAuthentication() {
+        mvc
+                .get().uri("/users/{username}", "rashidi.zin")
+                .assertThat().hasStatus(UNAUTHORIZED);
 
         verify(repository, never()).findByUsername("rashidi.zin");
     }
