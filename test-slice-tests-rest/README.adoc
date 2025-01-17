@@ -1,6 +1,6 @@
 = Spring Test: Slice Testing a REST Application
 Rashidi Zin <rashidi@zin.my>
-1.0, December 22, 2024: Initial version
+1.1, January 17, 2025: Replace MockMvc with MockMvcTester
 :toc:
 :icons: font
 :source-highlighter: highlight.js
@@ -154,28 +154,28 @@ arrange that it will return an empty `Optional`. This will lead to `InvalidUserE
 @WebMvcTest(controllers = UserResource.class, includeFilters = @Filter(EnableWebSecurity.class))
 class UserResourceTests {
 
-    private static MockMvc mvc;
+    private static MockMvcTester mvc;
 
     @MockitoBean
     private UserRepository repository;
 
     @BeforeAll
     static void setup(@Autowired WebApplicationContext context) {
-        mvc = webAppContextSetup(context).apply(springSecurity()).build();
+        mvc = from(context, builder -> builder.apply(springSecurity()).build());
     }
 
     @Test
     @WithMockUser
     @DisplayName("Given username rashidi.zin exists When when I request for the username Then the response status should be OK")
-    void findByUsername() throws Exception {
+    void findByUsername() {
         var fakeUser = Optional.of(new UserWithoutId("Rashidi Zin", "rashidi.zin", ACTIVE));
 
         doReturn(fakeUser).when(repository).findByUsername("rashidi.zin");
 
-        mvc.perform(
-                get("/users/{username}", "rashidi.zin")
-        )
-                .andExpect(status().isOk());
+        mvc
+                .get().uri("/users/{username}", "rashidi.zin")
+                .assertThat()
+                .hasStatus(OK);
 
         verify(repository).findByUsername("rashidi.zin");
     }
@@ -183,24 +183,23 @@ class UserResourceTests {
     @Test
     @WithMockUser
     @DisplayName("Given username rashidi.zin does not exist When when I request for the username Then the response status should be NOT_FOUND")
-    void findByNonExistingUsername() throws Exception {
+    void findByNonExistingUsername() {
         doReturn(empty()).when(repository).findByUsername("rashidi.zin");
 
-        mvc.perform(
-                get("/users/{username}", "rashidi.zin")
-        )
-                .andExpect(status().isNotFound());
+        mvc
+                .get().uri("/users/{username}", "rashidi.zin")
+                .assertThat()
+                .hasStatus(NOT_FOUND);
 
         verify(repository).findByUsername("rashidi.zin");
     }
 
     @Test
     @DisplayName("Given there is no authentication When I request for the username Then the response status should be UNAUTHORIZED")
-    void findByUsernameWithoutAuthentication() throws Exception {
-        mvc.perform(
-                get("/users/{username}", "rashidi.zin")
-        )
-                .andExpect(status().isUnauthorized());
+    void findByUsernameWithoutAuthentication() {
+        mvc
+                .get().uri("/users/{username}", "rashidi.zin")
+                .assertThat().hasStatus(UNAUTHORIZED);
 
         verify(repository, never()).findByUsername("rashidi.zin");
     }
@@ -210,7 +209,7 @@ class UserResourceTests {
 
 .Methods and annotations used in the test above:
 * `@WebMvcTest` - Our test will only focus on `UserResource` and we will load security configuration from `WebSecurityConfiguration`
-* `SecurityMockMvcConfigurers.springSecurity()` - Enable Spring Security support for `MockMvc`
+* `SecurityMockMvcConfigurers.springSecurity()` - Enable Spring Security support for `MockMvcTester`
 * `@WithMockUser` - Mocks user authentication. Without it the response will be `UNAUTHORIZED` as demonstrated in `findByUsernameWithoutAuthentication`
 * `@MockitoBean` - Mocks `UserRepository` since we have verified that it works correctly in link:{source-test}/user/UserRepositoryTests.java[`UserRepositoryTests`]
 * `Mockito.verify` - Verifies that `UserRepository.findByUsername` was either triggered (when user is authenticated) or not
