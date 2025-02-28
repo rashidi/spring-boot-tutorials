@@ -1,14 +1,7 @@
 package zin.rashidi.boot.batch.rest.user;
 
-import static java.time.Duration.ofSeconds;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.batch.core.ExitStatus.COMPLETED;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
-import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.BatchTestConfiguration;
-import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.MongoTestConfiguration;
-
-import javax.sql.DataSource;
-
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
@@ -16,28 +9,35 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.jdbc.support.JdbcTransactionManager;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
+import javax.sql.DataSource;
+
+import static java.time.Duration.ofSeconds;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.batch.core.ExitStatus.COMPLETED;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
+import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.BatchTestConfiguration;
+import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.MongoTestConfiguration;
 
 /**
  * @author Rashidi Zin
  */
 @Testcontainers
 @SpringBatchTest
-@SpringJUnitConfig({ BatchTestConfiguration.class, MongoTestConfiguration.class, UserJobConfiguration.class })
+@SpringBootTest(classes = { BatchTestConfiguration.class, MongoTestConfiguration.class, UserJobConfiguration.class }, webEnvironment = NONE)
 class UserBatchJobTests {
 
     @Container
