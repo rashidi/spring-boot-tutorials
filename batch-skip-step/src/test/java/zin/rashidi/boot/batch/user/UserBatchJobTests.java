@@ -8,13 +8,13 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -25,8 +25,8 @@ import javax.sql.DataSource;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.batch.core.ExitStatus.COMPLETED;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
-
 import static zin.rashidi.boot.batch.user.UserBatchJobTests.BatchTestConfiguration;
 import static zin.rashidi.boot.batch.user.UserBatchJobTests.JdbcTestConfiguration;
 
@@ -35,11 +35,11 @@ import static zin.rashidi.boot.batch.user.UserBatchJobTests.JdbcTestConfiguratio
  */
 @Testcontainers
 @SpringBatchTest
-@SpringJUnitConfig({
+@SpringBootTest(classes = {
         BatchTestConfiguration.class,
         JdbcTestConfiguration.class,
         UserJobConfiguration.class
-})
+}, webEnvironment = NONE)
 @Sql(
         scripts = {
                 "classpath:org/springframework/batch/core/schema-drop-mysql.sql",

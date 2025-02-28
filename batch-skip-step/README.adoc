@@ -107,11 +107,11 @@ We will implement integration tests to verify that our implementation is working
 ----
 @Testcontainers
 @SpringBatchTest
-@SpringJUnitConfig({
+@SpringBootTest(classes = {
         BatchTestConfiguration.class,
         JdbcTestConfiguration.class,
         UserJobConfiguration.class
-})
+}, webEnvironment = NONE)
 @Sql(
         scripts = {
                 "classpath:org/springframework/batch/core/schema-drop-mysql.sql",

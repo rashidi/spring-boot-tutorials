@@ -103,7 +103,7 @@ Once completed then we will verify that the database contains the expected numbe
 ----
 @Testcontainers
 @SpringBatchTest
-@SpringJUnitConfig({ BatchTestConfiguration.class, MongoTestConfiguration.class, UserJobConfiguration.class })
+@SpringBootTest(classes = { BatchTestConfiguration.class, MongoTestConfiguration.class, UserJobConfiguration.class }, webEnvironment = NONE)
 class UserBatchJobTests {
 
     @Container
