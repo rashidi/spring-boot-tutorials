@@ -12,7 +12,36 @@ permissions:
   pull-requests: write
 
 jobs:
+  check-changes:
+    name: Check Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      only_readme: ${{ steps.filter.outputs.only_readme }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for README.adoc changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            readme:
+              - '**/*.adoc'
+            other:
+              - '**/*'
+              - '!**/*.adoc'
+          list-files: json
+      - name: Set only_readme output
+        id: set_output
+        run: |
+          if [[ "${{ steps.filter.outputs.other_count }}" == "0" && "${{ steps.filter.outputs.readme_count }}" != "0" ]]; then
+            echo "only_readme=true" >> $GITHUB_OUTPUT
+          else
+            echo "only_readme=false" >> $GITHUB_OUTPUT
+          fi
+
   gradle-build:
+    needs: check-changes
+    if: needs.check-changes.outputs.only_readme != 'true'
     name: Build project with Gradle
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +73,15 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
       - name: Run CI build
         run: ./gradlew build
+      - name: Check for Java file changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            java:
+              - '**/*.java'
       - name: Publish test coverage
+        if: steps.changes.outputs.java == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -54,7 +91,8 @@ jobs:
     # The type of runner that the job will run on
     name: Generate articles with Ascii Doctor
     runs-on: ubuntu-latest
-    needs: gradle-build
+    needs: [check-changes, gradle-build]
+    if: needs.check-changes.outputs.only_readme != 'true'
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
