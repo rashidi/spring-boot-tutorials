@@ -28,7 +28,6 @@ jobs:
               - '**/*.adoc'
             other:
               - '**/*'
-              - '!**/*.adoc'
           list-files: json
       - name: Set only_readme output
         id: set_output
