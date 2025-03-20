@@ -14,8 +14,14 @@ name: "CodeQL"
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - '**/*.java'
+      - '**/*.gradle'
   pull_request:
     branches: [ "master" ]
+    paths:
+      - '**/*.java'
+      - '**/*.gradle'
   schedule:
     - cron: '25 21 * * 0'
 
