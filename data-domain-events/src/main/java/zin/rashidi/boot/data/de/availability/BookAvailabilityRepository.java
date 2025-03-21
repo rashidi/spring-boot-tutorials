@@ -1,17 +1,14 @@
 package zin.rashidi.boot.data.de.availability;
 
-import org.springframework.data.repository.RepositoryDefinition;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
 /**
  * @author Rashidi Zin
  */
-@RepositoryDefinition(domainClass = BookAvailability.class, idClass = Long.class)
-interface BookAvailabilityRepository {
+interface BookAvailabilityRepository extends JpaRepository<BookAvailability, Long> {
 
     Optional<BookAvailability> findByIsbn(Long isbn);
-
-    BookAvailability save(BookAvailability entity);
 
 }
