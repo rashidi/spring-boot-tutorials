@@ -1,8 +1,8 @@
 package zin.rashidi.boot.data.de.availability;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * @author Rashidi Zin
