@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - docs/customise-headers
     paths:
       - 'docs/**'
       - 'antora-playbook.yml'
