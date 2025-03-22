@@ -1,4 +1,431 @@
 = Spring Test: Implement BDD with RestAssured
 :page-aliases: test-rest-assured.adoc
+:source-highlighter: highlight.js
+:toc:
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-rest-assured
 
-include::../../../../test-rest-assured/README.adoc[lines=2..-1]
+Verify API implementation through integration tests with https://www.browserstack.com/guide/what-is-bdd[Behaviour Driven Development (BDD)]
+using Spring Boot, https://testcontainers.com/[Testcontainers], and https://rest-assured.io/[RestAssured].
+
+include::../../../badges.adoc[]
+
+== Background
+
+RestAssured provide the convenience to test REST API in BDD style. It is very useful to test API implementation in Spring Boot application.
+Provided that its API involved common BDD keywords such as `given`, `when` and `then`.
+
+In this example we will implement three features:
+
+[start=1]
+. User creation
+. User retrieval by username
+. User deletion
+
+We will implement test scenarios before implementing the actual API.
+
+== User Creation
+
+We will implement two scenarios - create with an available username and create with an unavailable username.
+
+[source,java]
+----
+@Testcontainers
+@TestExecutionListeners(listeners = UserCreationTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+class CreateUserTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+
+    @BeforeAll
+    static void port(@LocalServerPort int port) {
+        RestAssured.port = port;
+    }
+
+    @Test
+    @DisplayName("Given provided username is available When I create a User Then response status should be Created")
+    void availableUsername() {
+        var content = """
+                {
+                  "name": "Rashidi Zin",
+                  "username": "rashidi.zin"
+                }
+                """;
+
+        given()
+                .contentType(JSON)
+                .body(content)
+        .when()
+                .post("/users")
+        .then().assertThat()
+                .statusCode(equalTo(SC_CREATED));
+    }
+
+    @Test
+    @DisplayName("Given the username zaid.zin is unavailable When I create a User Then response status should be Bad Request")
+    void unavailableUsername() {
+        var content = """
+                {
+                  "name": "Zaid Zin",
+                  "username": "zaid.zin"
+                }
+                """;
+
+        given()
+                .contentType(JSON)
+                .body(content)
+        .when()
+                .post("/users")
+        .then().assertThat()
+                .statusCode(equalTo(SC_BAD_REQUEST));
+    }
+
+}
+----
+
+In the implementation above. Testcontainers is used to simulate actual MongoDB and
+link:{url-quickref}/src/test/java/zin/rashidi/boot/test/restassured/user/UserCreationTestExecutionListener.java[UserCreationTestExecutionListener] will load data into the database.
+The data will be used to validate the second scenario.
+
+Next we will implement the API which will ensure that scenarios above will pass. We will start our implementation to fix the first failing
+scenario - create with an available username.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping("/users")
+    @ResponseStatus(CREATED)
+    public void create(@RequestBody UserRequest request) {
+        repository.save(new User(request.name(), request.username()));
+    }
+
+}
+----
+
+The implementation above should be sufficient to fix our first scenario. We will run the test again to ensure that it passes. Next is to
+fix our second scenario - create with an unavailable username.
+
+Given that we do not have any validation in place, the second scenario will fail. We will add validation to ensure that the username is
+unique. We will start by implementing a `Repository` method to validate if the username exists.
+
+[source,java]
+----
+interface UserRepository extends MongoRepository<User, ObjectId> {
+
+    boolean existsByUsername(String username);
+
+}
+----
+
+Next, we will use `existsByUsername` to validate if the username exists before saving the user.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping("/users")
+    @ResponseStatus(CREATED)
+    public void create(@RequestBody UserRequest request) {
+        if (repository.existsByUsername(request.username())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        repository.save(new User(request.name(), request.username()));
+    }
+
+}
+----
+
+This, however, is insufficient as the server will throw `500 Internal Server Error` when the username already exists. We will add
+`@ExceptionHandler` to handle the exception which converts it to `BAD REQUEST`.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping("/users")
+    @ResponseStatus(CREATED)
+    public void create(@RequestBody UserRequest request) {
+        if (repository.existsByUsername(request.username())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        repository.save(new User(request.name(), request.username()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(BAD_REQUEST)
+    public void handleIllegalArgumentException(IllegalArgumentException ignored) {
+    }
+
+}
+----
+
+Now we will run link:{url-quickref}/src/test/java/zin/rashidi/boot/test/restassured/user/CreateUserTests.java[CreateUserTests] again to ensure that both scenarios pass. Next, we will follow the same approach to implement the API for user retrieval by username.
+
+== User Retrieval by Username
+
+In link:{url-quickref}/src/test/java/zin/rashidi/boot/test/restassured/user/FindUserByUsernameTests.java[FindUserByUsernameTests], we will implement two scenarios - find with an available username and find with an unavailable username.
+
+[source,java]
+----
+@Testcontainers
+@TestExecutionListeners(listeners = UserCreationTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+class FindUserByUsernameTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+
+    @BeforeAll
+    static void port(@LocalServerPort int port) {
+        RestAssured.port = port;
+    }
+
+    @Test
+    @DisplayName("Given username zaid.zin exists When I find a User Then response status should be OK and User should be returned")
+    void findByExistingUsername() {
+        given()
+                .contentType(JSON)
+        .when()
+                .get("/users/{username}", "zaid.zin")
+        .then().assertThat()
+                .statusCode(equalTo(SC_OK))
+                .body("name", equalTo("Zaid Zin"))
+                .body("username", equalTo("zaid.zin"));
+    }
+
+    @Test
+    @DisplayName("Given there is no User with username rashidi.zin When I find a User Then response status should be Not Found")
+    void findByNonExistingUsername() {
+        given()
+                .contentType(JSON)
+        .when()
+                .get("/users/{username}", "rashidi.zin")
+        .then().assertThat()
+                .statusCode(equalTo(SC_NOT_FOUND));
+    }
+
+}
+----
+
+As you can see, `findByExistingUsername` validates the response body as well as HTTP response. Given that the user exists then the response body should contain the user's name and username. The HTTP response should be `200 OK`.
+
+While in the event requested `username` does not exist then the HTTP response should be `404 Not Found`.
+
+We will start by implementing a `Repository` method which will retrieve requested username.
+
+[source,java]
+----
+interface UserRepository extends MongoRepository<User, ObjectId> {
+
+    Optional<UserReadOnly> findByUsername(String username);
+
+}
+----
+
+link:{url-quickref}/src/main/java/zin/rashidi/boot/test/restassured/user/UserReadOnly.java[UserReadOnly] is a read-only projection of
+`User` which will be used to retrieve the user's name and username.
+
+Then we will implement the API to fix the scenarios above. We will start with the first scenario - find with an available username.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @GetMapping("/users/{username}")
+    public UserReadOnly findByUsername(@PathVariable String username) {
+        return repository.findByUsername(username).orElseThrow();
+    }
+
+}
+----
+
+The implementation above should be sufficient to fix our first scenario. We will run the test again to ensure that it passes.
+Next is to fix our second scenario - find with an unavailable username.
+
+As for now, the second scenario will fail. We will add `@ExceptionHandler` to handle the exception which converts it to `NOT FOUND`.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @GetMapping("/users/{username}")
+    public UserReadOnly findByUsername(@PathVariable String username) {
+        return repository.findByUsername(username).orElseThrow();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(NOT_FOUND)
+    public void handleNoSuchElementException(NoSuchElementException ignored) {
+    }
+
+}
+----
+
+Now we will run link:{url-quickref}/src/test/java/zin/rashidi/boot/test/restassured/user/FindUserByUsernameTests.java[FindUserByUsernameTests]
+again to ensure that both scenarios pass. Next, we will follow the same approach to implement the API for user deletion.
+
+== User Deletion
+
+For User Deletion, the action requires a valid `id`. However, since we are going to utilise data stored by `Testcontainers`, we are required
+to retrieve the existing user's `id` first. Then we will perform the deletion.
+
+We will implement two scenarios - delete with an available `id` and delete with an non-existing `id`.
+
+[source,java]
+----
+@Testcontainers
+@TestExecutionListeners(listeners = UserCreationTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+class DeleteUserTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+
+    @BeforeAll
+    static void port(@LocalServerPort int port) {
+        RestAssured.port = port;
+    }
+
+    @Test
+    @DisplayName("Given username zaid.zin exists When I delete with its id Then response status should be No Content")
+    void deleteWithValidId() {
+        String id = get("/users/{username}", "zaid.zin").path("id");
+
+        when()
+                .delete("/users/{id}", id)
+        .then().assertThat()
+                .statusCode(equalTo(SC_NO_CONTENT));
+    }
+
+    @Test
+    @DisplayName("When I trigger delete with a non-existing ID Then response status should be Not Found")
+    void deleteWithNonExistingId() {
+        when()
+                .delete("/users/{id}", "5f9b0a9b9d9b4a0a9d9b4a0a")
+        .then().assertThat()
+                .statusCode(equalTo(SC_NOT_FOUND));
+    }
+
+}
+----
+
+As you can see, in `deleteWithValidId` we are retrieving the existing user's `id` first.
+
+[source,java]
+----
+@Testcontainers
+@TestExecutionListeners(listeners = UserCreationTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+class DeleteUserTests {
+
+    @Test
+    @DisplayName("Given username zaid.zin exists When I delete with its id Then response status should be No Content")
+    void deleteWithValidId() {
+        String id = get("/users/{username}", "zaid.zin").path("id");
+
+        when()
+                .delete("/users/{id}", id)
+        .then().assertThat()
+                .statusCode(equalTo(SC_NO_CONTENT));
+    }
+
+}
+----
+
+Once we have the `id`, we will perform the deletion. Next, we will implement the API to fix the scenarios above. We will start with the first scenario - delete with an available `id`.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @DeleteMapping("/users/{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void deleteById(@PathVariable ObjectId id) {
+        repository.findById(id).ifPresent(repository::delete);
+    }
+
+}
+----
+
+The implementation above should be sufficient to fix our first scenario. We will run the test again to ensure that it passes. Next is to fix our second scenario - delete with an non-existing `id`. We're expecting `404 Not Found` in this scenario. We can achieve this with slight modification to `deleteById` method.
+
+[source,java]
+----
+@RestController
+class UserResource {
+
+    private final UserRepository repository;
+
+    UserResource(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @DeleteMapping("/users/{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void deleteById(@PathVariable ObjectId id) {
+        repository.findById(id).ifPresentOrElse(repository::delete, () -> { throw new NoSuchElementException(); });
+    }
+
+}
+----
+
+Since we have already implement `@ExceptionHandler` to handle `NoSuchElementException`, this implementation should be sufficient to fix our
+second scenario. We will run the test again to ensure that it passes.
+
+== Conclusion
+
+I have always preferred RestAssured as it allows me to test API implementation in BDD style. Given that I can decouple my tests with the
+production code, I can ensure that my tests are not affected by the implementation details.
+
+As you can see from tests above. None of the tests uses production code. This is very useful when I need to refactor my
+code. I can refactor my code without worrying that my tests will break. As long as the API contract remains the same, my tests will pass.

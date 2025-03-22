@@ -1,4 +1,133 @@
 = Spring Batch: Skip Specific Data
 :page-aliases: batch-skip-step.adoc
+:source-highlighter: highlight.js
+:toc:
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch-skip-step
 
-include::../../../../batch-skip-step/README.adoc[lines=2..-1]
+Skip processing specific data through business logic in Spring Batch.
+
+include::../../../badges.adoc[]
+
+== Background
+Spring Batch is a framework for batch processing – execution of a series of jobs. A job is composed of a series of steps.
+Each step consists of a reader, a processor, and a writer. The reader reads data from a data source, the processor
+processes the data, and the writer writes the processed data to a data source.
+
+There are scenarios where we want to skip processing specific data through business logic. For example, in this guide,
+we want to skip data where `username` are either `Elwyn.Skiles` or `Maxime_Nienow`. We will look into two approaches;
+one by returning `null` and another by throwing `RuntimeException`. Both approaches will be implemented in the same
+`ItemProcessor`.
+
+Our application will process data from link:{url-quickref}/src/main/resources/users.json[users.json] file and write the processed data
+into MySQL database. Content of `users.json` is taken from link:https://jsonplaceholder.typicode.com/users[JSONPlaceholder].
+
+== Implement Logics to Skip Data
+=== Returning `null`
+First approach is to return `null` from `ItemProcessor` implementation. This approach is straight forward and does not
+require additional configuration.
+
+[source,java]
+----
+@Configuration
+class UserJobConfiguration {
+    private ItemProcessor<UserFile, User> processor() {
+        return item -> switch (item.username()) {
+            case "Elwyn.Skiles" -> null;
+        };
+    }
+}
+----
+
+With that, when the `Job` detected that the `ItemProcessor` returns `null`, it will skip the data and continue to the next.
+
+=== Throwing `RuntimeException`
+Second approach is to throw `RuntimeException` from `ItemProcessor` implementation. This approach requires additional
+configuration to be done when defining `Step`.
+
+Implementation in `ItemProcessor` is as follows:
+
+[source,java]
+----
+@Configuration
+class UserJobConfiguration {
+    private ItemProcessor<UserFile, User> processor() {
+        return item -> switch (item.username()) {
+            case "Maxime_Nienow" -> throw new UsernameNotAllowedException(item.username());
+        };
+    }
+    static class UsernameNotAllowedException extends RuntimeException {
+        public UsernameNotAllowedException(String username) {
+            super("Username " + username + " is not allowed");
+        }
+    }
+}
+----
+
+Next is to inform `Step` to skip `UsernameNotAllowedException`:
+
+[source,java]
+----
+@Configuration
+class UserJobConfiguration {
+    private Step step(JobRepository jobRepository, PlatformTransactionManager transactionManager, DataSource dataSource) {
+        return new StepBuilder("userStep", jobRepository)
+                .<UserFile, User>chunk(10, transactionManager)
+                .faultTolerant()
+                .skip(UsernameNotAllowedException.class)
+                .skipLimit(1)
+                .build();
+    }
+}
+----
+
+With that, when the `Job` detected that the `ItemProcessor` throws `UsernameNotAllowedException`, it will skip the data.
+
+Full definition of the `Job` can be found in link:{url-quickref}/src/main/java/zin/rashidi/boot/batch/user/UserJobConfiguration.java[UserJobConfiguration.java].
+
+== Verification
+We will implement integration tests to verify that our implementation is working as intended whereby `Elwyn.Skiles` and
+`Maxime_Nienow` are skipped thus will not be available in the database.
+
+[source,java]
+----
+@Testcontainers
+@SpringBatchTest
+@SpringBootTest(classes = {
+        BatchTestConfiguration.class,
+        JdbcTestConfiguration.class,
+        UserJobConfiguration.class
+}, webEnvironment = NONE)
+@Sql(
+        scripts = {
+                "classpath:org/springframework/batch/core/schema-drop-mysql.sql",
+                "classpath:org/springframework/batch/core/schema-mysql.sql"
+        },
+        statements = "CREATE TABLE IF NOT EXISTS users (id BIGINT PRIMARY KEY, name text, username text)"
+)
+class UserBatchJobTests {
+    @Container
+    @ServiceConnection
+    private final static MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:latest");
+    @Autowired
+    private JobLauncherTestUtils launcher;
+    @Autowired
+    private JdbcTemplate jdbc;
+    @Test
+    @DisplayName("Given the username Elwyn.Skiles and Maxime_Nienow are skipped, When job is executed, Then users are not inserted into database")
+    void findAll() {
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            var execution = launcher.launchJob();
+            assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
+        });
+        var users = jdbc.query("SELECT * FROM users", (rs, rowNum) ->
+                new User(rs.getLong("id"), rs.getString("name"), rs.getString("username"))
+        );
+        assertThat(users).extracting("username").doesNotContain("Elwyn.Skiles", "Maxime_Nienow");
+    }
+}
+----
+
+By executing our tests in link:{url-quickref}src/test/java/zin/rashidi/boot/batch/user/UserBatchJobTests.java[UserBatchJobTests.java],
+we will see that all users are processed except `Elwyn.Skiles` and `Maxime_Nienow`.
