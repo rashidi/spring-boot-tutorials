@@ -1,12 +1,24 @@
-<div class="navbar-item has-dropdown is-hoverable">
-  <a class="navbar-link" href="#">Components</a>
-  <div class="navbar-dropdown">
-    <div class="navbar-item">{{site.title}}</div>
-  </div>
+<div class="navbar-brand">
+  <a class="navbar-item" href="{{{relativize site.url}}}"><img src="{{{uiRootPath}}}/img/logo.svg" alt="{{site.title}}"></a>
+  <button class="navbar-burger" data-target="topbar-nav">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
 </div>
-<div class="navbar-item has-dropdown is-hoverable">
-  <a class="navbar-link" href="#">Documentation</a>
-  <div class="navbar-dropdown">
+<div id="topbar-nav" class="navbar-menu">
+  <div class="navbar-end">
     <a class="navbar-item" href="{{{relativize site.url}}}">Home</a>
+    <div class="navbar-item has-dropdown is-hoverable">
+      <a class="navbar-link" href="#">Documentation</a>
+      <div class="navbar-dropdown">
+        <a class="navbar-item" href="{{{relativize site.url}}}">Home</a>
+      </div>
+    </div>
+    <div class="navbar-item">
+      <span class="control">
+        <a class="button is-primary" href="https://github.com/rashidi/spring-boot-tutorials">Download</a>
+      </span>
+    </div>
   </div>
 </div>
