@@ -1,5 +1,4 @@
 = Spring Data Envers: Audit With Entity Revisions
-:page-aliases: data-envers-audit.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

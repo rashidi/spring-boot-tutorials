@@ -1,5 +1,4 @@
 = Spring Data Jpa: Global Filter Query
-:page-aliases: data-jpa-filtered-query.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

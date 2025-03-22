@@ -1,5 +1,4 @@
 = Spring Data MongoDB Audit Example
-:page-aliases: data-mongodb-audit.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

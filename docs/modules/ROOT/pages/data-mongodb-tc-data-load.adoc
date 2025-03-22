@@ -1,5 +1,4 @@
 = Spring Data MongoDb with Testcontainers
-:page-aliases: data-mongodb-tc-data-load.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

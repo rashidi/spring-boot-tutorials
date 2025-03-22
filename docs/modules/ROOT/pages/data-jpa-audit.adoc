@@ -1,5 +1,4 @@
 = Spring Data Jpa Audit Example
-:page-aliases: data-jpa-audit.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

@@ -1,5 +1,4 @@
 = Spring Data: Repository Definition
-:page-aliases: data-repository-definition.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

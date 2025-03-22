@@ -1,5 +1,4 @@
 = Spring Test: Implement BDD with RestAssured
-:page-aliases: test-rest-assured.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

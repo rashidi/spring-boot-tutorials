@@ -1,5 +1,4 @@
 = Spring Data: Domain Events Example
-:page-aliases: data-domain-events.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

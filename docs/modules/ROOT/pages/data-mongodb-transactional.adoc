@@ -1,5 +1,4 @@
 = @Transactional with Spring Data MongoDB
-:page-aliases: data-mongodb-transactional.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

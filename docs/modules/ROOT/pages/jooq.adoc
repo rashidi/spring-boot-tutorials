@@ -1,5 +1,4 @@
 = jOOQ: Implement jOOQ with Spring Boot and Gradle
-:page-aliases: jooq.adoc
 :source-highlighter: highlight.js
 :highlightjs-languages: java, groovy
 :toc:

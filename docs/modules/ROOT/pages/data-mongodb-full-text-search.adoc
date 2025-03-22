@@ -1,5 +1,4 @@
 = Spring Data MongoDB: Full Text Search
-:page-aliases: data-mongodb-full-text-search.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

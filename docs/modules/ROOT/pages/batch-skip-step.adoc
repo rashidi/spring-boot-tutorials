@@ -1,5 +1,4 @@
 = Spring Batch: Skip Specific Data
-:page-aliases: batch-skip-step.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

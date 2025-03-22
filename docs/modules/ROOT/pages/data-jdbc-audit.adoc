@@ -1,5 +1,4 @@
 = Spring Data JDBC: Implement Auditing
-:page-aliases: data-jdbc-audit.adoc
 :toc:
 :icons: font
 :source-highlighter: highlight.js

@@ -1,5 +1,4 @@
 = GraphQL With Spring Boot
-:page-aliases: graphql.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

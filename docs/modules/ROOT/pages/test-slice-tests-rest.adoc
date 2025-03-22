@@ -1,5 +1,4 @@
 = Spring Test: Slice Testing a REST Application
-:page-aliases: test-slice-tests-rest.adoc
 :toc:
 :icons: font
 :source-highlighter: highlight.js

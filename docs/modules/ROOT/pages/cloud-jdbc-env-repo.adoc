@@ -1,5 +1,4 @@
 = Spring Cloud: JDBCEnvironmentRepository Sample Application
-:page-aliases: cloud-jdbc-env-repo.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

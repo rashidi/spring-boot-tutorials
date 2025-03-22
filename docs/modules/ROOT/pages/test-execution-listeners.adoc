@@ -1,5 +1,4 @@
 = Spring Test: Managing Test Data with `TestExecutionListener`
-:page-aliases: test-execution-listeners.adoc
 :source-highlighter: highlight.js
 :toc:
 :nofooter:

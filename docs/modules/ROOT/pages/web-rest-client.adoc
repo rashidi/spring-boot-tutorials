@@ -1,5 +1,4 @@
 = Spring Web: REST Clients for calling Synchronous API
-:page-aliases: web-rest-client.adoc
 :toc:
 :icons: font
 :source-highlighter: highlight.js
