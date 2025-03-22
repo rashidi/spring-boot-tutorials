@@ -1,7 +1,7 @@
 site:
   title: Spring Boot Tutorials
   url: https://rashidi.github.io/spring-boot-tutorials
-  start_page: spring-boot-tutorials::index.adoc
+  start_page: main::index.adoc
 
 content:
   sources:
