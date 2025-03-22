@@ -3,7 +3,7 @@ name: Build and Publish Antora Site
 on:
   push:
     branches:
-      - asciidoc/antora
+      - master
     paths:
       - 'docs/**'
       - 'antora-playbook.yml'
