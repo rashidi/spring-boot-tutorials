@@ -1,0 +1,148 @@
+= Spring Data: Domain Events Example
+:source-highlighter: highlight.js
+:toc:
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-domain-events
+
+Reduce method complexity by utilising `@DomainEvents` from link:https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.domain-events[Spring Data JPA].
+
+
+== Background
+In this repository we will explore Spring Data JPA helps us to adhere to link:https://en.wikipedia.org/wiki/Single-responsibility_principle[Single Responsibility], a component of link:https://en.wikipedia.org/wiki/SOLID[SOLID Principles].
+We will reduce responsibilities of a method that does more than one thing.
+
+== Scenario
+This repository demonstrates a scenario where once a book is purchased, its total availability will be reduced.
+
+== Implementation
+=== Integration End-to-end Test
+In the spirit of TDD, we will start by implementing an integration end-to-end test.
+
+[source,java]
+----
+@SpringBootTest(
+        classes = TestDataDomainEventsApplication.class,
+        properties = "spring.jpa.hibernate.ddl-auto=create",
+        webEnvironment = RANDOM_PORT
+)
+class BookPurchaseTests {
+    @Autowired
+    private BookAvailabilityRepository availabilities;
+    @Autowired
+    private BookRepository books;
+    @Autowired
+    private TestRestTemplate client;
+    private Book book;
+    @BeforeEach
+    void setup() {
+        book = books.save(book());
+        availabilities.save(availability());
+    }
+    @Test
+    @DisplayName("Given total book availability is 100 When a book is purchased Then total book availability should be 99")
+    void purchase() {
+        client.delete("/books/{id}/purchase", book.getId());
+        var availability = availabilities.findByIsbn(book.getIsbn());
+        assertThat(availability).get()
+                .extracting("total")
+                .isEqualTo(99);
+    }
+    private Book book() {
+        var book = new Book();
+        book.setTitle("Say Nothing: A True Story of Murder and Memory in Northern Ireland");
+        book.setAuthor("Patrick Radden Keefe");
+        book.setIsbn(9780385543378L);
+        return book;
+    }
+    private BookAvailability availability() {
+        var availability =  new BookAvailability();
+        availability.setIsbn(9780385543378L);
+        availability.setTotal(100);
+        return availability;
+    }
+}
+----
+
+Full implementation can be found in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/de/availability/BookPurchaseTests.java[BookPurchaseTests.java].
+
+=== Domain and Repository class
+Our domain class, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/book/Book.java[Book.java], will hold information about the event that will be published.
+
+[source,java]
+----
+@Entity
+public class Book extends AbstractAggregateRoot<Book> {
+    @Id
+    @GeneratedValue
+    private Long id;
+    private String title;
+    private String author;
+    private Long isbn;
+    // getter & setter are omitted for brevity
+    public Book purchase() {
+        registerEvent(new BookPurchaseEvent(this));
+        return this;
+    }
+}
+----
+
+The class will publish link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/book/BookPurchaseEvent.java[BookPurchaseEvent.java] when a book is purchased.
+Next is to implement a repository classes for `Book` and link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/availability/BookAvailability.java[BookAvailability.java].
+
+[source,java]
+----
+public interface BookRepository extends JpaRepository<Book, Long> {
+}
+----
+
+[source,java]
+----
+interface BookAvailabilityRepository extends JpaRepository<BookAvailability, Long> {
+    Optional<BookAvailability> findByIsbn(Long isbn);
+}
+----
+
+==== REST Resource Class
+link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/book/BookResource.java[BookResource] is a typical `@RestController` class which will trigger `Book.purchase`.
+
+[source,java]
+----
+@RestController
+class BookResource {
+    private final BookRepository repository;
+    BookResource(BookRepository repository) {
+        this.repository = repository;
+    }
+    @Transactional
+    @DeleteMapping("/books/{id}/purchase")
+    public void purchase(@PathVariable Long id) {
+        repository.findById(id).map(Book::purchase).ifPresent(repository::delete);
+    }
+}
+----
+
+==== Event Listener Class
+Finally, we will implement a `@Service` class that will observe link:{url-quickref}/src/main/java/zin/rashidi/boot/data/de/book/BookPurchaseEvent.java[BookPurchaseEvent] and reduce the total availability of the book.
+
+[source,java]
+----
+@Service
+class BookAvailabilityManagement {
+    private final BookAvailabilityRepository repository;
+    BookAvailabilityManagement(BookAvailabilityRepository repository) {
+        this.repository = repository;
+    }
+    @TransactionalEventListener
+    @Transactional(propagation = REQUIRES_NEW)
+    public void updateTotal(BookPurchaseEvent event) {
+        var book = event.getSource();
+        repository.findByIsbn(book.getIsbn())
+                .map(BookAvailability::reduceTotal)
+                .ifPresent(repository::save);
+    }
+}
+----
+
+== Verification
+By executing `BookPurchaseTests.purchase`, we will see that the test passes.

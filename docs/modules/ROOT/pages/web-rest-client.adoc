@@ -1,0 +1,356 @@
+= Spring Web: REST Clients for calling Synchronous API
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web-rest-client
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/web/restclient
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/web/restclient
+
+
+== Background
+
+Historically, `RestTemplate` has been the main choice as the REST client to call synchronous API. Since Spring 6, https://docs.spring.io/spring-framework/reference/integration/rest-clients.html[there are two other
+options being provided - `RestClient` and `@HttpExchange` as the alternatives].
+
+== RestClient
+
+https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-restclient[`RestClient`] provides fluent API which makes it more readable.
+`RestClient` can be constructed through two options - `RestClient.create` and `RestClient.Builder`. In this tutorial we will use `RestClient.Builder` as it is more
+convenient for us to utilise `RestClientTest`.
+
+We will start by creating a repository interface for link:{source-main}/user/User.java[`User`]:
+
+[source,java]
+----
+interface UserRepository {
+
+    List<User> findAll();
+
+    User findById(Long id);
+
+}
+----
+
+For those who are familiar with Spring Data, these methods name are following Spring Data's standard method naming. Next we will write tests and its respective implementation.
+Our implementation for `UserRepository` will be done in `UserRestRepository`. This is to align with standard Spring's repository practices.
+
+=== Declaring RestClient
+
+As mentioned earlier, we will use `RestClient.Builder` to construct `RestClient`:
+
+[source, java]
+----
+@Repository
+class UserRestRepository implements UserRepository {
+
+    private final RestClient restClient;
+
+    UserRestRepository(RestClient.Builder restClientBuilder) {
+        this.restClient = restClientBuilder
+                .baseUrl("https://jsonplaceholder.typicode.com/users")
+                .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
+                .build();
+    }
+
+}
+----
+
+Our `RestClient` will communicate with https://jsonplaceholder.typicode.com/[{JSON} Placeholder] to retrieve all `User` and all requests
+will be equipped with `application/json` as the expected response header.
+
+=== Get all users
+
+[source,java]
+----
+@Repository
+class UserRestRepository implements UserRepository {
+
+    private final RestClient restClient;
+
+    @Override
+    public List<User> findAll() {
+        return restClient.get()
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+    }
+
+}
+----
+
+Our first implementation is fairly simple. We will retrieve a `List` of `User` and we use `ParamterizedTypeReference` to convert it. In our test, we will verify that
+the `restClient` will trigger a call to `https://jsonplaceholder.typicode.com/users` and we will mock the responses. As our intention is to ensure we are calling the right endpoint.
+
+[source,java]
+----
+@RestClientTest(UserRestRepository.class)
+class UserRepositoryTests {
+
+    @Autowired
+    private UserRepository repository;
+
+    @Autowired
+    private MockRestServiceServer mockServer;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Test
+    @DisplayName("When findAll Then all users should be returned")
+    void findAll() throws JsonProcessingException {
+        var response = mapper.writeValueAsString(List.of(
+                new User(84L, "Rashidi Zin", "rashidi.zin", "rashidi@zin.my", URI.create("rashidi.zin.my")),
+                new User(87L, "Zaid Zin", "zaid.zin", "zaid@zin.my", URI.create("zaid.zin.my"))
+        ));
+
+        mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/users")).andRespond(withSuccess(response, APPLICATION_JSON));
+
+        assertThat(repository.findAll()).hasSize(2);
+
+        mockServer.verify();
+    }
+
+}
+----
+
+.There are three dependencies declared:
+* `UserRepository` - the class that we want to test
+* `MockRestServiceServer` - the class that we will use to mock responses from JSONPlaceholder
+* `ObjectMapper` - the class that we will use to convert an `Object` to `String` to be used as the mocked response
+
+In the test above, we mocked the response from `https://jsonplaceholder.typicode.com/users` and we verify that when `UserRepository.findAll()` is called then
+a request to `https://jsonplaceholder.typicode.com/users` is triggered.
+
+Next, let's simulate a situation where an error is returned in the response.
+
+=== Get a user by id
+
+We are going to implement a method that will return a particular `User` based on provided `id`:
+
+[source,java]
+----
+@Repository
+class UserRestRepository implements UserRepository {
+
+    private final RestClient restClient;
+
+    @Override
+    public User findById(Long id) {
+        return restClient.get().uri("/{id}", id)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
+                    throw new UserNotFoundException();
+                }))
+                .body(User.class);
+    }
+
+    static class UserNotFoundException extends RuntimeException {}
+
+}
+
+----
+
+In the implementation above, `UserNotFoundException` will be thrown when client error is returned as the response. In our test we will
+simulate a situation where error resource not found is returned (`404`):
+
+[source,java]
+----
+@RestClientTest(UserRestRepository.class)
+class UserRepositoryTests {
+
+    @Autowired
+    private UserRepository repository;
+
+    @Autowired
+    private MockRestServiceServer mockServer;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Test
+    @DisplayName("When an invalid user id is provided Then UserNotFoundException will be thrown")
+    void findByInvalidId() {
+        mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/users/84")).andRespond(withResourceNotFound());
+
+        assertThatThrownBy(() -> repository.findById(84L)).isInstanceOf(UserNotFoundException.class);
+
+        mockServer.verify();
+    }
+
+}
+----
+
+Full implementation of the test and its production code can be found in link:{source-main}/user/UserRestRepository.java[UserRepository] and link:{source-test}/user/UserRepositoryTests.java[UserRepositoryTests].
+
+== HTTP Interface
+
+Spring allows us to define HTTP service as Java interface with `@HttpExchange` methods - `@DeleteExchange`, `@GetExchange`, `@PatchExchange`, `@PostExchange`, and `@PutExchange`.
+In this tutorial we will use `@GetExchange` to retrieve all `Post` and to retrieve one link:{source-main}/post/main/Post.java[`Post`] by its `id`.
+
+=== PostRepository interface
+
+These methods are implemented in link:{source-main}/post/PostRepository.java[`PostRepository`]:
+
+[source,java]
+----
+@HttpExchange(url = "/posts", accept = APPLICATION_JSON_VALUE)
+interface PostRepository {
+
+    @GetExchange
+    List<Post> findAll();
+
+    @GetExchange("/{id}")
+    Post findById(@PathVariable Long id);
+
+}
+----
+
+.In the implementation above we have defined the following:
+* All methods in this class will call an endpoint that ends with `/posts`
+* Each REST calls accepts `application/json` in the response
+* `findAll` will return all `Post`
+* `findById` will return `Post` that belongs to the requested `id`
+
+=== PostRepository configuration class
+
+Spring requires us to define which REST Client to use for API calls in `PostRepository`. In this tutorial, our choice will be `RestClient`. Our aim is to have
+same outcome as `UserRepository`.
+
+[source,java]
+----
+@Configuration
+class PostRepositoryConfiguration {
+
+    @Bean
+    public PostRepository postRepository(RestClient.Builder restClientBuilder) {
+        var restClient = restClientBuilder
+                .baseUrl("https://jsonplaceholder.typicode.com")
+                .defaultStatusHandler(HttpStatusCode::is4xxClientError, new PostErrorResponseHandler())
+                .build();
+
+        return builderFor(create(restClient))
+                .build()
+                .createClient(PostRepository.class);
+    }
+
+    static class PostErrorResponseHandler implements ErrorHandler {
+
+        @Override
+        public void handle(HttpRequest request, ClientHttpResponse response) throws IOException {
+
+            if (response.getStatusCode() == NOT_FOUND) { throw new PostNotFoundException(); }
+
+        }
+
+        static class PostNotFoundException extends RuntimeException {}
+    }
+}
+----
+
+.In link:{source-main}/post/PostRepositoryConfiguration.java[`PostRepositoryConfiguration`], we have defined:
+* Our `RestClient` will trigger calls to `https://jsonplaceholder.typicode.com`
+* When error `404` is returned then `PostNotFoundException` will be thrown
+* `@HttpExchange` in `PostRepository` will use the `RestClient` that we have defined in `postRepository`
+
+=== Verify PostRepository implementation
+
+We will write same tests as `UserRepositoryTests` where we will validate retrieving all `Post` and an error will be thrown when invalid `id` is provided.
+
+==== Test configuration
+
+Given that we have a `@Configuration` class, the class need to be included in our test when defining `RestClientTest`:
+
+[source, java]
+----
+@RestClientTest(components = PostRepository.class, includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = PostRepositoryConfiguration.class))
+class PostRepositoryTests {
+
+    @Autowired
+    private PostRepository repository;
+
+    @Autowired
+    private MockRestServiceServer mockServer;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+}
+----
+
+Now our test is aware about `PostRepositoryConfiguration`. The dependencies are the same as `UserRepositoryTests` except for our target repository - `PostRepository`.
+
+==== Get all posts
+
+In this test, we are expecting a HTTP call to `https://jsonplaceholder.typicode.com/posts` will be made when we trigger `PostRepository.findAll()`:
+
+[source,java]
+----
+@RestClientTest(components = PostRepository.class, includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = PostRepositoryConfiguration.class))
+class PostRepositoryTests {
+
+    @Autowired
+    private PostRepository repository;
+
+    @Autowired
+    private MockRestServiceServer mockServer;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Test
+    @DisplayName("When requesting for all posts then response should contain all posts available")
+    void findAll() throws JsonProcessingException {
+        var content = mapper.writeValueAsString(posts());
+
+        mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/posts")).andRespond(withSuccess(content, APPLICATION_JSON));
+
+        repository.findAll();
+
+        mockServer.verify();
+    }
+
+    private List<Post> posts() {
+        return List.of(
+                new Post(1L, 84L, "Spring Web: REST Clients Example with RESTClient", "An example of using RESTClient"),
+                new Post(2L, 84L, "Spring Web: REST Clients Example with HTTPExchange", "An example of using HttpExchange interface")
+        );
+    }
+
+}
+----
+
+==== Get a post with invalid id
+
+Next, we want to validate that when we provide an invalid id to `PostRepository.findById()` the error `PostNotFoundException` will be thrown. To simulate this,
+we will mock a response that returns `404`:
+
+[source,java]
+----
+@RestClientTest(components = PostRepository.class, includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = PostRepositoryConfiguration.class))
+class PostRepositoryTests {
+
+    @Autowired
+    private PostRepository repository;
+
+    @Autowired
+    private MockRestServiceServer mockServer;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Test
+    @DisplayName("When requesting with an invalid post id Then an error PostNotFoundException will be thrown")
+    void findByInvalidId() {
+        mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/posts/10101011")).andRespond(withResourceNotFound());
+
+        assertThatThrownBy(() -> repository.findById(10101011L)).isInstanceOf(PostNotFoundException.class);
+    }
+
+}
+----
+
+All the tests can be found in link:{source-test}/post/PostRepositoryTests.java[PostRepository].
+
+== Conclusion
+
+`@HttpExchange` provides a cleaner implementation and the flexibility to choose which REST Client to be used. In this example, we are dealing with a synchronous API and we
+chose `RestClient` over `RestTemplate`. If you are dealing with asynchronous API then `WebClient` should be your choice.

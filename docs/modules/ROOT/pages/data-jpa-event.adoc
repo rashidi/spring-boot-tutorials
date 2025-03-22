@@ -1,0 +1,148 @@
+= Spring Data JPA: Perform Entity Validation at Repository Level through Event Driven
+:source-highlighter: highlight.js
+:highlightjs-languages: java, groovy
+:toc:
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-event
+
+In this tutorial, we will look into how we can utilise events to perform validation at repository level.
+
+
+== Background
+It is common that we implement validation at a service layer (`@Service`). For example, we want to ensure that a username is unique. The common practice
+is to perform the validation in a service layer before calling our repository method, such as `repository.save`. While this work, it breaks the principle of single responsibility by the method.
+The service method is called `save()`. But, it performs a validation which is not part of its name. Alternatively, we may create a method `saveIfUsernameAvailable`. We will ended up with a long method name
+and worse if we have several validations.
+
+In this tutorial we will implement the validation at `repository` level while following single responsibility principle.
+
+== Entity and Repository Classes
+We will start by implementing link:{url-quickref}/src/main/java/zin/rashidi/data/event/user/User.java[User] and link:{url-quickref}/src/main/java/zin/rashidi/data/event/user/UserRepository.java[UserRepository] classes:
+
+[source, java]
+----
+@Entity
+@Table(name = "users")
+class User {
+    @Id
+    @GeneratedValue
+    private Long id;
+    private String username;
+    protected User() {
+    }
+    public User(String username) {
+        this.username = username;
+    }
+    public String getUsername() {
+        return username;
+    }
+}
+----
+
+[source,java]
+----
+interface UserRepository extends JpaRepository<User, Long> {
+    boolean existsByUsername(String username);
+}
+----
+
+The method `existsByUsername` will be used to perform validation against newly created `User` account.
+
+== Event Classes
+We will create a custom `ApplicationEvent` class, link:{url-quickref}/src/main/java/zin/rashidi/data/event/user/UserBeforeSaveEvent.java[UserBeforeSaveEvent],
+that will be triggered before `repository.save` is executed.
+
+[source, java]
+----
+class UserBeforeSaveEvent extends ApplicationEvent {
+    public UserBeforeSaveEvent(User source) {
+        super(source);
+    }
+    @Override
+    public User getSource() {
+        return (User) super.getSource();
+    }
+}
+----
+
+Next is to implement an event publisher class that will be responsible to publish `UserBeforeSaveEvent` prior to saving the `User` into the database.
+
+[source, java]
+----
+@Component
+class UserEventPublisher {
+    private final ApplicationEventPublisher publisher;
+    UserEventPublisher(ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
+    }
+    @PrePersist
+    public void beforeSave(User user) {
+        publisher.publishEvent(new UserBeforeSaveEvent(user));
+    }
+}
+----
+
+The method `beforeSave` is marked with `PrePersist` which is our way of telling JPA to trigger this method before persisting the `Entity` into the database. We will also need to update our `User` class
+so that JPA is aware about `UserEventPublisher`. We can do this by using `@EntityListeners`.
+
+[source, java]
+----
+@Entity
+@Table(name = "users")
+@EntityListeners(UserEventPublisher.class)
+class User {
+    // remove for brevity
+}
+----
+
+== Validator Class
+`User.username` unique validation will be implemented in link:{url-quickref}/src/main/java/zin/rashidi/data/event/user/UserValidation.java[UserValidation]. This will be done by utilising `@EventListener`
+that will be observing `UserBeforeSaveEvent`.
+
+[source, java]
+----
+@Component
+class UserValidation {
+    private final UserRepository repository;
+    UserValidation(UserRepository repository) {
+        this.repository = repository;
+    }
+    @EventListener
+    void usernameIsUnique(UserBeforeSaveEvent event) {
+        var usernameExisted = repository.existsByUsername(event.getSource().getUsername());
+        if (usernameExisted) {
+            throw new IllegalArgumentException("Username is already taken");
+        }
+    }
+}
+----
+
+== Verify the Implementation
+We will verify our implementation through `@DataJpaTest`, which does not require the whole application to run. Instead, only relevant classes will be used. Our intention is to ensure that
+the username `rashidi.zin` is unique. Therefore, if a new `User` being created with the same `username`, an error that reads `Username is already taken` will be thrown.
+
+[source, java]
+----
+@Testcontainers
+@DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = { UserEventPublisher.class, UserValidation.class }))
+class UserRepositoryTests {
+    @Container
+    @ServiceConnection
+    private static final PostgreSQLContainer<?> postgresql = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+    @Autowired
+    private TestEntityManager em;
+    @Autowired
+    private UserRepository repository;
+    @Test
+    @DisplayName("Given username rashidi.zin is exist When I create a new user with username rashidi.zin Then error with a message Username is already taken will be thrown")
+    void saveWithExistingUsername() {
+        em.persistAndFlush(new User("rashidi.zin"));
+        assertThatThrownBy(() -> repository.save(new User("rashidi.zin")))
+                .hasCauseInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Username is already taken");
+    }
+}
+----
+
+Once done, execute the test in link:{url-quickref}/src/test/java/zin/rashidi/data/event/user/UserRepositoryTests.java[UserRepositoryTests] to ensure our implementation is working as expected. The full implementation can be found in {url-quickref}[Github].

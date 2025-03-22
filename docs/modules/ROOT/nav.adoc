@@ -1,0 +1,29 @@
+* xref:index.adoc[Home]
+* Spring Batch
+** xref:batch-rest-repository.adoc[Batch Job With REST API source]
+** xref:batch-skip-step.adoc[Skip Specific Data]
+* Spring Cloud
+** xref:cloud-jdbc-env-repo.adoc[Environment Repository]
+* Spring Data
+** xref:data-domain-events.adoc[Domain Events]
+** xref:data-envers-audit.adoc[Envers Audit]
+** xref:data-jdbc-audit.adoc[JDBC Audit]
+** xref:data-jpa-audit.adoc[JPA Audit]
+** xref:data-jpa-event.adoc[Event Driven]
+** xref:data-jpa-filtered-query.adoc[Global Filtered Query]
+** xref:data-mongodb-audit.adoc[MongoDB Audit]
+** xref:data-mongodb-full-text-search.adoc[MongoDB Full Text Search]
+** xref:data-mongodb-transactional.adoc[MongoDB Transactional]
+** xref:data-repository-definition.adoc[Repository Definition]
+** xref:data-rest-validation.adoc[REST Validation]
+* Spring GraphQL
+** xref:graphql.adoc[GraphQL Server]
+* jOOQ
+** xref:jooq.adoc[jOOQ]
+* Spring Test
+** xref:data-mongodb-tc-data-load.adoc[Load data with Testcontainers]
+** xref:test-execution-listeners.adoc[Test Execution Listeners]
+** xref:test-rest-assured.adoc[Integration with RestAssured]
+** xref:test-slice-tests-rest.adoc[Implementing Slice Tests for REST application]
+* Spring Web
+** xref:web-rest-client.adoc[REST Clients for calling Synchronous API]

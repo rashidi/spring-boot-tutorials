@@ -1,0 +1,17 @@
+site:
+  title: Spring Boot Tutorials
+  url: https://rashidi.github.io/spring-boot-tutorials
+  start_page: spring-boot-tutorials::index.adoc
+
+content:
+  sources:
+    - url: .
+      start_path: docs
+
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+
+runtime:
+  fetch: true
