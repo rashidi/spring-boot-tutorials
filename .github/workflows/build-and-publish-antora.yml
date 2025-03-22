@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - master
+      - docs/**
     paths:
       - 'docs/**'
       - 'antora-playbook.yml'
       - '.github/workflows/build-and-publish-antora.yml'
       - '**/README.adoc'
+      - '**/**.hbs'
   workflow_dispatch:
 
 jobs:
