@@ -7,7 +7,6 @@
 
 Implementing https://graphql.org/[GraphQL] server with https://spring.io/guides/gs/graphql-server/[Spring Boot GraphQL Server].
 
-include::../../../badges.adoc[]
 
 == Background
 GraphQL provides the flexibility for clients to retrieve fields that are only relevant to them. In this tutorial we will

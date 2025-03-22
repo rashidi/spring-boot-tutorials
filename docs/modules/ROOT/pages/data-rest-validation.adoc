@@ -7,7 +7,6 @@
 
 Implement validation in Spring Data REST.
 
-include::../../../badges.adoc[]
 
 == Background
 link:https://spring.io/projects/spring-data-rest[Spring Data REST] is a framework that helps developers to build hypermedia-driven REST web services. It is built on top of the Spring Data project and makes it easy to build hypermedia-driven REST web services that connect to Spring Data repositories – all using HAL as the driving hypermedia type.

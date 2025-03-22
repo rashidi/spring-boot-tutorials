@@ -7,7 +7,6 @@
 
 Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with link:https://spring.io/projects/spring-data-mongodb[Spring Data MongoDB].
 
-include::../../../badges.adoc[]
 
 == Background
 MongoDB full text search provides the flexibility to perform search entries through multiple fields. In this example we will explore how to implement full text search with Spring Data MongoDB.

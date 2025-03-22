@@ -7,7 +7,6 @@
 
 Skip processing specific data through business logic in Spring Batch.
 
-include::../../../badges.adoc[]
 
 == Background
 Spring Batch is a framework for batch processing – execution of a series of jobs. A job is composed of a series of steps.

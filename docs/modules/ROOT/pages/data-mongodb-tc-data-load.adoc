@@ -7,7 +7,6 @@
 
 Preloaded data for testing.
 
-include::../../../badges.adoc[]
 
 == Background
 It is common to have preloaded data when we are testing our delete, read, and update operations. One of the most common approaches is to

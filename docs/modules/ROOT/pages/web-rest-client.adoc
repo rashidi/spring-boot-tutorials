@@ -6,7 +6,6 @@
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/web/restclient
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/web/restclient
 
-include::../../../badges.adoc[]
 
 == Background
 

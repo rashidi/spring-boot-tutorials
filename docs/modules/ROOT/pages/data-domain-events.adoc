@@ -7,7 +7,6 @@
 
 Reduce method complexity by utilising `@DomainEvents` from link:https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.domain-events[Spring Data JPA].
 
-include::../../../badges.adoc[]
 
 == Background
 In this repository we will explore Spring Data JPA helps us to adhere to link:https://en.wikipedia.org/wiki/Single-responsibility_principle[Single Responsibility], a component of link:https://en.wikipedia.org/wiki/SOLID[SOLID Principles].

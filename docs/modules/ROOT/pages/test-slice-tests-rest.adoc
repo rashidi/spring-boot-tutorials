@@ -9,7 +9,6 @@
 Testing has become a critical component in today's software development world. It helps us in ensuring high quality product
 that provides stability and scalability. In this article, we will explore about implementing tests for Spring Boot Web application.
 
-include::../../../badges.adoc[]
 
 == Background
 

@@ -7,7 +7,6 @@
 
 Implement custom repository interfaces with @RepositoryDefinition annotation.
 
-include::../../../badges.adoc[]
 
 == Background
 link:https://spring.io/projects/spring-data[Spring Data] provides a consistent programming model for data access while still retaining the special traits of the underlying data store. It makes it easy to use data access technologies, relational and non-relational databases, map-reduce frameworks, and cloud-based data services.

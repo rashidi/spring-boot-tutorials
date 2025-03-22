@@ -8,7 +8,6 @@
 Verify API implementation through integration tests with https://www.browserstack.com/guide/what-is-bdd[Behaviour Driven Development (BDD)]
 using Spring Boot, https://testcontainers.com/[Testcontainers], and https://rest-assured.io/[RestAssured].
 
-include::../../../badges.adoc[]
 
 == Background
 

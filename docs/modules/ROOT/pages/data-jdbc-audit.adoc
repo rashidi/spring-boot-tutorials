@@ -8,7 +8,6 @@
 
 We have explored on how to implement auditing with link:../data-jpa-audit/[Spring Data Jpa], link:../data-envers-audit/[Spring Data Enver], and link:../data-mongodb-audit/[Spring Data Mongo]. In this tutorial, we will implement auditing with https://spring.io/projects/spring-data-jdbc[Spring Data JDBC].
 
-include::../../../badges.adoc[]
 
 == Background
 Spring Data JDBC provides the convenience to enable auditing for a class. This can be achieved by using the following annotations:

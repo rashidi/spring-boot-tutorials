@@ -8,7 +8,6 @@
 
 While JPA is commonly used in Java applications, it is not the only option. In this tutorial, we will look at how to use jOOQ with Spring Boot and Gradle.
 
-include::../../../badges.adoc[]
 
 == Background
 https://www.jooq.org/[jOOQ] is a Java library that allows for fluent SQL query construction and typesafe database querying. It supports a
