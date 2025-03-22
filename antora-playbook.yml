@@ -2,6 +2,8 @@ site:
   title: Spring Boot Tutorials
   url: https://rashidi.github.io/spring-boot-tutorials
   start_page: main::index.adoc
+  keys:
+    download_url: https://github.com/rashidi/spring-boot-tutorials/archive/refs/heads/master.zip
 
 content:
   sources:
