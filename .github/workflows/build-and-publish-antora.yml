@@ -10,6 +10,7 @@ on:
       - 'antora-playbook.yml'
       - '.github/workflows/build-and-publish-antora.yml'
       - '**/README.adoc'
+      - '**/**.hbs'
   workflow_dispatch:
 
 jobs:
