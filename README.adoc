@@ -2,6 +2,7 @@
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials
+:url-docs: https://rashidi.github.io/spring-boot-tutorials
 
 Samples and tutorials for https://spring.io/projects/spring-boot[Spring Boot] modules such as, but not limited to,
 Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial is equipped
@@ -13,6 +14,7 @@ image:https://img.shields.io/github/license/rashidi/spring-boot-tutorials?style=
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/build-and-publish.yml?style=flat-square&logo=githubactions&color=blue[GitHub Actions Workflow Status]
 image:https://img.shields.io/sonar/coverage/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Coverage]
 image:https://img.shields.io/github/stars/rashidi/spring-boot-tutorials?style=flat-square&logo=github[GitHub Repo stars, link={url-quickref}]
+image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/build-and-publish-antora.yml?style=flat-square&logo=antora&label=Antora&color=blue[Antora Site Status, link={url-docs}]
 
 == Motivation
 
@@ -29,6 +31,10 @@ and always will be, my primary goal.
 With the help of https://github.com/dependabot[Dependabot], each tutorial is also kept up-to-date with the latest
 dependencies. Currently, we are using Java https://adoptium.net/en-GB/temurin/releases/?version=21[Temurin 21]
 with https://plugins.gradle.org/plugin/org.springframework.boot/3.4.3[Spring Boot 3.4.3].
+
+== Documentation
+
+All tutorials are documented in AsciiDoc format and published as an https://antora.org/[Antora] site at {url-docs}[Spring Boot Tutorials]. The documentation is automatically generated and published whenever changes are made to the documentation files or the tutorials themselves.
 
 == Topics
 

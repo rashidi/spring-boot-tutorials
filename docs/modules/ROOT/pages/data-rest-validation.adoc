@@ -1,0 +1,4 @@
+= Spring Data REST: Validation
+:page-aliases: data-rest-validation.adoc
+
+include::../../../../data-rest-validation/README.adoc[lines=2..-1]

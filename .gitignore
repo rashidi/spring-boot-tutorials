@@ -35,7 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
-
 ### Ignore Gradle files in submodules ###
 **/gradlew*
 **/gradle/
+### Antora ###
+build/site/

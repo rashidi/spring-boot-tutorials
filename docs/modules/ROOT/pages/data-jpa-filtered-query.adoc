@@ -1,0 +1,4 @@
+= Spring Data Jpa: Global Filter Query
+:page-aliases: data-jpa-filtered-query.adoc
+
+include::../../../../data-jpa-filtered-query/README.adoc[lines=2..-1]

@@ -1,0 +1,4 @@
+= Spring Batch: Working With REST Resources
+:page-aliases: batch-rest-repository.adoc
+
+include::../../../../batch-rest-repository/README.adoc[lines=2..-1]

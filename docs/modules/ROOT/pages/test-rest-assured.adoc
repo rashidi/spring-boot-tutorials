@@ -1,0 +1,4 @@
+= Spring Test: Implement BDD with RestAssured
+:page-aliases: test-rest-assured.adoc
+
+include::../../../../test-rest-assured/README.adoc[lines=2..-1]

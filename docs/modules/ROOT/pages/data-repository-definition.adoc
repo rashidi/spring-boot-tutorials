@@ -1,0 +1,4 @@
+= Spring Data: Repository Definition
+:page-aliases: data-repository-definition.adoc
+
+include::../../../../data-repository-definition/README.adoc[lines=2..-1]

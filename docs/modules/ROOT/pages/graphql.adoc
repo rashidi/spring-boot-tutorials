@@ -1,0 +1,4 @@
+= GraphQL With Spring Boot
+:page-aliases: graphql.adoc
+
+include::../../../../graphql/README.adoc[lines=2..-1]

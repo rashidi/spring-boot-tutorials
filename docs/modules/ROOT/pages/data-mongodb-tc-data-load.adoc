@@ -1,0 +1,4 @@
+= Spring Data MongoDb with Testcontainers
+:page-aliases: data-mongodb-tc-data-load.adoc
+
+include::../../../../data-mongodb-tc-data-load/README.adoc[lines=2..-1]

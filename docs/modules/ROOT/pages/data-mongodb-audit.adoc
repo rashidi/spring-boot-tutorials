@@ -1,0 +1,4 @@
+= Spring Data MongoDB Audit Example
+:page-aliases: data-mongodb-audit.adoc
+
+include::../../../../data-mongodb-audit/README.adoc[lines=2..-1]

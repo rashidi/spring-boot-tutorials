@@ -1,0 +1,4 @@
+= Spring Test: Managing Test Data with `TestExecutionListener`
+:page-aliases: test-execution-listeners.adoc
+
+include::../../../../test-execution-listeners/README.adoc[lines=2..-1]

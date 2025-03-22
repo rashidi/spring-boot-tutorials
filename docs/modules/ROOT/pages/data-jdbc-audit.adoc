@@ -1,0 +1,4 @@
+= Spring Data JDBC: Implement Auditing
+:page-aliases: data-jdbc-audit.adoc
+
+include::../../../../data-jdbc-audit/README.adoc[lines=2..-1]

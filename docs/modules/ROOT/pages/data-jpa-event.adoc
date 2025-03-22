@@ -1,0 +1,4 @@
+= Spring Data JPA: Perform Entity Validation at Repository Level through Event Driven
+:page-aliases: data-jpa-event.adoc
+
+include::../../../../data-jpa-event/README.adoc[lines=2..-1]

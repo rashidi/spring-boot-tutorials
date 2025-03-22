@@ -1,0 +1,4 @@
+= Spring Test: Slice Testing a REST Application
+:page-aliases: test-slice-tests-rest.adoc
+
+include::../../../../test-slice-tests-rest/README.adoc[lines=2..-1]

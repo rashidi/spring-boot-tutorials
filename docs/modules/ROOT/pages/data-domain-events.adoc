@@ -1,0 +1,4 @@
+= Spring Data: Domain Events Example
+:page-aliases: data-domain-events.adoc
+
+include::../../../../data-domain-events/README.adoc[lines=2..-1]

@@ -1,0 +1,4 @@
+= Spring Web: REST Clients for calling Synchronous API
+:page-aliases: web-rest-client.adoc
+
+include::../../../../web-rest-client/README.adoc[lines=2..-1]

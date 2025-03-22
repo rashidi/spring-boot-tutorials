@@ -1,0 +1,4 @@
+= Spring Data Jpa Audit Example
+:page-aliases: data-jpa-audit.adoc
+
+include::../../../../data-jpa-audit/README.adoc[lines=2..-1]

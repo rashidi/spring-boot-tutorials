@@ -1,0 +1,4 @@
+= Spring Cloud: JDBCEnvironmentRepository Sample Application
+:page-aliases: cloud-jdbc-env-repo.adoc
+
+include::../../../../cloud-jdbc-env-repo/README.adoc[lines=2..-1]

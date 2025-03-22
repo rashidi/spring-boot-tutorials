@@ -1,0 +1,5 @@
+name: spring-boot-tutorials
+title: Spring Boot Tutorials
+version: master
+nav:
+  - modules/ROOT/nav.adoc
