@@ -2,6 +2,7 @@
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials
+:url-download: https://github.com/rashidi/spring-boot-tutorials/archive/refs/heads/master.zip
 
 Samples and tutorials for https://spring.io/projects/spring-boot[Spring Boot] modules such as, but not limited to,
 Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial is equipped
