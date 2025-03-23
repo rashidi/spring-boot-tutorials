@@ -1,6 +1,5 @@
 = Spring Test: Implement BDD with RestAssured
 :source-highlighter: highlight.js
-:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-rest-assured

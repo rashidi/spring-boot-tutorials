@@ -1,6 +1,5 @@
 = Spring Data Envers: Audit With Entity Revisions
 :source-highlighter: highlight.js
-:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-envers-audit

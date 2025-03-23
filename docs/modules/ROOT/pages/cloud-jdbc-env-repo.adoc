@@ -1,6 +1,5 @@
 = Spring Cloud: JDBCEnvironmentRepository Sample Application
 :source-highlighter: highlight.js
-:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/cloud-jdbc-env-repo
