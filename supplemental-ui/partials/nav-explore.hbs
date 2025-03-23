@@ -1,20 +1,8 @@
 <div class="nav-panel-explore{{#unless page.navigation}} is-active{{/unless}}" data-panel="explore">
-    <ul class="components">
-        {{#each site.components}}
-            <li class="component{{#if (eq this @root.page.component)}} is-current{{/if}}">
-                <div class="title"><a href="{{{relativize ./url}}}">{{{./title}}}</a></div>
-                {{#if (or ./versions.[1] ./versions.[0].version (ne ./versions.[0].displayVersion 'default'))}}
-                    <ul class="versions">
-                        {{#each ./versions}}
-                            <li class="version
-          {{~#if (and (eq .. @root.page.component) (eq this @root.page.componentVersion))}} is-current{{/if~}}
-                                {{~#if (eq this ../latest)}} is-latest{{/if}}">
-                                <a href="{{{relativize ./url}}}">{{./displayVersion}}</a>
-                            </li>
-                        {{/each}}
-                    </ul>
-                {{/if}}
-            </li>
-        {{/each}}
-    </ul>
+    {{#if page.component}}
+        <div class="context">
+            <span class="title"></span>
+            <span class="version"></span>
+        </div>
+    {{/if}}
 </div>
