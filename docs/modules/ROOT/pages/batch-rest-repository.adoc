@@ -1,6 +1,5 @@
 = Spring Batch: Working With REST Resources
 :source-highlighter: highlight.js
-:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch-rest-repository

@@ -1,6 +1,5 @@
 = Spring Data: Domain Events Example
 :source-highlighter: highlight.js
-:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-domain-events

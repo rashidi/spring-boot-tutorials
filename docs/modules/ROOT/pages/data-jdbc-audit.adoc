@@ -1,5 +1,4 @@
 = Spring Data JDBC: Implement Auditing
-:toc:
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jdbc-audit
