@@ -27,10 +27,8 @@ dependencies {
     }}
 }
 
-dependencyManagement {
-    imports {
-        mavenBom SpringBootPlugin.BOM_COORDINATES
-    }
+dependencies {
+    implementation platform(SpringBootPlugin.BOM_COORDINATES)
 }
 
 reporting {

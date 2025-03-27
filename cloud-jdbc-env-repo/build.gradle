@@ -23,15 +23,11 @@ repositories {
 	mavenCentral()
 }
 
-ext {
-	set('springCloudVersion', "2024.0.1")
-}
-
 dependencies {
-	implementation platform("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}")
+	implementation platform('org.springframework.cloud:spring-cloud-dependencies:2024.0.1')
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-        implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
 	implementation 'org.springframework.cloud:spring-cloud-config-server'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
