@@ -49,3 +49,7 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.named("build") {
+	dependsOn("dependencies")
+}
