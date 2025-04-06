@@ -17,7 +17,7 @@ class CourseManagement {
     }
 
     @Transactional
-    void updateCourse(Course course) {
+    public void updateCourse(Course course) {
         courses.save(course);
     }
 
