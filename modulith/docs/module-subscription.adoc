@@ -1,0 +1,16 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`zin.rashidi.boot.modulith.subscription`
+|Spring components
+|_Repositories_
+
+* `z.r.b.m.s.SubscriptionRepository`
+
+_Event listeners_
+
+* `z.r.b.m.s.SubscriptionManagement`
+|Events listened to
+|* `z.r.b.m.c.CourseEnded` (async) 
+* `z.r.b.m.s.StudentInactivated` (async) 
+|===
