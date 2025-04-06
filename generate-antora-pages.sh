@@ -17,6 +17,7 @@ SUBMODULES=(
   "data-repository-definition"
   "data-rest-validation"
   "graphql"
+  "modulith"
   "jooq"
   "data-mongodb-tc-data-load"
   "test-execution-listeners"
@@ -29,7 +30,7 @@ SUBMODULES=(
 for submodule in "${SUBMODULES[@]}"; do
   # Extract the title from the README.adoc file
   title=$(head -n 1 "$submodule/README.adoc" | sed 's/^= //')
-  
+
   # Create the Antora page
   cat > "docs/modules/ROOT/pages/$submodule.adoc" << EOF
 = $title

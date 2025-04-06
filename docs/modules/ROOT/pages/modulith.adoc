@@ -1,0 +1,4 @@
+= Spring Modulith: Building Modular Monolithic Applications
+:page-aliases: modulith.adoc
+
+include::../../../../modulith/README.adoc[lines=2..-1]
