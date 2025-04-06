@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - docs/**
+      - modulith
     paths:
       - 'docs/**'
       - 'antora-playbook.yml'
