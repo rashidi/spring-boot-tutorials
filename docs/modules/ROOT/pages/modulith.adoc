@@ -238,7 +238,7 @@ class SubscriptionManagementTests {
 
 == Generated Documentation
 
-Spring Modulith automatically generates documentation for your modules. You can view the generated documentation in the ${url-quickref}/docs/all-docs.adoc[docs/all-docs.adoc] file.
+Spring Modulith automatically generates documentation for your modules. You can view the generated documentation in the {url-quickref}/docs/all-docs.adoc[docs/all-docs.adoc] file.
 
 == Conclusion
 
