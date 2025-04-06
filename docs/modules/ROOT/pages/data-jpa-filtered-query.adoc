@@ -1,20 +1,24 @@
 = Spring Data Jpa: Global Filter Query
 :source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, October 12, 2023
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-filtered-query
 
 Implement global filter query which involves several `Entity` with Spring Data Jpa.
 
-
 == Background
+
 It is common that we need to implement similar filter query in our application. For example, we have `User` and `Post` entities whereby both
 contains `status` field. We would want to ensure that when these `Entity` is retrieved, only `ACTIVE` ones will be returned.
 
 In this tutorial we will implement a global filter by utilising Spring Data Jpa `repositoryBaseClass`.
 
 == Integration Tests
+
 There are two tests which involves two entities - `User` and `Country`. `User` contains a `status` field while `Country` does not.
+
 When `findAll` is triggered for `User` then only `ACTIVE` users will be returned.
 
 [source,java]
@@ -25,11 +29,14 @@ When `findAll` is triggered for `User` then only `ACTIVE` users will be returned
         includeFilters = @Filter(type = ANNOTATION, classes = EnableJpaRepositories.class)
 )
 class UserRepositoryTests {
+
     @Container
     @ServiceConnection
     private static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:latest");
+
     @Autowired
     private UserRepository users;
+
     @BeforeEach
     void setup() {
         users.saveAll(List.of(
@@ -37,6 +44,7 @@ class UserRepositoryTests {
                 new User("John Doe", INACTIVE)
         ));
     }
+
     @Test
     @DisplayName("Given there are two users with status ACTIVE and INACTIVE, when findAll is invoked, then only ACTIVE users are returned")
     void findAll() {
@@ -44,6 +52,7 @@ class UserRepositoryTests {
                 .extracting("status")
                 .containsOnly(ACTIVE);
     }
+
 }
 ----
 
@@ -57,11 +66,14 @@ However, when `findAll` is triggered for `Country` then all countries will be re
         includeFilters = @Filter(type = ANNOTATION, classes = EnableJpaRepositories.class)
 )
 class CountryRepositoryTests {
+
     @Container
     @ServiceConnection
     private static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:latest");
+
     @Autowired
     private CountryRepository countries;
+
     @BeforeEach
     void setup() {
         countries.saveAll(List.of(
@@ -69,6 +81,7 @@ class CountryRepositoryTests {
                 new Country("MY", "Malaysia")
         ));
     }
+
     @Test
     @DisplayName("Given there are two countries, when findAll is invoked, then both countries are returned")
     void findAll() {
@@ -77,23 +90,28 @@ class CountryRepositoryTests {
                 .extracting("isoCode")
                 .containsOnly("DE", "MY");
     }
+
 }
 ----
 
 == Configuration Class
+
 We will start by defining `repositoryBaseClass`
 
 [source,java]
 ----
 class JpaCustomBaseRepository<T, ID> extends SimpleJpaRepository<T, ID> {
+
     public JpaCustomBaseRepository(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
         super(entityInformation, entityManager);
     }
+
     @Override
     public List<T> findAll() {
         var hasStatusField = Stream.of(ReflectionUtils.getDeclaredMethods(getDomainClass())).anyMatch(field -> field.getName().equals("status"));
         return hasStatusField ? findAll(where((root, query, criteriaBuilder) -> root.get("status").in(ACTIVE))) : super.findAll();
     }
+
 }
 ----
 
@@ -115,9 +133,12 @@ in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/jpa/JpaConfigurat
         repositoryBaseClass = JpaCustomBaseRepository.class
 )
 class JpaConfiguration {
+
 }
 ----
 
 == Verification
+
 To ensure that our implementation is working as expected, we will execute tests defined in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/jpa/user/UserRepositoryTests.java[`UserRepositoryTests`] and link:{url-quickref}/src/test/java/zin/rashidi/boot/data/jpa/country/CountryRepositoryTests.java[`CountryRepositoryTests`].
+
 Both tests should pass.

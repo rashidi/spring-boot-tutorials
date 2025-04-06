@@ -18,6 +18,8 @@
 ** xref:data-rest-validation.adoc[REST Validation]
 * Spring GraphQL
 ** xref:graphql.adoc[GraphQL Server]
+* Spring Modulith
+** xref:modulith.adoc[Building Modular Monolithic Applications]
 * jOOQ
 ** xref:jooq.adoc[jOOQ]
 * Spring Test

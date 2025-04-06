@@ -1,10 +1,11 @@
 = Spring Web: REST Clients for calling Synchronous API
+Rashidi Zin <rashidi@zin.my>
+1.0, December 02, 2024: Initial version
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web-rest-client
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/web/restclient
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/web/restclient
-
 
 == Background
 
@@ -241,6 +242,7 @@ class PostRepositoryConfiguration {
         }
 
         static class PostNotFoundException extends RuntimeException {}
+
     }
 }
 ----
@@ -352,4 +354,3 @@ All the tests can be found in link:{source-test}/post/PostRepositoryTests.java[P
 == Conclusion
 
 `@HttpExchange` provides a cleaner implementation and the flexibility to choose which REST Client to be used. In this example, we are dealing with a synchronous API and we
-chose `RestClient` over `RestTemplate`. If you are dealing with asynchronous API then `WebClient` should be your choice.

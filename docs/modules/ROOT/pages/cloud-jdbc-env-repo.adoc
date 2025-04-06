@@ -1,5 +1,7 @@
 = Spring Cloud: JDBCEnvironmentRepository Sample Application
 :source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+2.0, September 25, 2023
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/cloud-jdbc-env-repo
@@ -8,16 +10,20 @@ Sample of https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config
 
 
 == Background
+
 https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html#_spring_cloud_config_server[Spring Cloud Config Server] provides several options to store configuration for an application. In general it is handled
 by https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html#_environment_repository[Environment Repository].
+
 Available options are git, file system, vault, svn, and database. This application demonstrates usage of https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html#_jdbc_backend[JdbcEnvironmentRepository]
 which allows an application to store its configuration in database.
 
 == Configuration
+
 In order to enable this feature we will include `spring-boot-starter-jdbc` as one of the dependencies for the application and
 include `jdbc` as one of its active profiles.
 
 === Include JDBC as dependency
+
 This can be seen in link:{url-quickref}/build.gradle[build.gradle].
 
 [source,groovy]
@@ -26,6 +32,7 @@ implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 ----
 
 === Include `jdbc` as active profile
+
 This can be seen in link:{url-quickref}/src/main/resources/bootstrap.yml[bootstrap.yml].
 
 [source,yaml]
@@ -36,7 +43,9 @@ spring:
 ----
 
 == Creating table and populating data
+
 By default the https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html#_jdbc_backend[JdbcEnvironmentRepository] will look into a table called `PROPERTIES` which contains the following columns:
+
 * KEY
 * VALUE
 * APPLICATION
@@ -44,6 +53,7 @@ By default the https://cloud.spring.io/spring-cloud-config/single/spring-cloud-c
 * LABEL
 
 === Create table schema
+
 Schema to create the table can found in link:{url-quickref}/src/test/resources/init-script.sql[init-script.sql]:
 
 [source,sql]
@@ -62,6 +72,7 @@ CREATE TABLE `PROPERTIES`
 In the script above KEY, APPLICATION, PROFILE, and LABEL are marked as composite key in order to avoid duplicated entry.
 
 === Populate table
+
 For this demonstration will we have a configuration called `app.greet.name` and this will be populated upon start-up.
 Its script can be found in link:{url-quickref}/src/test/resources/init-script.sql[init-script.sql].
 
@@ -72,11 +83,13 @@ VALUES ('demo', 'default', 'master', 'app.greet.name', 'Demo');
 ----
 
 The script above explains that the configuration `app.greet.name` belongs to:
+
 * an application called _demo_
 * with profile called _default_
 * and labelled _master_
 
 == Configure Application Properties
+
 In order for https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html#_jdbc_backend[JdbcEnvironmentRepository] to retrieve properties for this application it will need to be informed on
 its name, profile, and label. This configurations can be found in link:{url-quickref}/src/main/resources/bootstrap.yml[bootstrap.yml]
 
@@ -90,6 +103,7 @@ spring:
 We are not configuring `spring.cloud.profile` because its default value is `default`.
 
 == Create Bootstrap Application Context
+
 Finally, we will need to inform Spring Cloud on what are the classes needed in order to build the
 bootstrap application context. This can found in link:{url-quickref}/src/main/resources/META-INF/spring.factories[spring.factories]:
 
@@ -103,6 +117,7 @@ org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 These two classes will help us to build https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/jdbc/core/JdbcTemplate.html[JdbcTemplate] which is needed to construct https://github.com/spring-cloud/spring-cloud-config/blob/master/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/JdbcEnvironmentRepository.java[JdbcEnvironmentRepository].
 
 == Verify Configuration Properties
+
 In order to ensure that the application will use configurations from database we will create same configuration in link:{url-quickref}/src/main/resources/application.yml[application.yml]:
 
 [source,yaml]
@@ -113,6 +128,7 @@ app:
 ----
 
 == Configure Environment Properties Retrieval SQL
+
 By default, https://github.com/spring-cloud/spring-cloud-config/blob/main/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/JdbcEnvironmentProperties.java#L30[there are two SQL statements that are used to retrieve properties from database].
 However, these queries need to be modified to follow MySQL requirement and implemented in link:{url-quickref}/src/main/resources/bootstrap.yml[bootstrap.yml]:
 
@@ -133,14 +149,18 @@ We will have link:{url-quickref}/src/main/java/zin/rashidi/boot/cloud/jdbcenvrep
 ----
 @RestController
 class GreetResource {
+
     private final GreetProperties properties;
+
     GreetResource(GreetProperties properties) {
         this.properties = properties;
     }
+
     @GetMapping("/greet")
     public String greet(@RequestParam String greeting) {
         return String.format("%s, my name is %s", greeting, properties.name());
     }
+
 }
 ----
 
@@ -151,16 +171,21 @@ Next we will have link:{url-quickref}/src/test/java/zin/rashidi/boot/cloud/jdbce
 @Testcontainers
 @SpringBootTest(properties = "spring.datasource.url=jdbc:tc:mysql:8:///test?TC_INITSCRIPT=init-script.sql", webEnvironment = RANDOM_PORT)
 class CloudJdbcEnvRepoApplicationTests {
+
     @Container
     private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8");
+
     @Autowired
     private TestRestTemplate restClient;
-        @Test
+
+	@Test
     @DisplayName("Given app.greet.name is configured to Demo in the database When I call greet Then I should get Hello, my name is Demo")
-        void greet() {
+	void greet() {
         var response = restClient.getForEntity("/greet?greeting={0}", String.class, "Hello");
+
         assertThat(response.getBody()).isEqualTo("Hello, my name is Demo");
-        }
+	}
+
 }
 ----
 

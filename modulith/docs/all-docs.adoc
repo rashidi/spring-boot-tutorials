@@ -1,0 +1,15 @@
+== ModulithApplication
+plantuml::components.puml[,,format=svg]
+
+== Course
+plantuml::module-course.puml[,,format=svg]
+include::module-course.adoc[]
+
+== Student
+plantuml::module-student.puml[,,format=svg]
+include::module-student.adoc[]
+
+== Subscription
+plantuml::module-subscription.puml[,,format=svg]
+include::module-subscription.adoc[]
+

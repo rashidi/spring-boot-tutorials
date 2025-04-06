@@ -1,0 +1,21 @@
+@startuml
+set separator none
+title ModulithApplication
+
+top to bottom direction
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Component>
+
+Container_Boundary("ModulithApplication.ModulithApplication_boundary", "ModulithApplication", $tags="") {
+  Component(ModulithApplication.ModulithApplication.Course, "Course", $techn="Module", $descr="", $tags="", $link="")
+  Component(ModulithApplication.ModulithApplication.Student, "Student", $techn="Module", $descr="", $tags="", $link="")
+  Component(ModulithApplication.ModulithApplication.Subscription, "Subscription", $techn="Module", $descr="", $tags="", $link="")
+}
+
+Rel(ModulithApplication.ModulithApplication.Subscription, ModulithApplication.ModulithApplication.Course, "listens to", $techn="", $tags="", $link="")
+Rel(ModulithApplication.ModulithApplication.Subscription, ModulithApplication.ModulithApplication.Student, "listens to", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+@enduml

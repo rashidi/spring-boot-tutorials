@@ -1,5 +1,7 @@
 = Spring Data MongoDb with Testcontainers
 :source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+3.0, November 24, 2024: Replace usage of mongo-init.js with Spring's RepositoryPopulator
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-mongodb-tc-data-load

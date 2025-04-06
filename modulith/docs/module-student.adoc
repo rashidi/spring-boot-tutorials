@@ -1,0 +1,27 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`zin.rashidi.boot.modulith.student`
+|Spring components
+|_Services_
+
+* `z.r.b.m.s.StudentManagement`
+
+_Repositories_
+
+* `z.r.b.m.s.StudentRepository`
+
+_Event listeners_
+
+* `o.s.c.ApplicationListener`
+
+_Others_
+
+* `z.r.b.m.s.StudentEventsConfiguration`
+|Published events
+|* `z.r.b.m.s.StudentInactivated` created by:
+** `z.r.b.m.s.StudentEventsConfiguration.studentInactivated(…)`
+
+|Events listened to
+|* `org.springframework.context.ApplicationEvent` 
+|===

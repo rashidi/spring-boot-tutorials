@@ -1,4 +1,6 @@
 = Spring Test: Slice Testing a REST Application
+Rashidi Zin <rashidi@zin.my>
+1.1, January 17, 2025: Replace MockMvc with MockMvcTester
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-slice-tests-rest
@@ -7,7 +9,6 @@
 
 Testing has become a critical component in today's software development world. It helps us in ensuring high quality product
 that provides stability and scalability. In this article, we will explore about implementing tests for Spring Boot Web application.
-
 
 == Background
 
@@ -292,5 +293,3 @@ be affected should the production code implementation changes. For example, a re
 
 With `@SpringBootTest`, I am able to implement my tests following link:../test-rest-assured/[Behaviour Driven Development] easily as
 opposed to using `@WebMvcTest` as I don't have to be concerned about the feature's implementation.
-
-In the end, choose the ones that provide you with the efficiency to maintain and to run your tests. Either with `@SpringBootTest` or the combination of `@WebMvcTest` and `@DataJpaTest`.

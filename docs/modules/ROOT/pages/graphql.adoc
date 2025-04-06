@@ -1,30 +1,37 @@
 = GraphQL With Spring Boot
 :source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, September 3, 2023
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/graphql
 
 Implementing https://graphql.org/[GraphQL] server with https://spring.io/guides/gs/graphql-server/[Spring Boot GraphQL Server].
 
-
 == Background
+
 GraphQL provides the flexibility for clients to retrieve fields that are only relevant to them. In this tutorial we will
 explore how we can implement GraphQL server with Spring Boot.
 
 == Server Implementation
+
 === schema.graphqls
+
 [source,graphql]
 ----
 scalar Long
+
 type Query {
     findAll: [Book]
     findByTitle(title: String): Book
 }
+
 type Book {
     isbn: Isbn
     title: String
     author: Author
 }
+
 type Isbn {
     ean: Long
     registrationGroup: Int
@@ -32,44 +39,56 @@ type Isbn {
     publication: Int
     digit: Int
 }
+
 type Author {
     name: Name
 }
+
 type Name {
     first: String
     last: String
 }
 ----
+
 This is the schema that inform our clients on available fields and queries. Next is to implement a `@Controller` that
 handle all requests.
 
 === Controller
+
 [source, java]
 ----
 @Controller
 class BookResource {
+
     private final BookRepository repository;
+
     BookResource(BookRepository repository) {
         this.repository = repository;
     }
+
     @QueryMapping
     public List<Book> findAll() {
         return repository.findAll();
     }
+
     @QueryMapping
     public Book findByTitle(@Argument String title) {
         return repository.findByTitle(title);
     }
+
 }
 ----
+
 link:{url-quickref}/src/main/java/zin/rashidi/boot/graphql/book/BookResource.java[BookResource] implements two types of services -
 `findAll`, a service without parameter and `findByTitle`, a service with a parameter. Both services are annotated with
 `@QueryMapping` to indicate that they are GraphQL queries.
 
 == Verification
+
 We will utilise `@GraphQlTest` to verify our implementation.
 
 === Integration Test
+
 [source, java]
 ----
 @GraphQlTest(
@@ -77,8 +96,10 @@ We will utilise `@GraphQlTest` to verify our implementation.
         includeFilters = @Filter(type = ANNOTATION, classes = { Configuration.class, Repository.class })
 )
 class BookResourceTests {
+
     @Autowired
     private GraphQlTester client;
+
     @Test
     @DisplayName("Given there are 3 books, when findAll is invoked, then return all books")
     void findAll() {
@@ -102,6 +123,7 @@ class BookResourceTests {
                 )
         ;
     }
+
     @Test
     @DisplayName("Given there is a book titled The Hobbit, when findByTitle is invoked, then return the book")
     void findByTitle() {
@@ -130,10 +152,12 @@ class BookResourceTests {
                                 """
                 );
     }
+
 }
 ----
 
 === Client schema definition
+
 In order to map the response to a Java object, we need to define the schema of the response. This is done in link:{url-quickref}/src/test/resources/graphql-test/books.graphql[books.graphl].
 
 [source, graphql]
@@ -155,9 +179,11 @@ query books($title: String) {
       }
     }
   }
+
   findAll {
     title
   }
+
 }
 ----
 

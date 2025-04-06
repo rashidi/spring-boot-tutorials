@@ -1,0 +1,27 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`zin.rashidi.boot.modulith.course`
+|Spring components
+|_Services_
+
+* `z.r.b.m.c.CourseManagement`
+
+_Repositories_
+
+* `z.r.b.m.c.CourseRepository`
+
+_Event listeners_
+
+* `o.s.c.ApplicationListener`
+
+_Others_
+
+* `z.r.b.m.c.CourseEventsConfiguration`
+|Published events
+|* `z.r.b.m.c.CourseEnded` created by:
+** `z.r.b.m.c.CourseEventsConfiguration.courseEnded(…)`
+
+|Events listened to
+|* `org.springframework.context.ApplicationEvent` 
+|===

@@ -1,5 +1,7 @@
 = Spring Data Jpa Audit Example
 :source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+2.0, October 12, 2023
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-audit
@@ -8,10 +10,12 @@ Enable auditing with Spring Data Jpa's `@CreatedDate` and `@LastModified`. For e
 
 
 == Background
+
 http://docs.spring.io/spring-data/jpa/docs/current/reference/html/[Spring Data Jpa] provides auditing feature which includes `@CreateDate`, `@CreatedBy`, `@LastModifiedDate`,
 and `@LastModifiedBy`. In this example we will see how it can be implemented with very little configurations.
 
 == Entity Class
+
 In this example we have an entity class, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/user/User.java[User] which contains information about the table structure. Initial
 structure is as follows:
 
@@ -19,27 +23,36 @@ structure is as follows:
 ----
 @Entity
 class User {
+
     @Id
     @GeneratedValue
     private Long id;
+
     private String name;
     private String username;
+
     @CreatedBy
     private String createdBy;
+
     @CreatedDate
     private Instant created;
+
     @LastModifiedBy
     private String modifiedBy;
+
     @LastModifiedDate
     private Instant modified;
+
     // omitted getter / setter
 }
+
 ----
 
 As you can see it is a standard implementation of `@Entity` JPA class. We would like to keep track when an entry is
 created with `created` column and when it is modified with `modified` column.
 
 == Enable JpaAudit
+
 In order to enable http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.auditing[JPA Auditing] for this project will need to apply three annotations and a configuration class.
 Those annotations are; `@EntityListener`, `@CreatedDate`, and `@LastModifiedDate`.
 
@@ -57,19 +70,26 @@ The final look of `User` class:
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 class User {
+
     @Id
     @GeneratedValue
     private Long id;
+
     private String name;
     private String username;
+
     @CreatedBy
     private String createdBy;
+
     @CreatedDate
     private Instant created;
+
     @LastModifiedBy
     private String modifiedBy;
+
     @LastModifiedDate
     private Instant modified;
+
     // omitted getter / setter
 }
 ----
@@ -87,21 +107,26 @@ We will do so in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/audit/A
 @Configuration
 @EnableJpaAuditing
 class AuditConfiguration {
+
     @Bean
     public AuditorAware<String> auditorAwareRef() {
         return () -> Optional.of("Mr. Auditor");
     }
+
 }
 ----
 
 That's it! Our application has JPA Auditing feature enabled. The result can be seen in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/user/UserAuditTests.java[UserAuditTests].
 
 == Verify Audit Implementation
+
 There is no better way to verify an implementation other than running some tests. In our test class we have to scenario:
+
 * Create an entity which will have `created` and `modified` fields has values without us assigning them
 * Update created entity and `created` field will remain to have the same value while `modified` values will be updated
 
 === Create an entity
+
 In the following test we will see that values for `created` and `modified` are assigned by Spring itself:
 
 [source,java]
@@ -109,19 +134,25 @@ In the following test we will see that values for `created` and `modified` are a
 @Testcontainers
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ANNOTATION, classes = EnableJpaAuditing.class))
 class UserAuditTests {
+
     @Container
     @ServiceConnection
     private final static MySQLContainer MYSQL = new MySQLContainer("mysql:latest");
+
     @Autowired
     private UserRepository repository;
+
     @Test
     @DisplayName("When a user is saved Then created and modified fields are set And createdBy and modifiedBy fields are set to Mr. Auditor")
     void create() {
         var user = new User("Rashidi Zin", "rashidi");
+
         var createdUser = repository.save(user);
+
         assertThat(createdUser).extracting("created", "modified").isNotNull();
         assertThat(createdUser).extracting("createdBy", "modifiedBy").containsOnly("Mr. Auditor");
     }
+
 }
 ----
 
@@ -129,6 +160,7 @@ As mentioned earlier, we did not assign values for `created` and `modified` fiel
 Same goes with when we are updating an entry.
 
 === Update an entity
+
 In the following test we will change the `username` without changing `modified` field. We will expect that `modified`
 field will have a recent time as compare to when it was created:
 
@@ -137,20 +169,26 @@ field will have a recent time as compare to when it was created:
 @Testcontainers
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(type = ANNOTATION, classes = EnableJpaAuditing.class))
 class UserAuditTests {
+
     @Container
     @ServiceConnection
     private final static MySQLContainer MYSQL = new MySQLContainer("mysql:latest");
+
     @Autowired
     private UserRepository repository;
+
     @Test
     @DisplayName("When a user is updated Then modified field should be updated")
     @Sql(statements = "INSERT INTO users (id, name, username, created, modified) VALUES ('84', 'Rashidi Zin', 'rashidi', now() - INTERVAL 7 DAY, now() - INTERVAL 7 DAY)")
     void update() {
         var modifiedUser = repository.findById(84L).map(user -> { user.setUsername("rashidi.zin"); return user; }).map(repository::saveAndFlush).orElseThrow();
+
         var created = (Instant) ReflectionTestUtils.getField(modifiedUser, "created");
         var modified = (Instant) ReflectionTestUtils.getField(modifiedUser, "modified");
+
         assertThat(modified).isAfter(created);
     }
+
 }
 ----
 
@@ -158,7 +196,9 @@ As you can see at our final verification we assert that `modified` field should 
 previously had.
 
 == Conclusion
+
 To recap. All we need in order to enable JPA auditing feature in this project are:
+
 * `@EnableJpaAuditing`
 * `@EntityListeners`
 * `@CreatedBy`
