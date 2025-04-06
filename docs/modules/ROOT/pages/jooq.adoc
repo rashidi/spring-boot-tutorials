@@ -1,4 +1,3 @@
 = jOOQ: Implement jOOQ with Spring Boot and Gradle
-:page-aliases: jooq.adoc
 
 include::../../../../jooq/README.adoc[lines=2..-1]

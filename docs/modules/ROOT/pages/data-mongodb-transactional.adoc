@@ -1,4 +1,3 @@
 = @Transactional with Spring Data MongoDB
-:page-aliases: data-mongodb-transactional.adoc
 
 include::../../../../data-mongodb-transactional/README.adoc[lines=2..-1]
