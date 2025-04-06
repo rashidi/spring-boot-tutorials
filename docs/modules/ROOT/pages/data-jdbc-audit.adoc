@@ -1,3 +1,170 @@
 = Spring Data JDBC: Implement Auditing
+Rashidi Zin <rashidi@zin.my>
+1.0, December 20, 2024: Initial version
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jdbc-audit
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jdbc
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jdbc
 
-include::../../../../data-jdbc-audit/README.adoc[lines=2..-1]
+We have explored on how to implement auditing with link:../data-jpa-audit/[Spring Data Jpa], link:../data-envers-audit/[Spring Data Enver], and link:../data-mongodb-audit/[Spring Data Mongo]. In this tutorial, we will implement auditing with https://spring.io/projects/spring-data-jdbc[Spring Data JDBC].
+
+== Background
+
+Spring Data JDBC provides the convenience to enable auditing for a class. This can be achieved by using the following annotations:
+
+  - `@EnableJdbcAuditing`
+  - `@Created`
+  - `@CreatedBy`
+  - `@LastModified`
+  - `@LastModifiedBy`
+
+== Configuration
+
+In order to enable auditing we will create a `@Configuration` class that is also annotated with `@EnableJdbcAuditing` and expose
+a `@Bean` of `AuditorAware`:
+
+[source, java]
+----
+@Configuration
+@EnableJdbcAuditing
+class AuditConfiguration {
+
+    @Bean
+    public AuditorAware<String> auditorAware() {
+        return () -> Optional.of("Mr. Auditor");
+    }
+
+}
+----
+
+link:{source-main}/audit/AuditConfiguration.java[`AuditConfiguration`] demonstrates a simple implementation of `AuditorAware` which returns `Mr. Auditor`. This will be assigned to fields that are annotated with `@CreatedBy` and `@LastModifiedBy`.
+
+== Audited Class
+
+Next, we will implement link:{source-main}/user/User.java[`User`] which stores audit information:
+
+[source,java]
+----
+@Table("users")
+class User {
+
+    @Id
+    private Long id;
+
+    @CreatedDate
+    private Instant created;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedDate
+    private Instant lastModified;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
+
+    private final String name;
+    private String username;
+
+    User(String name, String username) {
+        this.name = name;
+        this.username = username;
+    }
+
+    public User username(String username) {
+        this.username = username;
+        return this;
+    }
+
+}
+----
+
+Values for the fields `created`, `createdBy`, `lastModified`, and `lastModifiedBy` will be handled by the framework.
+
+== Repository Class
+
+Finally, we will implement the repository class - link:{source-main}/user/UserRepository.java[`UserRepository] which extends `CrudRepository` class from Spring Data:
+
+[source, java]
+----
+interface UserRepository extends CrudRepository<User, Long> {
+}
+----
+
+== Verification
+
+As always, we will verify our implementation through database integration test. We will utilise `@Testcontainers` and `@DataJdbcTest` annotations.
+
+Unlike Spring Data JPA / Hibernate, Spring Data JDBC does not support automatic creation of a table. Therefore, we will use `@Sql` in our test to create the table `users` before running our tests. The setup will look as follows:
+
+[source, java]
+----
+@Testcontainers
+@DataJdbcTest(includeFilters = @Filter(EnableJdbcAuditing.class))
+@Sql(
+        executionPhase = BEFORE_TEST_CLASS,
+        statements = "CREATE TABLE users (id BIGSERIAL PRIMARY KEY, created TIMESTAMP WITH TIME ZONE NOT NULL, created_by TEXT NOT NULL, last_modified TIMESTAMP WITH TIME ZONE NOT NULL, last_modified_by TEXT NOT NULL, name TEXT NOT NULL, username TEXT NOT NULL)"
+)
+class UserAuditTests {
+
+    @Container
+    @ServiceConnection
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+
+    @Autowired
+    private UserRepository repository;
+
+}
+----
+
+`@DataJdbcTest` is not aware about our `AuditConfiguration` class. For that, we are using `includeFilters` to inform it about the class.
+
+=== Create new User
+
+Upon the creation of a new `User`, the annotated fields should be automatically assigned. Whereby `created` and `lastModified` are assigned with current time while `createdBy` and `lastModifiedBy` are assigned with `Mr. Auditor`:
+
+[source,java]
+----
+class UserAuditTests {
+
+    @Autowired
+    private UserRepository repository;
+
+    @Test
+    @DisplayName("When a user is persisted Then created and lastModified fields are set And createdBy and lastModifiedBy fields are set to Mr. Auditor")
+    void create() {
+        var user = repository.save(new User("Rashidi Zin", "rashidi"));
+
+        assertThat(user).extracting("created", "lastModified").doesNotContainNull();
+        assertThat(user).extracting("createdBy", "lastModifiedBy").containsOnly("Mr. Auditor");
+    }
+
+}
+----
+
+=== Update an existing User
+
+When updating an existing `User`, the field `lastModified` should be updated. The following test demonstrates that there is a `User` created seven days ago and once updated, its `lastModified` field should be later than `created` field:
+
+[source,java]
+----
+class UserAuditTests {
+
+    @Autowired
+    private UserRepository repository;
+
+    @Test
+    @DisplayName("Given there is a user When I update its username Then lastModified field should be updated")
+    @Sql(statements = "INSERT INTO users (id, created, created_by, last_modified, last_modified_by, name, username) VALUES (84, CURRENT_TIMESTAMP - INTERVAL '7 days', 'Mr. Auditor', CURRENT_TIMESTAMP - INTERVAL '7 days', 'Mr. Auditor', 'Rashidi Zin', 'rashidi');")
+    void update() {
+        var modifiedUser = repository.findById(84L).map(user -> { user.username("rashidi.zin"); return user; }).map(repository::save).orElseThrow();
+
+        var created = (Instant) ReflectionTestUtils.getField(modifiedUser, "created");
+        var modified = (Instant) ReflectionTestUtils.getField(modifiedUser, "lastModified");
+
+        assertThat(modified).isAfter(created);
+    }
+
+}
+----

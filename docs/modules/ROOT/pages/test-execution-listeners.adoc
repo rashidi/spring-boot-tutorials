@@ -1,3 +1,129 @@
 = Spring Test: Managing Test Data with `TestExecutionListener`
+:source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, September 19, 2023
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-execution-listeners
 
-include::../../../../test-execution-listeners/README.adoc[lines=2..-1]
+We often make use of `@BeforeEach` and `@AfterEach` methods to prepare and clean up test data. However, this approach is not scalable and can be difficult to maintain. In this article, we will look at how we can use `TestExecutionListener` to manage test data.
+
+== Background
+
+Spring provides link:https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/test/context/TestExecutionListener.html[`TestExecutionListener`] interface that we can implement to hook into the test execution lifecycle. This helps us in ensuring that our test classes are concise and not cluttered with test data preparation and clean up code.
+
+In this article, we will look at how we can use `TestExecutionListener` to manage test data. We will implement listeners to create initial data, update relevant data, and clean up data after the test execution.
+
+== `TestExecutionListener` classes
+
+=== Creating initial data
+We will start by creating initial link:{url-quickref}/src/main/java/zin/rashidi/boot/test/user/User.java[User] data which consists of `name` and `username` fields.
+
+[source,java]
+----
+class UserCreationTestExecutionListener extends AbstractTestExecutionListener {
+
+    @Override
+    public void beforeTestClass(TestContext testContext) {
+        var mongo = testContext.getApplicationContext().getBean(MongoOperations.class);
+
+        mongo.save(new User("Rashidi Zin", "rashidi.zin"));
+    }
+
+    @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE;
+    }
+
+}
+----
+
+By default `getOrder` method returns `LOWEST_PRECEDENCE` which means that this listener will be executed last. Since we want this listener to always be executed first, we will set the order to `HIGHEST_PRECEDENCE`.
+
+=== Update relevant data
+Our test will focus on finding `User` with `status` `INACTIVE`. We will create a listener to update the `status` of the `User` to `INACTIVE` after the test execution.
+
+[source,java]
+----
+class UserStatusUpdateTestExecutionListener extends AbstractTestExecutionListener {
+
+    @Override
+    public void beforeTestClass(TestContext testContext) {
+        var mongo = testContext.getApplicationContext().getBean(MongoOperations.class);
+        var findByUsername = mongo.findOne(query(where("username").is("rashidi.zin")), User.class);
+
+        mongo.save(findByUsername.status(INACTIVE));
+    }
+
+    @Override
+    public int getOrder() {
+        return 1;
+    }
+
+}
+----
+
+Given that we are expecting a `User` with `username` `rashidi.zin` to be returned, we will update the `status` of the `User` with `username` `rashidi.zin` to `INACTIVE`.
+
+In this listener, we will set the order to `1` as we want to ensure it will not be the last one to be executed.
+
+=== Clean up data
+Both listeners above will create and update `User` data. They will be executed _before_ test class. For data cleanup it will be executed _after_ test class is executed.
+
+[source,java]
+----
+class UserDeletionTestExecutionListener extends AbstractTestExecutionListener {
+
+    private static Logger log = LoggerFactory.getLogger(UserDeletionTestExecutionListener.class);
+
+    @Override
+    public void afterTestClass(TestContext testContext) {
+        var mongo = testContext.getApplicationContext().getBean(MongoOperations.class);
+
+        mongo.dropCollection(User.class);
+
+        log.info("user collection dropped");
+    }
+
+}
+----
+
+== Registering `TestExecutionListener` classes
+Finally, we will implement a test class to test the link:{url-quickref}/src/main/java/zin/rashidi/boot/test/user/UserRepository.java[UserRepository] which will be executed with the listeners above.
+We will define necessary `TestExecutionListeners` using `@TestExecutionListeners` annotation and we will also set the `mergeMode` to `MERGE_WITH_DEFAULTS` to ensure that the default listeners are also executed.
+
+[source,java]
+----
+@Testcontainers
+@DataMongoTest
+@TestExecutionListeners(
+        listeners = { UserCreationTestExecutionListener.class, UserStatusUpdateTestExecutionListener.class, UserDeletionTestExecutionListener.class },
+        mergeMode = MERGE_WITH_DEFAULTS
+)
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+
+    @Autowired
+    private UserRepository repository;
+
+    @Test
+    @DisplayName("Given there are users with status INACTIVE, When I search for users with status INACTIVE, Then I should get users with status INACTIVE")
+    void findByStatus() {
+        var inactiveUsers = repository.findByStatus(INACTIVE);
+
+        assertThat(inactiveUsers)
+                .hasSize(1)
+                .extracting("username")
+                .containsOnly("rashidi.zin");
+    }
+
+}
+----
+
+While `findByStatus` will validate our implementation in `UserCreationTestExecutionListener` and `UserStatusUpdateTestExecutionListener`, a log message will be printed to indicate that `UserDeletionTestExecutionListener` is executed.
+
+== Conclusion
+With `TestExecutionListener` data can be reused across test classes. This helps us in ensuring that our test classes are concise and not cluttered with test data preparation and clean up code.

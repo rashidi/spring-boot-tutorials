@@ -1,3 +1,247 @@
 = Spring Modulith: Building Modular Monolithic Applications
+:source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, April 6, 2025
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/modulith
 
-include::../../../../modulith/README.adoc[lines=2..-1]
+== Introduction
+
+This tutorial demonstrates how to use Spring Modulith to build a modular monolithic application. Spring Modulith is a framework that helps structure applications into well-defined modules with clear boundaries while still deploying as a single unit.
+
+In this example, we've built a simple student course management system with three modules:
+
+* *Course*: Manages course information and lifecycle
+* *Student*: Manages student information and status
+* *Subscription*: Manages the relationship between students and courses
+
+== What is Spring Modulith?
+
+Spring Modulith is an extension to the Spring ecosystem that provides:
+
+* Clear module boundaries through package conventions
+* Explicit module dependencies
+* Event-based communication between modules
+* Testing support for modules in isolation
+* Documentation generation for module structure
+
+== Project Structure
+
+The project follows the Spring Modulith package convention:
+
+[source]
+----
+zin.rashidi.boot.modulith
+├── ModulithApplication.java
+├── course
+│   ├── Course.java
+│   ├── CourseEnded.java
+│   ├── CourseEventsConfiguration.java
+│   ├── CourseManagement.java
+│   └── CourseRepository.java
+├── student
+│   ├── Student.java
+│   ├── StudentEventsConfiguration.java
+│   ├── StudentInactivated.java
+│   ├── StudentManagement.java
+│   └── StudentRepository.java
+└── subscription
+    ├── Subscription.java
+    ├── SubscriptionManagement.java
+    └── SubscriptionRepository.java
+----
+
+Each module is a separate package under the application's base package.
+
+== Module Interactions
+
+The modules interact with each other through events:
+
+1. When a course ends, the Course module publishes a `CourseEnded` event
+2. When a student is inactivated, the Student module publishes a `StudentInactivated` event
+3. The Subscription module listens for these events and cancels the relevant subscriptions
+
+This event-based communication ensures loose coupling between modules.
+
+== Key Components
+
+=== Domain Entities
+
+Each module has its own domain entity:
+
+* `Course`: Represents a course with a name and status (ACTIVE, DORMANT, ENDED)
+* `Student`: Represents a student with a name and status (ACTIVE, INACTIVE)
+* `Subscription`: Represents a relationship between a student and a course with a status (ACTIVE, COMPLETED, DORMANT, CANCELLED)
+
+=== Repositories
+
+Each module has its own repository for data access:
+
+* `CourseRepository`: Basic CRUD operations for courses
+* `StudentRepository`: Basic CRUD operations for students
+* `SubscriptionRepository`: CRUD operations plus custom methods for cancelling subscriptions by course or student
+
+=== Services
+
+Each module has a service class for business logic:
+
+* `CourseManagement`: Updates course information
+* `StudentManagement`: Manages student status
+* `SubscriptionManagement`: Listens for events and manages subscriptions accordingly
+
+=== Events
+
+The application uses domain events for communication between modules:
+
+* `CourseEnded`: Published when a course status is set to ENDED
+* `StudentInactivated`: Published when a student status is set to INACTIVE
+
+== Testing
+
+Spring Modulith provides excellent testing support:
+
+* `ModuleTests`: Verifies the modulith architecture and generates documentation
+* Module-specific tests: Test each module in isolation or with its dependencies
+
+=== Architecture Verification
+
+The `ModuleTests` class includes a test that verifies the modulith architecture:
+
+[source,java]
+----
+@Test
+@DisplayName("Verify architecture")
+void verify() {
+    modules.verify();
+}
+----
+
+This test ensures that module dependencies are correctly defined and that there are no unwanted dependencies between modules.
+
+=== Documentation Generation
+
+The `ModuleTests` class also includes a test that generates documentation:
+
+[source,java]
+----
+@Test
+@DisplayName("Generate documentation")
+void document() {
+    new Documenter(modules, defaults().withOutputFolder("docs"))
+            .writeModulesAsPlantUml()
+            .writeDocumentation(Documenter.DiagramOptions.defaults(), Documenter.CanvasOptions.defaults().revealInternals());
+}
+----
+
+This test generates documentation in the `docs` folder, including PlantUML diagrams and AsciiDoc files for each module.
+
+=== Testing Event-Based Communication
+
+Spring Modulith provides excellent support for testing event-based communication between modules. Here are examples from our test classes:
+
+==== Publishing Events
+
+The `CourseManagementTests` class demonstrates how to test event publishing:
+
+[source,java]
+----
+@ApplicationModuleTest
+class CourseManagementTests {
+
+    @Autowired
+    private CourseManagement courses;
+
+    @Test
+    @DisplayName("When a course is ENDED Then CourseEnded event will be triggered with the course Id")
+    void courseEnded(Scenario scenario) {
+        var course = new Course("Advanced Java Programming").status(ENDED);
+        ReflectionTestUtils.setField(course, "id", 2L);
+
+        scenario.stimulate(() -> courses.updateCourse(course))
+                .andWaitAtMost(ofMillis(101))
+                .andWaitForEventOfType(CourseEnded.class)
+                .toArriveAndVerify(event -> assertThat(event).extracting("id").isEqualTo(2L));
+    }
+}
+----
+
+.This test:
+. Uses `@ApplicationModuleTest` to test the Course module
+. Uses `Scenario.stimulate()` to trigger an action (updating a course)
+. Uses `andWaitAtMost()` to specify a maximum wait time
+. Uses `andWaitForEventOfType()` to wait for a specific event type
+. Uses `toArriveAndVerify()` to verify the event's properties
+
+Similarly, the `StudentManagementTests` class tests event publishing from the Student module:
+
+[source,java]
+----
+@ApplicationModuleTest
+class StudentManagementTests {
+
+    @Autowired
+    private StudentManagement students;
+
+    @Test
+    @DisplayName("When the student with id 4 is inactivated Then StudentInactivated event will be triggered with student id 4")
+    void inactive(Scenario scenario) {
+        var student = new Student("Bob Johnson");
+        ReflectionTestUtils.setField(student, "id", 4L);
+
+        scenario.stimulate(() -> students.inactive(student))
+                .andWaitForEventOfType(StudentInactivated.class)
+                .toArriveAndVerify(inActivatedStudent -> assertThat(inActivatedStudent).extracting("id").isEqualTo(4L));
+    }
+}
+----
+
+==== Consuming Events
+
+The `SubscriptionManagementTests` class demonstrates how to test event consumption:
+
+[source,java]
+----
+@ApplicationModuleTest
+class SubscriptionManagementTests {
+
+    @Autowired
+    private SubscriptionRepository subscriptions;
+
+    @Test
+    @DisplayName("When CourseEnded is triggered with id 5 Then all subscriptions for the course will be CANCELLED")
+    void courseEnded(Scenario scenario) {
+        var event = new CourseEnded(5L);
+
+        scenario.publish(event)
+                .andWaitForStateChange(() -> subscriptions.cancelByCourseId(5L))
+                .andVerify(updatedRows -> assertThat(updatedRows).isEqualTo(2));
+    }
+
+    @Test
+    @DisplayName("When StudentInactivated is triggered with id 5 Then all subscriptions for the student will be CANCELLED")
+    void studentInactivated(Scenario scenario) {
+        var event = new StudentInactivated(5L);
+
+        scenario.publish(event)
+                .andWaitForStateChange(() -> subscriptions.cancelByStudentId(5L))
+                .andVerify(updatedRows -> assertThat(updatedRows).isEqualTo(2));
+    }
+}
+----
+
+.This test:
+. Uses `@ApplicationModuleTest` to test the Subscription module
+. Uses `Scenario.publish()` to publish an event
+. Uses `andWaitForStateChange()` to wait for a state change in the system
+. Uses `andVerify()` to verify the result of the state change
+
+== Generated Documentation
+
+Spring Modulith automatically generates documentation for your modules. You can view the generated documentation in the link:${url-quickref}/docs/all-docs.adoc[docs/all-docs.adoc] file.
+
+== Conclusion
+
+Spring Modulith provides a powerful way to structure your Spring Boot applications into well-defined modules while still deploying as a single unit. By following package conventions and using event-based communication, you can build modular monolithic applications that are easier to understand, test, and maintain.
+
+For more information, visit the https://spring.io/projects/spring-modulith[Spring Modulith website].

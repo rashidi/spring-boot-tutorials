@@ -1,3 +1,193 @@
 = Spring Data MongoDB: Full Text Search
+:source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, September 25, 2023
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-mongodb-full-text-search
 
-include::../../../../data-mongodb-full-text-search/README.adoc[lines=2..-1]
+Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with link:https://spring.io/projects/spring-data-mongodb[Spring Data MongoDB].
+
+== Background
+
+MongoDB full text search provides the flexibility to perform search entries through multiple fields. In this example we will explore how to implement full text search with Spring Data MongoDB.
+
+== Verification
+Given we have the following entries in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/mongodb/character/Character.java[Character]:
+
+.Characters
+|===
+|Name |Publisher
+
+|Captain Marvel
+|Marvel
+
+|Joker
+|DC
+
+|Thanos
+|Marvel
+|===
+
+When searching for `captain marvel` then the following results should be returned
+
+.Characters that contains the keyword `captain` or `marvel`
+|===
+|Name |Publisher
+
+|Captain Marvel
+|Marvel
+
+|Thanos
+|Marvel
+|===
+
+This is demonstrated in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/mongodb/character/CharacterRepositoryTests.java[CharacterRepositoryTests].
+
+== Implementation
+We will start by defining the `Character` entity.
+
+[source,java]
+----
+@Document
+class Character {
+
+    @Id
+    private ObjectId id;
+
+    @TextIndexed
+    private final String name;
+
+    @TextIndexed
+    private final String publisher;
+
+    public Character(String name, String publisher) {
+        this.name = name;
+        this.publisher = publisher;
+    }
+
+}
+----
+
+=== With Predefined Index
+If respective fields are already `indexed` then we can utilise Spring Data query generation to perform full text search.
+
+This can be done by creating a method that takes `TextCriteria` as parameter:
+
+[source,java]
+----
+interface CharacterRepository extends MongoRepository<Character, ObjectId>, CharacterSearchRepository {
+
+    List<Character> findAllBy(TextCriteria criteria, Sort sort);
+
+}
+----
+
+This method can then be used in the following manner:
+
+[source,java]
+----
+@Testcontainers
+@DataMongoTest
+class CharacterRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private final static MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+
+    @Autowired
+    private MongoOperations operations;
+
+    @Autowired
+    private CharacterRepository repository;
+
+    @Test
+    @DisplayName("Generated query: Search for 'captain marvel' should return 'Captain Marvel' and 'Thanos'")
+    void withGeneratedQuery() {
+        // Simulate predefined index
+        operations.indexOps(Character.class).ensureIndex(new TextIndexDefinitionBuilder().onFields("name", "publisher").build());
+
+        var characters = repository.findAllBy(new TextCriteria().matchingAny("captain", "marvel"), Sort.by("name"));
+
+        assertThat(characters)
+                .hasSize(2)
+                .extracting("name")
+                .containsOnly("Captain Marvel", "Thanos")
+                .doesNotContain("Joker");
+    }
+
+}
+----
+
+=== Without Predefined Index
+Without predefined index, we will need to implement a custom repository implementation. We will start by defining a custom repository interface, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepository.java[CharacterSearchRepository]:
+
+[source,java]
+----
+interface CharacterSearchRepository {
+
+    List<Character> findByText(String text, Sort sort);
+
+}
+----
+
+Next, implement the custom repository interface in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/mongodb/character/CharacterSearchRepositoryImpl.java[CharacterSearchRepositoryImpl]:
+
+[source,java]
+----
+class CharacterSearchRepositoryImpl implements CharacterSearchRepository {
+
+    private final MongoOperations operations;
+
+    CharacterSearchRepositoryImpl(MongoOperations operations) {
+        this.operations = operations;
+    }
+
+    @Override
+    public List<Character> findByText(String text, Sort sort) {
+        operations.indexOps(Character.class)
+                .ensureIndex(new TextIndexDefinitionBuilder().onFields("name", "publisher").build());
+
+        var parameters = text.split(" ");
+        var query = TextQuery.queryText(new TextCriteria().matchingAny(parameters)).with(sort);
+
+        return operations.find(query, Character.class);
+    }
+
+}
+----
+
+This implementation will `indexed` searchable fields, i.e. `name` and `publisher` before searching the `Document`.
+
+Finally, we will verify our custom implementation through integration test:
+
+[source,java]
+----
+@Testcontainers
+@DataMongoTest
+class CharacterRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private final static MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+
+    @Autowired
+    private MongoOperations operations;
+
+    @Autowired
+    private CharacterRepository repository;
+
+    @Test
+    @DisplayName("Custom implementation: Search for 'captain marvel' should return 'Captain Marvel' and 'Thanos'")
+    void findByText() {
+        var characters = repository.findByText("captain marvel", Sort.by("name"));
+
+        assertThat(characters)
+                .hasSize(2)
+                .extracting("name")
+                .containsOnly("Captain Marvel", "Thanos")
+                .doesNotContain("Joker");
+    }
+
+}
+----
