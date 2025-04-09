@@ -7,7 +7,7 @@ on:
       - 'gradle/wrapper/**'
       - '**/*.gradle'
       - '**/*.java'
-      - '**/gradle-build.yml'      
+      - '**/gradle-build.yml'
   pull_request:
     branches: [ "master" ]
     types: [opened, synchronize, reopened]
@@ -41,6 +41,7 @@ jobs:
             build:
               - 'gradle/wrapper/**'
               - '**/*.gradle'
+              - '**/gradle-build.yml'
 
   gradle-build:
     name: Build project with Gradle
