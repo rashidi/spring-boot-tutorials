@@ -7,6 +7,7 @@ on:
       - 'gradle/wrapper/**'
       - '**/*.gradle'
       - '**/*.java'
+      - '**/gradle-build.yml'      
   pull_request:
     branches: [ "master" ]
     types: [opened, synchronize, reopened]
@@ -14,6 +15,7 @@ on:
       - 'gradle/wrapper/**'
       - '**/*.gradle'
       - '**/*.java'
+      - '**/gradle-build.yml'
 
 permissions:
   contents: write
@@ -52,6 +54,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'gradle'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -66,12 +69,6 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
       - name: Run CI build
         run: ./gradlew build
       - name: Publish test coverage
