@@ -70,6 +70,10 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+      - name: Setup Testcontainers Cloud Client
+        uses: atomicjar/testcontainers-cloud-setup-action@v1
+        with:
+          token: ${{ secrets.TC_CLOUD_TOKEN }}          
       - name: Run CI build
         run: ./gradlew build
       - name: Publish test coverage
@@ -78,3 +82,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew jacocoTestReport sonar
+      - name: Terminate Testcontainers Cloud Client active sessions
+        uses: atomicjar/testcontainers-cloud-setup-action@v1
+        with:
+          action: terminate        
