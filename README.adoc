@@ -47,6 +47,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:data-domain-events[Spring Data Domain Events] |Publish Domain Events with Spring Data
 |link:data-envers-audit[Spring Data Envers Audit] |Enable with Entity Revisions using Spring Data Envers
 |link:data-jdbc-audit[Spring Data JDBC Audit] |Enable Audit with Spring Data JDBC
+|link:data-jdbc-schema-generation[Spring Data JDBC: Generate Liquibase Changeset] |Generate Liquibase changeset with Spring Data JDBC
 |link:data-jpa-audit[Spring Data JPA Audit] |Enable Audit with Spring Data JPA
 |link:data-jpa-event[Spring Data JPA: Event Driven] |Implement `Entity` validation at `Repository` level through `EventListeners`
 |link:data-jpa-filtered-query[Spring Data JPA: Global Filtered Query] |Implement global filtered query with Spring Data JPA by defining `repositoryBaseClass`
