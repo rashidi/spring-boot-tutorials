@@ -1,0 +1,48 @@
+databaseChangeLog:
+- changeSet:
+    id: '1744500868871'
+    author: Spring Data Relational
+    objectQuotingStrategy: LEGACY
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: name
+            type: VARCHAR(255 BYTE)
+        - column:
+            constraints:
+              nullable: false
+            name: book
+            type: BIGINT
+        tableName: author
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: isbn
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: title
+            type: VARCHAR(255 BYTE)
+        tableName: book
+    - addForeignKeyConstraint:
+        baseColumnNames: book
+        baseTableName: author
+        constraintName: book_isbn_fk
+        referencedColumnNames: isbn
+        referencedTableName: book
+

@@ -8,6 +8,7 @@
 ** xref:data-domain-events.adoc[Domain Events]
 ** xref:data-envers-audit.adoc[Envers Audit]
 ** xref:data-jdbc-audit.adoc[JDBC Audit]
+** xref:data-jdbc-schema-generation.adoc[JDBC Schema Generation]
 ** xref:data-jpa-audit.adoc[JPA Audit]
 ** xref:data-jpa-event.adoc[Event Driven]
 ** xref:data-jpa-filtered-query.adoc[Global Filtered Query]
