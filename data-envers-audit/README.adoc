@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Sample application that demonstrates entity revisions with http://projects.spring.io/spring-data-envers/[Spring Data Envers].
 
-include::../docs/badges.adoc[]
 
 == Background
 

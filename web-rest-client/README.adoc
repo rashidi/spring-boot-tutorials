@@ -8,7 +8,6 @@ Rashidi Zin <rashidi@zin.my>
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/web/restclient
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/web/restclient
 
-include::../docs/badges.adoc[]
 
 == Background
 

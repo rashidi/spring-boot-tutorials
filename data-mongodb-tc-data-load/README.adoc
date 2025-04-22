@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Preloaded data for testing.
 
-include::../docs/badges.adoc[]
 
 == Background
 It is common to have preloaded data when we are testing our delete, read, and update operations. One of the most common approaches is to

@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Implement global filter query which involves several `Entity` with Spring Data Jpa.
 
-include::../docs/badges.adoc[]
 
 == Background
 
