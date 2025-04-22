@@ -26,7 +26,7 @@ class UserAuditTests {
 
     @Container
     @ServiceConnection
-    private final static MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:latest");
+    private final static MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:lts");
 
     @Autowired
     private UserRepository repository;

@@ -171,11 +171,11 @@ Next we will have link:{url-quickref}/src/test/java/zin/rashidi/boot/cloud/jdbce
 [source,java]
 ----
 @Testcontainers
-@SpringBootTest(properties = "spring.datasource.url=jdbc:tc:mysql:8:///test?TC_INITSCRIPT=init-script.sql", webEnvironment = RANDOM_PORT)
+@SpringBootTest(properties = "spring.datasource.url=jdbc:tc:mysql:lts:///test?TC_INITSCRIPT=init-script.sql", webEnvironment = RANDOM_PORT)
 class CloudJdbcEnvRepoApplicationTests {
 
     @Container
-    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8");
+    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:lts");
 
     @Autowired
     private TestRestTemplate restClient;

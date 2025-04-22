@@ -51,7 +51,7 @@ class UserBatchJobTests {
 
     @Container
     @ServiceConnection
-    private final static MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:latest");
+    private final static MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:lts");
 
     @Autowired
     private JobLauncherTestUtils launcher;
