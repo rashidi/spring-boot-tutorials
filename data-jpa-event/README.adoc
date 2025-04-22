@@ -10,7 +10,6 @@ Rashidi Zin <rashidi@zin.my>
 
 In this tutorial, we will look into how we can utilise events to perform validation at repository level.
 
-include::../docs/badges.adoc[]
 
 == Background
 

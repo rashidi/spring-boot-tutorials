@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Implement batch operation for REST resources with https://spring.io/projects/spring-batch[Spring Batch]
 
-include::../docs/badges.adoc[]
 
 == Background
 Spring Batch allows us to perform large volumes of records from several resources such as https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/item/file/FlatFileItemReader.html[File],

@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Skip processing specific data through business logic in Spring Batch.
 
-include::../docs/badges.adoc[]
 
 == Background
 

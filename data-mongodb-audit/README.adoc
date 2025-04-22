@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Enable auditing with Spring Data MongoDB. For example with Spring Data JPA, visit link:../data-jpa-audit/[Spring Data JPA Audit Example].
 
-include::../docs/badges.adoc[]
 
 == Background
 

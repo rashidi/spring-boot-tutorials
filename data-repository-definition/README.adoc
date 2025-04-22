@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Implement custom repository interfaces with @RepositoryDefinition annotation.
 
-include::../docs/badges.adoc[]
 
 == Background
 

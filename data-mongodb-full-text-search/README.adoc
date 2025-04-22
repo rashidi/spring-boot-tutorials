@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with link:https://spring.io/projects/spring-data-mongodb[Spring Data MongoDB].
 
-include::../docs/badges.adoc[]
 
 == Background
 

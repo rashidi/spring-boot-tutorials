@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 We often make use of `@BeforeEach` and `@AfterEach` methods to prepare and clean up test data. However, this approach is not scalable and can be difficult to maintain. In this article, we will look at how we can use `TestExecutionListener` to manage test data.
 
-include::../docs/badges.adoc[]
 
 == Background
 

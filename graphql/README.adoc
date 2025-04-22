@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Implementing https://graphql.org/[GraphQL] server with https://spring.io/guides/gs/graphql-server/[Spring Boot GraphQL Server].
 
-include::../docs/badges.adoc[]
 
 == Background
 

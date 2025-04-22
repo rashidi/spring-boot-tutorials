@@ -10,7 +10,6 @@ Rashidi Zin <rashidi@zin.my>
 
 We have explored on how to implement auditing with link:../data-jpa-audit/[Spring Data Jpa], link:../data-envers-audit/[Spring Data Enver], and link:../data-mongodb-audit/[Spring Data Mongo]. In this tutorial, we will implement auditing with https://spring.io/projects/spring-data-jdbc[Spring Data JDBC].
 
-include::../docs/badges.adoc[]
 
 == Background
 

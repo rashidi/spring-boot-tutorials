@@ -9,7 +9,6 @@ Rashidi Zin <rashidi@zin.my>
 
 Implement validation in Spring Data REST.
 
-include::../docs/badges.adoc[]
 
 == Background
 
