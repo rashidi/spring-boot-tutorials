@@ -13,11 +13,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @Testcontainers
-@SpringBootTest(properties = "spring.datasource.url=jdbc:tc:mysql:8:///test?TC_INITSCRIPT=init-script.sql", webEnvironment = RANDOM_PORT)
+@SpringBootTest(properties = "spring.datasource.url=jdbc:tc:mysql:lts:///test?TC_INITSCRIPT=init-script.sql", webEnvironment = RANDOM_PORT)
 class CloudJdbcEnvRepoApplicationTests {
 
     @Container
-    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8");
+    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:lts");
 
     @Autowired
     private TestRestTemplate restClient;

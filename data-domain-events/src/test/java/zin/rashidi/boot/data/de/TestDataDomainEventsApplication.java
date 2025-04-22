@@ -12,7 +12,7 @@ public class TestDataDomainEventsApplication {
 	@Bean
 	@ServiceConnection
 	MySQLContainer<?> mysqlContainer() {
-		return new MySQLContainer<>("mysql:latest");
+		return new MySQLContainer<>("mysql:lts");
 	}
 
 	public static void main(String[] args) {

@@ -28,7 +28,7 @@ class BookAuditRevisionTests {
 
     @Container
     @ServiceConnection
-    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:latest");
+    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:lts");
 
     @Autowired
     private BookRepository repository;

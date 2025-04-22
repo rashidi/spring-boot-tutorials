@@ -13,7 +13,7 @@ public class TestDataJpaFilteredQueryApplication {
     @Bean
     @ServiceConnection
     MySQLContainer<?> mysqlContainer() {
-        return new MySQLContainer<>(DockerImageName.parse("mysql:latest"));
+        return new MySQLContainer<>(DockerImageName.parse("mysql:lts"));
     }
 
     public static void main(String[] args) {

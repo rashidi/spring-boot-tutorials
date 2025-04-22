@@ -29,7 +29,7 @@ class CountryRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:latest");
+    private static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:lts");
 
     @Autowired
     private CountryRepository countries;

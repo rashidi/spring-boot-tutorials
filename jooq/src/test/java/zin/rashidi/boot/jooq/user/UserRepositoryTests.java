@@ -24,7 +24,7 @@ class UserRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final MySQLContainer<?> container = new MySQLContainer<>("mysql:latest");
+    private static final MySQLContainer<?> container = new MySQLContainer<>("mysql:lts");
 
     @Autowired
     private UserRepository repository;
