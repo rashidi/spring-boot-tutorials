@@ -61,7 +61,7 @@ jooq {
                         }
                     }
                     target {
-                        packageName = "zin.rashidi.jooq"
+                        packageName = "zin.rashidi.boot.jooq"
                     }
                     strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
                 }
