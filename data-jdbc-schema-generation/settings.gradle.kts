@@ -1,0 +1,1 @@
+rootProject.name = "data-jdbc-schema-generation"
