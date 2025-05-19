@@ -5,7 +5,7 @@ on:
     branches: [ "master" ]
     paths:
       - 'gradle/wrapper/**'
-      - '**/*.gradle'
+      - '**/*.gradle.kts'
       - '**/*.java'
       - '**/gradle-build.yml'
   pull_request:
@@ -13,7 +13,7 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - 'gradle/wrapper/**'
-      - '**/*.gradle'
+      - '**/*.gradle.kts'
       - '**/*.java'
       - '**/gradle-build.yml'
 
@@ -40,7 +40,7 @@ jobs:
               - '**/*.java'
             build:
               - 'gradle/wrapper/**'
-              - '**/*.gradle'
+              - '**/*.gradle.kts'
               - '**/gradle-build.yml'
 
   gradle-build:
