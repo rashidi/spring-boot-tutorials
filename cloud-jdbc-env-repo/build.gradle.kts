@@ -7,6 +7,8 @@ plugins {
 group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
 
+val springCloudVersion = "2024.0.1"
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
@@ -24,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2024.0.1"))
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.cloud:spring-cloud-starter-bootstrap")
