@@ -1,11 +1,13 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.4.5"
+    id("org.springframework.boot") version "3.5.0"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
+
+val springCloudVersion = "2024.0.1"
 
 java {
     toolchain {
@@ -24,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2024.0.1"))
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.cloud:spring-cloud-starter-bootstrap")

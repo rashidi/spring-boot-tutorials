@@ -1,3 +1,7 @@
 app:
   greet:
     name: Default
+spring:
+  cloud:
+    compatibility-verifier:
+      enabled: false
