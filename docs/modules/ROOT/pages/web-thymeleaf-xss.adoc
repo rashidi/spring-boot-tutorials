@@ -1,0 +1,123 @@
+= Preventing XSS with Spring Security and Thymeleaf
+:source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, May 25, 2023
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web-thymeleaf-xss
+
+Prevent Cross-Site Scripting (XSS) attacks in Spring Boot applications using Spring Security and Thymeleaf.
+
+== Background
+
+https://owasp.org/www-community/attacks/xss/[Cross-Site Scripting (XSS)] is a security vulnerability that allows attackers to inject client-side scripts into web pages viewed by other users. This can lead to various attacks, including stealing session cookies, redirecting users to malicious websites, or performing actions on behalf of the user.
+
+In this tutorial, we will demonstrate how to prevent XSS attacks in a Spring Boot application using Spring Security and Thymeleaf. We will focus on two main approaches:
+
+1. Using Spring Security to add security headers
+2. Leveraging Thymeleaf's automatic HTML escaping
+
+== Security Configuration
+
+The first line of defense against XSS attacks is to configure Spring Security to add appropriate security headers. In our example, we use the following configuration:
+
+[source,java]
+----
+@Configuration
+@EnableWebSecurity
+class SecurityConfiguration {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                .headers(headers -> headers
+                        .contentSecurityPolicy(policy -> policy.policyDirectives("default-src 'self'"))
+                        .xssProtection(xss -> xss.headerValue(ENABLED_MODE_BLOCK))
+                )
+                .build();
+    }
+}
+----
+
+This configuration adds two important security headers:
+
+1. **Content-Security-Policy**: Restricts the sources from which content can be loaded. In this case, `default-src 'self'` means that the browser should only load resources from the same origin.
+
+2. **X-XSS-Protection**: Enables the browser's built-in XSS filter. The value `1; mode=block` (represented by `ENABLED_MODE_BLOCK`) tells the browser to block the response if a XSS attack is detected.
+
+== Thymeleaf Template
+
+Thymeleaf provides built-in protection against XSS by automatically escaping HTML content. Let's look at our simple greeting template:
+
+[source,html]
+----
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Greeting</title>
+</head>
+<body>
+<p th:id="greet" th:utext="|Hello, ${name}!|"></p>
+</body>
+</html>
+----
+
+The key part here is the use of `th:utext` attribute. Unlike `th:text` which automatically escapes HTML content, `th:utext` (unescaped text) renders HTML as-is. This means that if a user inputs `<script>alert('XSS')</script>`, it will be executed as code rather than displayed as text. This approach is used when you need to render HTML content, but it requires careful handling of user input to prevent XSS attacks.
+
+== Controller Implementation
+
+Our controller simply takes a name parameter and passes it to the Thymeleaf template:
+
+[source,java]
+----
+@Controller
+class GreetResource {
+
+    @GetMapping("/greet")
+    public String greet(@RequestParam String name, Model model) {
+        model.addAttribute("name", name);
+
+        return "greet";
+    }
+}
+----
+
+== Verifying XSS Protection
+
+We can verify that our XSS protection is working by checking that the appropriate security headers are present in the response:
+
+[source,java]
+----
+@WebMvcTest(controllers = GreetResource.class, includeFilters = @Filter(classes = EnableWebSecurity.class))
+class GreetResourceTests {
+
+    @Autowired
+    private MockMvcTester mvc;
+
+    @Test
+    @DisplayName("Given XSS protection is enabled Then response header should contain information about X-XSS-Protection and Content-Security-Policy")
+    void headers() {
+        mvc.get()
+                .uri("/greet?name={name}", "rashidi")
+            .assertThat()
+                .matches(status().isOk())
+                .matches(header().string("Content-Security-Policy", "default-src 'self'"))
+                .matches(header().string("X-XSS-Protection", "1; mode=block"));
+    }
+}
+----
+
+== Common XSS Vulnerabilities to Avoid
+
+1. **Understanding the risks of `th:utext`**: As demonstrated in our example, the `th:utext` attribute in Thymeleaf renders unescaped HTML, which can lead to XSS vulnerabilities if not handled properly. While our example uses `th:utext` for demonstration purposes, in production applications you should use `th:text` instead unless you are absolutely sure the content is safe and HTML rendering is required.
+
+2. **Disabling Content Security Policy**: The Content Security Policy is a powerful defense against XSS. Avoid disabling it or setting overly permissive policies.
+
+3. **Trusting user input**: Always validate and sanitize user input before processing it, even if you're using automatic escaping.
+
+== Conclusion
+
+In this tutorial, we've seen how to implement XSS protection in a Spring Boot application using Spring Security and Thymeleaf. We've demonstrated how to add appropriate security headers through Spring Security configuration. We've also shown how Thymeleaf handles HTML content with `th:utext`, while highlighting the potential security implications and when to use the safer `th:text` alternative instead.
+
+Remember that security is a multi-layered approach, and XSS protection is just one aspect of a comprehensive security strategy. Always keep your dependencies up to date and follow security best practices to ensure your application remains secure.
