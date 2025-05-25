@@ -3,19 +3,18 @@ package zin.rashidi.web.xss.greet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Rashidi Zin
  */
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureMockMvc
+@WebMvcTest(controllers = GreetResource.class, includeFilters = @Filter(classes = EnableWebSecurity.class))
 class GreetResourceTests {
 
     @Autowired

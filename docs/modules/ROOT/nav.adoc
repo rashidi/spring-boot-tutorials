@@ -30,3 +30,4 @@
 ** xref:test-slice-tests-rest.adoc[Implementing Slice Tests for REST application]
 * Spring Web
 ** xref:web-rest-client.adoc[REST Clients for calling Synchronous API]
+** xref:web-thymeleaf-xss.adoc[]
