@@ -22,13 +22,11 @@ repositories {
 }
 
 dependencies {
+    implementation(platform(SpringBootPlugin.BOM_COORDINATES))
+
     subprojects.forEach { p ->
         implementation(project(":${p.name}"))
     }
-}
-
-dependencies {
-    implementation(platform(SpringBootPlugin.BOM_COORDINATES))
 }
 
 sonar {
@@ -51,3 +49,6 @@ subprojects {
     }
 }
 
+tasks.check {
+    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
+}
