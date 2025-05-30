@@ -7,7 +7,7 @@ plugins {
 group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
 
-val springCloudVersion = "2024.0.1"
+val springCloudVersion = "2025.0.0"
 
 java {
     toolchain {
