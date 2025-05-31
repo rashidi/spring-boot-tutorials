@@ -26,7 +26,6 @@ jobs:
     name: Check for file changes
     runs-on: ubuntu-latest
     outputs:
-      java-changes: ${{ steps.filter.outputs.java }}
       build-changes: ${{ steps.filter.outputs.build }}
     steps:
       - uses: actions/checkout@v4
@@ -36,8 +35,6 @@ jobs:
         id: filter
         with:
           filters: |
-            java:
-              - '**/*.java'
             build:
               - 'gradle/wrapper/**'
               - '**/*.gradle.kts'
@@ -46,7 +43,7 @@ jobs:
   gradle-build:
     name: Build project with Gradle
     needs: check-changes
-    if: ${{ needs.check-changes.outputs.java-changes == 'true' || needs.check-changes.outputs.build-changes == 'true' }}
+    if: ${{ needs.check-changes.outputs.build-changes == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -74,13 +71,10 @@ jobs:
         with:
           token: ${{ secrets.TC_CLOUD_TOKEN }}          
       - name: Run CI build
-        run: ./gradlew build
-      - name: Publish test coverage
-        if: ${{ needs.check-changes.outputs.java-changes == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew jacocoTestReport sonar
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      
+        run: ./gradlew build jacocoTestReport sonar
       - name: Terminate Testcontainers Cloud Client active sessions
         uses: atomicjar/testcontainers-cloud-setup-action@v1
         with:
