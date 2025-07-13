@@ -34,13 +34,13 @@ class CreateBookTests {
             .post().uri("/books")
                 .content("""
                 {
-                  "isbn": "9781509827829",
+                  "isbn": "9781402745777",
                   "title": "The Jungle Book",
                   "author": "http://localhost/authors/100"
                 }
                 """)
             .assertThat().headers()
-                .extracting(LOCATION).asString().isEqualTo("http://localhost/books/9781509827829");
+                .extracting(LOCATION).asString().isEqualTo("http://localhost/books/9781402745777");
     }
 
 }
