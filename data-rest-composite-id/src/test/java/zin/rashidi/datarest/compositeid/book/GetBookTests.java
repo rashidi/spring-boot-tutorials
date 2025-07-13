@@ -19,7 +19,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @Import(TestcontainersConfiguration.class)
 @Testcontainers
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = "spring.jpa.hibernate.Ïddl-auto=create-drop")
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 @AutoConfigureMockMvc
 class GetBookTests {
 
@@ -36,9 +36,9 @@ class GetBookTests {
         mvc
             .get().uri("/books/9781509827829")
             .assertThat().bodyJson()
-                .hasPathSatisfying("$.title", title -> assertThat(title).isEqualTo("The Jungle Book"))
-                .hasPathSatisfying("$._links.author.href", authorUri -> assertThat(authorUri).isEqualTo("http://localhost/books/9781509827829/author"))
-                .hasPathSatisfying("$._links.self.href", uri -> assertThat(uri).isEqualTo("http://localhost/books/9781509827829"));
+                .hasPathSatisfying("$.title", title -> assertThat(title).asString().isEqualTo("The Jungle Book"))
+                .hasPathSatisfying("$._links.author.href", authorUri -> assertThat(authorUri).asString().isEqualTo("http://localhost/books/9781509827829/author"))
+                .hasPathSatisfying("$._links.self.href", uri -> assertThat(uri).asString().isEqualTo("http://localhost/books/9781509827829"));
     }
 
 }
