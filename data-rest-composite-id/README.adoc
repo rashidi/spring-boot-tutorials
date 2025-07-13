@@ -21,7 +21,7 @@ This example demonstrates how to implement and expose entities with composite ID
 
 == Entity Classes
 
-In this example, we have two entity classes: `Book`[${source-main}/book/Book.java] and `Author`[${source-main}/book/Author.java].
+In this example, we have two entity classes: link:{source-main}/book/Book.java[`Book`] and link:{source-main}/book/Author.java[`Author`].
 Both use composite IDs implemented as embedded classes.
 
 === Book Entity
