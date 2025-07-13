@@ -16,10 +16,6 @@ class Author {
     @Embedded
     private Name name;
 
-    public Name getName() {
-        return name;
-    }
-
     @Embeddable
     static class Id implements Serializable {
 
@@ -35,25 +31,9 @@ class Author {
             return this;
         }
 
-        @Override
-        public final boolean equals(Object o) {
-            return o instanceof Id another && this.id.equals(another.id);
-       }
-
-        @Override
-        public int hashCode() {
-            return id.hashCode();
-        }
-
     }
 
     @Embeddable
-    record Name(@Column(name = "first_name") String first, @Column(name = "last_name") String last) {
-
-        public Name() {
-            this(null, null);
-        }
-
-    }
+    record Name(@Column(name = "first_name") String first, @Column(name = "last_name") String last) { }
 
 }

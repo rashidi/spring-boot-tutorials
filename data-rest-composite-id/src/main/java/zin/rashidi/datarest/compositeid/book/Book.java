@@ -3,7 +3,6 @@ package zin.rashidi.datarest.compositeid.book;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * @author Rashidi Zin
@@ -53,21 +52,6 @@ class Book {
             this.registrant = Integer.parseInt(isbn.substring(4, 7));
             this.publication = Integer.parseInt(isbn.substring(7, 12));
             this.check = Integer.parseInt(isbn.substring(12));
-        }
-
-        @Override
-        public final boolean equals(Object o) {
-            return o instanceof Isbn isbn
-                    && prefix.equals(isbn.prefix)
-                    && group.equals(isbn.group)
-                    && registrant.equals(isbn.registrant)
-                    && publication.equals(isbn.publication)
-                    && check.equals(isbn.check);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(prefix, group, registrant, publication, check);
         }
 
         @Override
