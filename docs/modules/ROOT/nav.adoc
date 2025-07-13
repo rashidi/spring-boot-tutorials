@@ -16,6 +16,7 @@
 ** xref:data-mongodb-full-text-search.adoc[MongoDB Full Text Search]
 ** xref:data-mongodb-transactional.adoc[MongoDB Transactional]
 ** xref:data-repository-definition.adoc[Repository Definition]
+** xref:data-rest-composite-id.adoc[Composite Id with Spring Data REST]
 ** xref:data-rest-validation.adoc[REST Validation]
 * Spring GraphQL
 ** xref:graphql.adoc[GraphQL Server]

@@ -1,0 +1,280 @@
+= Spring Data REST with Composite ID
+:source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, July 13, 2025
+:toc:
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-rest-composite-id
+:source-main: {url-quickref}/src/main/java/zin/rashidi/datarest/compositeid
+:source-test: {url-quickref}/src/test/java/zin/rashidi/datarest/compositeid
+
+Implementing and exposing entities with composite IDs through Spring Data REST.
+
+== Background
+
+https://docs.spring.io/spring-data/rest/docs/current/reference/html/[Spring Data REST] allows you to expose your
+Spring Data repositories as REST resources. However, when working with entities that have composite IDs, additional
+configuration is required to properly handle these IDs in the REST API.
+
+This example demonstrates how to implement and expose entities with composite IDs through Spring Data REST.
+
+== Entity Classes
+
+In this example, we have two entity classes: `Book`[${source-main}/book/Book.java] and `Author`[${source-main}/book/Author.java].
+Both use composite IDs implemented as embedded classes.
+
+=== Book Entity
+
+The `Book` entity uses an embedded `Isbn` class as its ID:
+
+[source,java]
+----
+@Entity
+class Book {
+
+    @EmbeddedId
+    private Isbn isbn = new Isbn();
+
+    @ManyToOne(optional = false)
+    private Author author;
+
+    private String title;
+
+    // Getters and setters omitted
+
+    @Embeddable
+    static class Isbn implements Serializable {
+
+        private Integer prefix;
+
+        @Column(name = "registration_group")
+        private Integer group;
+
+        private Integer registrant;
+        private Integer publication;
+
+        @Column(name = "check_digit")
+        private Integer check;
+
+        protected Isbn() {}
+
+        public Isbn(String isbn) {
+            this.prefix = Integer.parseInt(isbn.substring(0, 3));
+            this.group = Integer.parseInt(isbn.substring(3, 4));
+            this.registrant = Integer.parseInt(isbn.substring(4, 7));
+            this.publication = Integer.parseInt(isbn.substring(7, 12));
+            this.check = Integer.parseInt(isbn.substring(12));
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%d%d%d%d%d", prefix, group, registrant, publication, check);
+        }
+
+    }
+}
+----
+
+The `Isbn` class is annotated with `@Embeddable` and implements `Serializable`. It contains multiple fields that together form the ISBN. The class also provides a constructor that parses a string representation of an ISBN into its component parts and a `toString()` method that converts the component parts back to a string.
+
+=== Author Entity
+
+The `Author` entity uses an embedded `Id` class as its ID:
+
+[source,java]
+----
+@Entity
+class Author {
+
+    @EmbeddedId
+    private Id id = new Id();
+
+    @Embedded
+    private Name name;
+
+    @Embeddable
+    static class Id implements Serializable {
+
+        @GeneratedValue
+        private Long id;
+
+        public Long id() {
+            return id;
+        }
+
+        public Id id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+    }
+
+    @Embeddable
+    record Name(@Column(name = "first_name") String first, @Column(name = "last_name") String last) { }
+
+}
+----
+
+The `Id` class is annotated with `@Embeddable` and implements `Serializable`. It contains a single field with `@GeneratedValue`. The `Author` entity also has an embedded `Name` record that contains first and last name fields.
+
+== Repository Interfaces
+
+To expose these entities through Spring Data REST, we need to create repository interfaces that extend `JpaRepository` with the entity class and its ID class as type parameters.
+
+=== BookRepository
+
+[source,java]
+----
+@RepositoryRestResource
+interface BookRepository extends JpaRepository<Book, Isbn> {
+}
+----
+
+The `BookRepository` interface extends `JpaRepository` with `Book` as the entity type and `Isbn` (the composite ID class) as the ID type. It's annotated with `@RepositoryRestResource`, which exposes it through Spring Data REST.
+
+=== AuthorRepository
+
+[source,java]
+----
+@RepositoryRestResource
+interface AuthorRepository extends JpaRepository<Author, Author.Id> {
+}
+----
+
+The `AuthorRepository` interface extends `JpaRepository` with `Author` as the entity type and `Author.Id` (the composite ID class) as the ID type. It's annotated with `@RepositoryRestResource`, which exposes it through Spring Data REST.
+
+== Custom Converters
+
+When working with composite IDs in Spring Data REST, you may need to provide custom converters to handle the conversion between the composite ID and its string representation in the REST API.
+
+=== AuthorIdReferencedConverter
+
+[source,java]
+----
+@ReadingConverter
+class AuthorIdReferencedConverter implements Converter<String, Author.Id> {
+
+    @Override
+    public Author.Id convert(String source) {
+        return new Author.Id().id(Long.parseLong(source));
+    }
+
+}
+----
+
+The `AuthorIdReferencedConverter` implements the `Converter` interface to convert from a String to an `Author.Id`. It's annotated with `@ReadingConverter`, indicating it's used when reading data. The conversion simply parses the string as a Long and creates a new `Author.Id` with that value.
+
+=== Configuring Converters
+
+To register the custom converters, we need to implement `RepositoryRestConfigurer`:
+
+[source,java]
+----
+@Configuration
+class BookRepositoryRestConfigurer implements RepositoryRestConfigurer {
+
+    @Override
+    public void configureConversionService(ConfigurableConversionService conversionService) {
+        conversionService.addConverter(new AuthorIdReferencedConverter());
+    }
+
+}
+----
+
+This configuration class adds the `AuthorIdReferencedConverter` to the conversion service, allowing Spring Data REST to convert between string representations and `Author.Id` objects.
+
+== Testing
+
+Let's verify that our implementation works by writing tests that create and retrieve entities with composite IDs through the REST API.
+
+=== Creating an Author
+
+[source,java]
+----
+@Test
+@DisplayName("When an Author is created Then its ID should be a number")
+void create() {
+    mvc
+        .post().uri("/authors")
+            .contentType(APPLICATION_JSON)
+            .content("""
+            {
+              "name": {
+                "first": "Rudyard",
+                "last": "Kipling"
+              }
+            }
+            """)
+        .assertThat().headers()
+            .extracting(LOCATION).asString().satisfies(location -> assertThat(idFromLocation(location)).is(numeric()));
+}
+
+private Condition<String> numeric() {
+    return new Condition<>(NumberUtils::isDigits, "is a number");
+}
+
+private String idFromLocation(String location) {
+    return location.substring(location.lastIndexOf("/") + 1);
+}
+----
+
+This test creates an Author with a first and last name, then verifies that the returned location header contains a numeric ID.
+
+=== Creating a Book
+
+[source,java]
+----
+@Test
+@DisplayName("When a Book is created with an ISBN Then its Location should consists of the ISBN")
+@Sql(statements = "INSERT INTO author (id, first_name, last_name) VALUES (100, 'Rudyard', 'Kipling')")
+void create() {
+    mvc
+        .post().uri("/books")
+            .content("""
+            {
+              "isbn": "9781509827829",
+              "title": "The Jungle Book",
+              "author": "http://localhost/authors/100"
+            }
+            """)
+        .assertThat().headers()
+            .extracting(LOCATION).asString().isEqualTo("http://localhost/books/9781509827829");
+}
+----
+
+This test creates a Book with an ISBN, title, and author reference, then verifies that the returned location header contains the ISBN.
+
+=== Retrieving a Book
+
+[source,java]
+----
+@Test
+@Sql(statements = {
+        "INSERT INTO author (id, first_name, last_name) VALUES (100, 'Rudyard', 'Kipling')",
+        "INSERT INTO book (prefix, registration_group, registrant, publication, check_digit, author_id, title) VALUES (978, 1, 509, 82782, 9, 100, 'The Jungle Book')"
+})
+@DisplayName("Given a book is available When I request by its ISBN Then its information should be returned")
+void get() {
+    mvc
+        .get().uri("/books/9781509827829")
+        .assertThat().bodyJson()
+            .hasPathSatisfying("$.title", title -> assertThat(title).asString().isEqualTo("The Jungle Book"))
+            .hasPathSatisfying("$._links.author.href", authorUri -> assertThat(authorUri).asString().isEqualTo("http://localhost/books/9781509827829/author"))
+            .hasPathSatisfying("$._links.self.href", uri -> assertThat(uri).asString().isEqualTo("http://localhost/books/9781509827829"));
+}
+----
+
+This test sets up a Book with an ISBN and other details using SQL, then retrieves it using the ISBN in the URL. It verifies that the returned book has the expected title and links.
+
+== Conclusion
+
+In this article, we've demonstrated how to implement and expose entities with composite IDs through Spring Data REST. The key points are:
+
+1. Use `@EmbeddedId` to define composite IDs in your entity classes.
+2. Implement `Serializable` for your composite ID classes.
+3. Create repository interfaces that extend `JpaRepository` with the entity class and its ID class as type parameters.
+4. Provide custom converters if needed to handle the conversion between the composite ID and its string representation.
+5. Configure the converters by implementing `RepositoryRestConfigurer`.
+
+With these steps, you can successfully work with composite IDs in your Spring Data REST applications.
