@@ -29,7 +29,7 @@ class GetBookTests {
     @Test
     @Sql(statements = {
             "INSERT INTO author (id, first_name, last_name) VALUES (200, 'Rudyard', 'Kipling')",
-            "INSERT INTO book (prefix, registration_group, registrant, publication, check_digit, author_id, title) VALUES (978, 1, 509, 82782, 9, 100, 'The Jungle Book')"
+            "INSERT INTO book (prefix, registration_group, registrant, publication, check_digit, author_id, title) VALUES (978, 1, 509, 82782, 9, 200, 'The Jungle Book')"
     })
     @DisplayName("Given a book is available When I request by its ISBN Then its information should be returned")
     void get() {
