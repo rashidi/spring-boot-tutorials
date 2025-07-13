@@ -1,0 +1,278 @@
+databaseChangeLog:
+- changeSet:
+    id: '1748148271572'
+    author: Spring Data Relational
+    objectQuotingStrategy: LEGACY
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: name
+            type: VARCHAR(255 BYTE)
+        - column:
+            constraints:
+              nullable: false
+            name: book
+            type: BIGINT
+        tableName: author
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: isbn
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: title
+            type: VARCHAR(255 BYTE)
+        tableName: book
+    - addForeignKeyConstraint:
+        baseColumnNames: book
+        baseTableName: author
+        constraintName: book_isbn_fk
+        referencedColumnNames: isbn
+        referencedTableName: book
+- changeSet:
+    id: '1748149478922'
+    author: Spring Data Relational
+    objectQuotingStrategy: LEGACY
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: name
+            type: VARCHAR(255 BYTE)
+        - column:
+            constraints:
+              nullable: false
+            name: book
+            type: BIGINT
+        tableName: author
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: isbn
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: title
+            type: VARCHAR(255 BYTE)
+        tableName: book
+    - addForeignKeyConstraint:
+        baseColumnNames: book
+        baseTableName: author
+        constraintName: book_isbn_fk
+        referencedColumnNames: isbn
+        referencedTableName: book
+- changeSet:
+    id: '1748153682287'
+    author: Spring Data Relational
+    objectQuotingStrategy: LEGACY
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: isbn
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: title
+            type: VARCHAR(255 BYTE)
+        tableName: book
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: name
+            type: VARCHAR(255 BYTE)
+        - column:
+            constraints:
+              nullable: false
+            name: book
+            type: BIGINT
+        tableName: author
+    - addForeignKeyConstraint:
+        baseColumnNames: book
+        baseTableName: author
+        constraintName: book_isbn_fk
+        referencedColumnNames: isbn
+        referencedTableName: book
+- changeSet:
+    id: '1748171516774'
+    author: Spring Data Relational
+    objectQuotingStrategy: LEGACY
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: isbn
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: title
+            type: VARCHAR(255 BYTE)
+        tableName: book
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: name
+            type: VARCHAR(255 BYTE)
+        - column:
+            constraints:
+              nullable: false
+            name: book
+            type: BIGINT
+        tableName: author
+    - addForeignKeyConstraint:
+        baseColumnNames: book
+        baseTableName: author
+        constraintName: book_isbn_fk
+        referencedColumnNames: isbn
+        referencedTableName: book
+- changeSet:
+    id: '1748171956993'
+    author: Spring Data Relational
+    objectQuotingStrategy: LEGACY
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: isbn
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: title
+            type: VARCHAR(255 BYTE)
+        tableName: book
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: name
+            type: VARCHAR(255 BYTE)
+        - column:
+            constraints:
+              nullable: false
+            name: book
+            type: BIGINT
+        tableName: author
+    - addForeignKeyConstraint:
+        baseColumnNames: book
+        baseTableName: author
+        constraintName: book_isbn_fk
+        referencedColumnNames: isbn
+        referencedTableName: book
+- changeSet:
+    id: '1748172435101'
+    author: Spring Data Relational
+    objectQuotingStrategy: LEGACY
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: name
+            type: VARCHAR(255 BYTE)
+        - column:
+            constraints:
+              nullable: false
+            name: book
+            type: BIGINT
+        tableName: author
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: isbn
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: title
+            type: VARCHAR(255 BYTE)
+        tableName: book
+    - addForeignKeyConstraint:
+        baseColumnNames: book
+        baseTableName: author
+        constraintName: book_isbn_fk
+        referencedColumnNames: isbn
+        referencedTableName: book
+

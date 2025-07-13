@@ -55,6 +55,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:data-mongodb-full-text-search[Spring Data MongoDB: Full Text Search] |Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with Spring Data MongoDB
 |link:data-mongodb-transactional[Spring Data MongoDB: Transactional] |Enable `@Transactional` support for Spring Data MongoDB
 |link:data-repository-definition[Spring Data: Repository Definition] |Implement custom repository interfaces with `@RepositoryDefinition` annotation
+|link:data-rest-composite-id[Spring Data REST with Composite ID] |Implementing and exposing entities with composite IDs through Spring Data REST
 |link:data-rest-validation[Spring Data REST: Validation] |Perform validation with Spring Data REST
 |link:graphql[Spring GraphQL Server] |Implement GraphQL server with Spring GraphQL Server
 |link:jooq[jOOQ] | Implement an alternative to Jpa using https://www.jooq.org/[jOOQ] and Gradle
