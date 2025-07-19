@@ -51,8 +51,8 @@ spring.jpa.properties.hibernate.cache.use_second_level_cache=true
 These properties configure Hibernate to:
 
 * Use JCache as the caching implementation (`hibernate.cache.region.factory_class=jcache`)
-* Use the EhCache configuration file located at `/ehcache.xml` (`hibernate.javax.cache.uri=/ehcache.xml`)
-* Use EhCache as the JCache provider (`hibernate.javax.cache.provider=org.ehcache.jsr107.EhcacheCachingProvider`)
+* Use the EhCache configuration file located at `/ehcache.xml` (`hibernate.cache.jcache.uri=/ehcache.xml`)
+* Use EhCache as the JCache provider (`hibernate.cache.jcache.provider=org.ehcache.jsr107.EhcacheCachingProvider`)
 * Enable the second-level cache (`hibernate.cache.use_second_level_cache=true`)
 
 === EhCache Configuration
