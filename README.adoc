@@ -51,6 +51,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:data-jpa-audit[Spring Data JPA Audit] |Enable Audit with Spring Data JPA
 |link:data-jpa-event[Spring Data JPA: Event Driven] |Implement `Entity` validation at `Repository` level through `EventListeners`
 |link:data-jpa-filtered-query[Spring Data JPA: Global Filtered Query] |Implement global filtered query with Spring Data JPA by defining `repositoryBaseClass`
+|link:data-jpa-hibernate-cache[Spring Data JPA: Hibernate Second Level Caching with EhCache] |Implement Hibernate second level caching using Spring Data JPA and EhCache to improve application performance
 |link:data-mongodb-audit[Spring Data MongoDB Audit] |Enable Audit with Spring Data MongoDB
 |link:data-mongodb-full-text-search[Spring Data MongoDB: Full Text Search] |Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with Spring Data MongoDB
 |link:data-mongodb-transactional[Spring Data MongoDB: Transactional] |Enable `@Transactional` support for Spring Data MongoDB

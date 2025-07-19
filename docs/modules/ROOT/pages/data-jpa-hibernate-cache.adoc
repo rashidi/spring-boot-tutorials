@@ -1,0 +1,199 @@
+= Spring Data JPA: Hibernate Second Level Caching with EhCache
+:source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, July 19, 2025
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-hibernate-cache
+
+Implement Hibernate second level caching using Spring Data JPA and EhCache to improve application performance.
+
+== Background
+
+In a typical Spring Data JPA application, when an entity is retrieved from the database, it is stored in the first-level cache (Persistence Context). However, this cache is short-lived and tied to a specific transaction or EntityManager. Once the transaction is completed, the cached entities are no longer available.
+
+This is where Hibernate's second-level cache comes into play. The second-level cache is a session-factory-level cache that is shared across all sessions created by the same session factory. This means that entities can be cached and reused across multiple transactions, reducing database load and improving application performance.
+
+In this tutorial, we will implement Hibernate second-level cache using Spring Data JPA and EhCache as the caching provider.
+
+== Implementation
+
+=== Dependencies
+
+First, we need to add the necessary dependencies to our project. For a Gradle project using Kotlin DSL:
+
+[source,kotlin]
+----
+dependencies {
+    implementation("org.ehcache:ehcache::jakarta")
+    implementation("org.hibernate.orm:hibernate-jcache")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    // Other dependencies...
+}
+----
+
+The key dependencies are:
+
+* `org.ehcache:ehcache::jakarta` - EhCache implementation with Jakarta EE support
+* `org.hibernate.orm:hibernate-jcache` - Hibernate JCache integration, which allows Hibernate to use JCache-compatible caching providers like EhCache
+
+=== Configuration
+
+Next, we need to configure Hibernate to use EhCache as the second-level cache provider. This is done in the `application.properties` file:
+
+[source,properties]
+----
+spring.jpa.properties.hibernate.cache.region.factory_class=jcache
+spring.jpa.properties.hibernate.cache.jcache.uri=/ehcache.xml
+spring.jpa.properties.hibernate.cache.jcache.provider=org.ehcache.jsr107.EhcacheCachingProvider
+spring.jpa.properties.hibernate.cache.use_second_level_cache=true
+----
+
+These properties configure Hibernate to:
+
+* Use JCache as the caching implementation (`hibernate.cache.region.factory_class=jcache`)
+* Use the EhCache configuration file located at `/ehcache.xml` (`hibernate.javax.cache.uri=/ehcache.xml`)
+* Use EhCache as the JCache provider (`hibernate.javax.cache.provider=org.ehcache.jsr107.EhcacheCachingProvider`)
+* Enable the second-level cache (`hibernate.cache.use_second_level_cache=true`)
+
+=== EhCache Configuration
+
+We need to create an EhCache configuration file (`ehcache.xml`) in the resources directory:
+
+[source,xml]
+----
+<config xmlns='http://www.ehcache.org/v3'>
+    <cache alias="customer">
+        <resources>
+            <offheap unit="MB">10</offheap>
+        </resources>
+    </cache>
+</config>
+----
+
+This configuration defines a cache named "customer" with 10MB of off-heap memory. Off-heap memory is memory that is allocated outside the Java heap, which can help reduce garbage collection pressure.
+
+=== Entity Configuration
+
+Finally, we need to configure our entities to use the second-level cache. This is done using the `@Cache` annotation from Hibernate:
+
+[source,java]
+----
+@Entity
+@Cache(usage = READ_WRITE, region = "customer")
+class Customer {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+}
+----
+
+The `@Cache` annotation has two important attributes:
+
+* `usage` - Specifies the cache concurrency strategy. In this case, we're using `READ_WRITE`, which is appropriate for entities that can be updated.
+* `region` - Specifies the cache region (or name) to use. This should match the cache alias defined in the EhCache configuration file.
+
+== Validation
+
+To validate that our second-level cache is working correctly, we can use Hibernate's statistics API to check cache hits and misses. Here's a test that demonstrates this:
+
+[source,java]
+----
+@DataJpaTest(properties =  {
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.properties.hibernate.generate_statistics=true"
+})
+@Import(TestcontainersConfiguration.class)
+@Sql(statements = "INSERT INTO customer (id, name) VALUES (1, 'Rashidi Zin')", executionPhase = BEFORE_TEST_CLASS)
+@TestMethodOrder(OrderAnnotation.class)
+class CustomerRepositoryTests {
+
+    @Autowired
+    private CustomerRepository customers;
+
+    private Statistics statistics;
+
+    @BeforeEach
+    void setupStatistics(@Autowired EntityManagerFactory entityManagerFactory) {
+        statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+    }
+
+    @Test
+    @Order(1)
+    @Transactional(propagation = REQUIRES_NEW)
+    @DisplayName("On initial retrieval data will be retrieved from the database and customer cache will be stored")
+    void initial() {
+        customers.findById(1L).orElseThrow();
+
+        assertThat(statistics.getSecondLevelCachePutCount()).isEqualTo(1);
+        assertThat(statistics.getSecondLevelCacheHitCount()).isZero();
+    }
+
+    @Test
+    @Order(2)
+    @Transactional(propagation = REQUIRES_NEW)
+    @DisplayName("On subsequent retrieval data will be retrieved from the customer cache")
+    void subsequent() {
+        customers.findById(1L).orElseThrow();
+
+        assertThat(statistics.getSecondLevelCacheHitCount()).isEqualTo(1);
+    }
+
+}
+----
+
+This test does the following:
+
+1. Enables Hibernate statistics with `spring.jpa.properties.hibernate.generate_statistics=true`
+2. Uses Testcontainers to set up a PostgreSQL database for testing
+3. Inserts a test customer record before the test class runs
+4. Orders the tests to ensure they run in sequence
+5. Gets the Hibernate Statistics object from the EntityManagerFactory
+6. In the first test (`initial`), it verifies that on the initial retrieval:
+* The data is fetched from the database and stored in the cache (cache put count = 1)
+* The data is not fetched from the cache (cache hit count = 0)
+7. In the second test (`subsequent`), it verifies that on subsequent retrieval:
+* The data is fetched from the cache (cache hit count = 1)
+
+The test configuration uses a simple Testcontainers setup:
+
+[source,java]
+----
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgresContainer() {
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+    }
+
+}
+----
+
+== Benefits of Second-Level Caching
+
+Implementing Hibernate second-level caching with EhCache offers several benefits:
+
+1. **Improved Performance**: By caching frequently accessed entities, we reduce the number of database queries, resulting in faster response times.
+2. **Reduced Database Load**: Fewer database queries mean less load on the database server, which can improve overall system performance.
+3. **Scalability**: With proper caching, applications can handle more concurrent users without proportionally increasing database load.
+4. **Flexibility**: EhCache offers various configuration options, such as cache size, expiration policies, and storage options (heap, off-heap, disk).
+
+== Considerations
+
+While second-level caching can significantly improve performance, there are some considerations to keep in mind:
+
+1. **Cache Invalidation**: When data is updated in the database by external processes, the cache may become stale. Consider implementing cache invalidation strategies.
+2. **Memory Usage**: Caching consumes memory, so it's important to monitor memory usage and adjust cache sizes accordingly.
+3. **Concurrency**: In a multi-node environment, consider using a distributed cache to ensure cache consistency across nodes.
+4. **Selective Caching**: Not all entities benefit from caching. Focus on caching frequently accessed, rarely changed entities.
+
+== Conclusion
+
+In this tutorial, we've implemented Hibernate second-level caching using Spring Data JPA and EhCache. We've configured the necessary dependencies, set up the cache configuration, and annotated our entities to use the cache. We've also demonstrated how to validate that the cache is working correctly using Hibernate's statistics API.
+
+By implementing second-level caching, we can improve the performance of our Spring Data JPA applications, reduce database load, and enhance scalability.
