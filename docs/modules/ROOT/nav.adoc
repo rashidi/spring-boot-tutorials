@@ -12,6 +12,7 @@
 ** xref:data-jpa-audit.adoc[JPA Audit]
 ** xref:data-jpa-event.adoc[Event Driven]
 ** xref:data-jpa-filtered-query.adoc[Global Filtered Query]
+** xref:data-jpa-hibernate-cache.adoc[Implement Hibernate Second Level Caching]
 ** xref:data-mongodb-audit.adoc[MongoDB Audit]
 ** xref:data-mongodb-full-text-search.adoc[MongoDB Full Text Search]
 ** xref:data-mongodb-transactional.adoc[MongoDB Transactional]

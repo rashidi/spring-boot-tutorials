@@ -38,7 +38,6 @@ class CustomerRepositoryTests {
         statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
     }
 
-
     @Test
     @Order(1)
     @Transactional(propagation = REQUIRES_NEW)
