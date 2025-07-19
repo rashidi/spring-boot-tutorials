@@ -18,6 +18,8 @@ repositories {
 }
 
 dependencies {
+	implementation("org.ehcache:ehcache::jakarta")
+	implementation("org.hibernate.orm:hibernate-jcache")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
