@@ -1,0 +1,349 @@
+= Spring Data Redis: Implementing Caching with Spring Data Redis
+:source-highlighter: highlight.js
+:highlightjs-languages: java, kotlin
+Rashidi Zin <rashidi@zin.my>
+1.0, July 20, 2025: Initial version
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-redis-cache
+
+In this tutorial, we will explore how to implement caching with Spring Data Redis to improve application performance. We will also compare this approach with Hibernate second level caching.
+
+== Background
+
+Caching is a technique used to store frequently accessed data in memory to reduce database load and improve application performance. Spring provides a caching abstraction that allows you to use different caching providers with minimal configuration changes. In this tutorial, we will focus on using Redis as the caching provider.
+
+Redis is an in-memory data structure store that can be used as a database, cache, and message broker. It supports various data structures such as strings, hashes, lists, sets, and more. Redis is particularly well-suited for caching due to its high performance and support for data expiration.
+
+== Implementation
+
+=== Dependencies
+
+To implement caching with Spring Data Redis, we need to add the following dependencies to our project:
+
+[source, groovy]
+----
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    runtimeOnly 'org.postgresql:postgresql'
+    // Test dependencies omitted for brevity
+}
+----
+
+=== Entity Class
+
+Let's start by defining our entity class. In this example, we'll use a simple `Customer` entity:
+
+[source, java]
+----
+@Entity
+class Customer implements Serializable {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @Override
+    public final boolean equals(Object o) {
+        return o instanceof Customer another && this.id.equals(another.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+}
+----
+
+Note that the entity implements `Serializable`, which is required for Redis caching as objects need to be serialized to be stored in Redis. The class also overrides `equals` and `hashCode` methods based on the `id` field, which is important for proper object comparison when retrieving from cache.
+
+=== Repository Interface
+
+Next, we'll define our repository interface with caching annotations:
+
+[source, java]
+----
+interface CustomerRepository extends JpaRepository<Customer, Long> {
+
+    @Override
+    @Cacheable(cacheNames = "customers", key = "#root.methodName")
+    List<Customer> findAll();
+
+    @Override
+    @Cacheable(cacheNames = "customerById")
+    Optional<Customer> findById(Long id);
+}
+----
+
+We've annotated the `findAll()` and `findById()` methods with `@Cacheable` to enable caching for these methods:
+
+- `findAll()` is cached with the name "customers" and the key is the method name.
+- `findById()` is cached with the name "customerById" and the default key is the method parameter (id).
+
+The `@Cacheable` annotation means that the results of these methods will be cached, and subsequent calls with the same parameters will retrieve the results from the cache instead of executing the method again.
+
+=== Cache Configuration
+
+To configure Redis as the cache provider, we need to create a configuration class:
+
+[source, java]
+----
+@Configuration
+@EnableCaching
+class CacheConfiguration {
+
+    @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        return RedisCacheManager.create(connectionFactory);
+    }
+}
+----
+
+This class is responsible for configuring Redis as the cache provider for Spring's caching mechanism:
+
+1. `@Configuration` annotation indicates that this class provides Spring configuration.
+2. `@EnableCaching` annotation enables Spring's caching mechanism.
+3. A bean method creates a `RedisCacheManager` using a `RedisConnectionFactory`.
+
+The `RedisCacheManager` is created using the factory method `create()` with the `RedisConnectionFactory` as a parameter. This is a simple configuration that uses default settings for the Redis cache.
+
+== Testing the Implementation
+
+To test our caching implementation, we'll use Spring Boot's testing support along with Testcontainers to spin up Redis and PostgreSQL containers for integration testing.
+
+=== Testcontainers Configuration
+
+First, let's set up the Testcontainers configuration:
+
+[source, java]
+----
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgresContainer() {
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+    }
+
+    @Bean
+    @ServiceConnection(name = "redis")
+    RedisContainer redisContainer() {
+        return new RedisContainer(DockerImageName.parse("redis:latest"));
+    }
+}
+----
+
+This class defines two beans:
+- A `PostgreSQLContainer` bean annotated with `@ServiceConnection`, which will be used for the database.
+- A `RedisContainer` bean annotated with `@ServiceConnection(name = "redis")`, which will be used for Redis caching.
+
+The `@ServiceConnection` annotation is a Spring Boot feature that automatically configures the application to connect to these containers.
+
+=== Repository Tests
+
+Now, let's write tests to verify that our caching implementation works correctly:
+
+[source, java]
+----
+@Import(TestcontainersConfiguration.class)
+@ImportAutoConfiguration({ RedisAutoConfiguration.class, CacheAutoConfiguration.class })
+@Sql(executionPhase = BEFORE_TEST_CLASS, statements = "INSERT INTO customer (id, name) VALUES (1, 'Rashidi Zin')")
+@DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(EnableCaching.class))
+class CustomerRepositoryTests {
+
+    @Autowired
+    private CustomerRepository customers;
+
+    @Autowired
+    private CacheManager caches;
+
+    @Test
+    @Transactional(readOnly = true)
+    @DisplayName("Given the method name is configured as the cache's key Then subsequent retrieval should return the same value as initial retrieval")
+    void findAll() {
+        var persisted = customers.findAll();
+        var cached = caches.getCache("customers").get("findAll").get();
+
+        assertThat(cached).isEqualTo(persisted);
+    }
+
+    @Test
+    @Transactional(readOnly = true)
+    @DisplayName("Given the cache is configured Then subsequent retrieval with the same key should return the same value as initial retrieval")
+    void findById() {
+        var persisted = customers.findById(1L).get();
+        var cached = caches.getCache("customerById").get(1L).get();
+
+        assertThat(cached).isEqualTo(persisted);
+    }
+}
+----
+
+These tests verify that our caching implementation works correctly:
+
+1. The `findAll()` test:
+   - Calls the repository method to retrieve all customers.
+   - Retrieves the cached value directly from the cache manager.
+   - Asserts that the cached value is equal to the value returned by the repository method.
+
+2. The `findById()` test:
+   - Calls the repository method to retrieve a customer by ID.
+   - Retrieves the cached value directly from the cache manager.
+   - Asserts that the cached value is equal to the value returned by the repository method.
+
+== Comparison with Hibernate Second Level Caching
+
+Hibernate second level caching is another approach to caching in Spring applications. Let's compare it with Spring Data Redis caching.
+
+=== Hibernate Second Level Caching Implementation
+
+In Hibernate second level caching, caching is configured at the entity level rather than at the repository level. Here's how it's implemented:
+
+==== Entity Configuration
+
+[source, java]
+----
+@Entity
+@Cache(usage = READ_WRITE, region = "customer")
+class Customer {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+}
+----
+
+The entity is annotated with `@Cache(usage = READ_WRITE, region = "customer")`, which:
+- Enables Hibernate second level caching for this entity.
+- Sets the cache concurrency strategy to READ_WRITE, which is suitable for entities that are occasionally updated.
+- Defines a cache region named "customer" for this entity.
+
+==== Application Properties
+
+[source, properties]
+----
+spring.jpa.properties.hibernate.cache.region.factory_class=jcache
+spring.jpa.properties.hibernate.cache.jcache.uri=/ehcache.xml
+spring.jpa.properties.hibernate.cache.jcache.provider=org.ehcache.jsr107.EhcacheCachingProvider
+spring.jpa.properties.hibernate.cache.use_second_level_cache=true
+----
+
+These properties configure Hibernate to use JCache (JSR-107) with EhCache as the provider.
+
+==== EhCache Configuration
+
+[source, xml]
+----
+<config xmlns='http://www.ehcache.org/v3'>
+    <cache alias="customer">
+        <resources>
+            <offheap unit="MB">10</offheap>
+        </resources>
+    </cache>
+</config>
+----
+
+This configuration defines a cache named "customer" with 10MB of off-heap memory.
+
+==== Testing Hibernate Second Level Caching
+
+[source, java]
+----
+@DataJpaTest(properties =  {
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.properties.hibernate.generate_statistics=true"
+})
+@Import(TestcontainersConfiguration.class)
+@Sql(statements = "INSERT INTO customer (id, name) VALUES (1, 'Rashidi Zin')", executionPhase = BEFORE_TEST_CLASS)
+@TestMethodOrder(OrderAnnotation.class)
+class CustomerRepositoryTests {
+
+    @Autowired
+    private CustomerRepository customers;
+
+    private Statistics statistics;
+
+    @BeforeEach
+    void setupStatistics(@Autowired EntityManagerFactory entityManagerFactory) {
+        statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+    }
+
+    @Test
+    @Order(1)
+    @Transactional(propagation = REQUIRES_NEW)
+    @DisplayName("On initial retrieval data will be retrieved from the database and customer cache will be stored")
+    void initial() {
+        customers.findById(1L).orElseThrow();
+
+        assertThat(statistics.getSecondLevelCachePutCount()).isEqualTo(1);
+        assertThat(statistics.getSecondLevelCacheHitCount()).isZero();
+    }
+
+    @Test
+    @Order(2)
+    @Transactional(propagation = REQUIRES_NEW)
+    @DisplayName("On subsequent retrieval data will be retrieved from the customer cache")
+    void subsequent() {
+        customers.findById(1L).orElseThrow();
+
+        assertThat(statistics.getSecondLevelCacheHitCount()).isEqualTo(1);
+    }
+}
+----
+
+These tests use Hibernate's Statistics API to verify cache hits and misses.
+
+=== Comparison
+
+|===
+|Feature |Spring Data Redis Caching |Hibernate Second Level Caching
+
+|Configuration Level
+|Repository level
+|Entity level
+
+|Cache Provider
+|Redis
+|Various providers (EhCache in our example)
+
+|Cache Granularity
+|Method level
+|Entity level
+
+|Cache Control
+|Fine-grained control with SpEL expressions for keys
+|Limited control based on entity and region
+
+|Distributed Caching
+|Yes, Redis is a distributed cache
+|Depends on the provider (EhCache can be distributed)
+
+|Integration with Spring
+|Seamless integration with Spring's caching abstraction
+|Requires additional configuration
+
+|Performance
+|High performance for all data types
+|Optimized for entity caching
+
+|Use Cases
+|General-purpose caching, method results caching
+|Entity caching in JPA applications
+|===
+
+== Conclusion
+
+In this tutorial, we've explored how to implement caching with Spring Data Redis to improve application performance. We've also compared this approach with Hibernate second level caching.
+
+Spring Data Redis caching is a flexible and powerful approach that allows you to cache method results at the repository level. It's particularly useful when you need fine-grained control over what gets cached and how keys are generated.
+
+Hibernate second level caching, on the other hand, is more focused on entity caching and is tightly integrated with JPA. It's a good choice when you're primarily working with JPA entities and want to reduce database load.
+
+Both approaches have their strengths and are suitable for different use cases. The choice between them depends on your specific requirements and the nature of your application.
+
+The full implementation can be found in {url-quickref}[Github].
