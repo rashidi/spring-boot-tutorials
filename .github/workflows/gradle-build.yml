@@ -41,6 +41,7 @@ jobs:
               - 'gradle/wrapper/**'
               - '**/*.gradle.kts'
               - '**/gradle-build.yml'
+              - 'gradle.properties'
 
   gradle-build:
     name: Build project with Gradle
