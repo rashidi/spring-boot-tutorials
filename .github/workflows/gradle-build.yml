@@ -8,6 +8,7 @@ on:
       - '**/*.gradle.kts'
       - '**/*.java'
       - '**/gradle-build.yml'
+      - 'gradle.properties'
   pull_request:
     branches: [ "master" ]
     types: [opened, synchronize, reopened]
@@ -16,6 +17,7 @@ on:
       - '**/*.gradle.kts'
       - '**/*.java'
       - '**/gradle-build.yml'
+      - 'gradle.properties'
 
 permissions:
   contents: write
