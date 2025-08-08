@@ -79,8 +79,11 @@ jobs:
       - name: Run CI build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew build jacocoTestReport --configuration-cache
+      - name: Publish Sonar report
+        env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      
-        run: ./gradlew build jacocoTestReport sonar --configuration-cache
+        run: ./gradlew sonar
       - name: Terminate Testcontainers Cloud Client active sessions
         uses: atomicjar/testcontainers-cloud-setup-action@v1
         with:
