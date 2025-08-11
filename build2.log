@@ -1,0 +1,18 @@
+Calculating task graph as configuration cache cannot be reused because file 'build.gradle.kts' has changed.
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/app/build.gradle.kts' line: 54
+
+* What went wrong:
+Extension with name 'dependencyManagement' does not exist. Currently registered extension names: [ext, sonar, sonarqube, reporting, jacoco]
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 18s
+Configuration cache entry stored.

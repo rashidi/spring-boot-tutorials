@@ -1,0 +1,26 @@
+Calculating task graph as configuration cache cannot be reused because file 'build.gradle.kts' has changed.
+
+[Incubating] Problems report is available at: file:///app/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/app/jooq/build.gradle.kts' line: 57
+
+* What went wrong:
+Cannot invoke "org.jooq.meta.jaxb.Strategy.setName(String)" because the return value of "org.jooq.codegen.gradle.MetaExtensions$GeneratorExtension.getStrategy()" is null
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.0.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 7s
+Configuration cache entry stored.

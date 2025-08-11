@@ -41,6 +41,7 @@ sonar {
 
 subprojects {
     apply(plugin = "jacoco")
+    apply(plugin = "io.spring.dependency-management")
 
     // Only configure the test task if it exists
     tasks.matching { it.name == "test" }.configureEach {

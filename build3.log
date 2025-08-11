@@ -1,0 +1,26 @@
+Calculating task graph as configuration cache cannot be reused because file 'build.gradle.kts' has changed.
+
+> Configure project :jooq
+e: file:///app/jooq/build.gradle.kts:1:22: Unresolved reference 'kotlin'.
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/app/jooq/build.gradle.kts' line: 1
+
+* What went wrong:
+Script compilation error:
+
+  Line 1: import org.jooq.meta.kotlin.*
+                               ^ Unresolved reference 'kotlin'.
+
+1 error
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 13s
+Configuration cache entry stored.
