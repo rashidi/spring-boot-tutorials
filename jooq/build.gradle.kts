@@ -1,8 +1,11 @@
+import nu.studer.gradle.jooq.JooqEdition
+import org.jooq.meta.kotlin.*
+
 plugins {
     java
     id("org.springframework.boot") version "3.5.4"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.jooq.jooq-codegen-gradle") version "3.20.5"
+    id("nu.studer.jooq") version "10.1.1"
 }
 
 group = "zin.rashidi.boot"
@@ -20,8 +23,8 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jooq")
-    jooqCodegen("org.jooq:jooq-meta-extensions")
-    jooqCodegen("com.mysql:mysql-connector-j")
+    jooqGenerator("org.jooq:jooq-meta-extensions")
+    jooqGenerator("com.mysql:mysql-connector-j")
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
@@ -39,32 +42,31 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir("build/generated-src/jooq/main")
-        }
-    }
-}
-
 jooq {
-    configuration {
-        generator {
-            database {
-                name = "org.jooq.meta.extensions.ddl.DDLDatabase"
-                properties {
-                    property {
-                        key = "scripts"
-                        value = "src/main/resources/mysql-schema.sql"
+    version.set(dependencyManagement.importedProperties["jooq.version"])
+    edition.set(JooqEdition.OSS)
+
+    configurations {
+        create("main") {
+
+            jooqConfiguration {
+                generator {
+                    database {
+                        name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+                        properties {
+                            property {
+                                key = "scripts"
+                                value = "src/main/resources/mysql-schema.sql"
+                            }
+                        }
                     }
+                    target {
+                        packageName = "zin.rashidi.boot.jooq"
+                    }
+                    strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
                 }
             }
-            target {
-                packageName = "zin.rashidi.boot.jooq"
-            }
-            strategy {
-                name = "org.jooq.codegen.DefaultGeneratorStrategy"
-            }
+
         }
     }
 }
