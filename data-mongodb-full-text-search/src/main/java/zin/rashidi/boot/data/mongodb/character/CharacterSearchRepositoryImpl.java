@@ -22,7 +22,7 @@ class CharacterSearchRepositoryImpl implements CharacterSearchRepository {
     @Override
     public List<Character> findByText(String text, Sort sort) {
         operations.indexOps(Character.class)
-                .ensureIndex(new TextIndexDefinitionBuilder().onFields("name", "publisher").build());
+                .createIndex(new TextIndexDefinitionBuilder().onFields("name", "publisher").build());
 
         var parameters = text.split(" ");
         var query = TextQuery.queryText(new TextCriteria().matchingAny(parameters)).with(sort);

@@ -1,6 +1,5 @@
 package zin.rashidi.boot.data.jpa.jpa;
 
-import static org.springframework.data.jpa.domain.Specification.where;
 import static zin.rashidi.boot.data.jpa.user.User.Status.ACTIVE;
 
 import java.util.List;
@@ -24,7 +23,7 @@ class JpaCustomBaseRepository<T, ID> extends SimpleJpaRepository<T, ID> {
     @Override
     public List<T> findAll() {
         var hasStatusField = Stream.of(ReflectionUtils.getDeclaredMethods(getDomainClass())).anyMatch(field -> field.getName().equals("status"));
-        return hasStatusField ? findAll(where((root, query, criteriaBuilder) -> root.get("status").in(ACTIVE))) : super.findAll();
+        return hasStatusField ? findAll((root, query, criteriaBuilder) -> root.get("status").in(ACTIVE)) : super.findAll();
     }
 
 }

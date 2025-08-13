@@ -42,6 +42,7 @@ jobs:
               - '**/*.gradle.kts'
               - '**/gradle-build.yml'
               - 'gradle.properties'
+              - '**/*.java'
 
   gradle-build:
     name: Build project with Gradle
@@ -79,7 +80,7 @@ jobs:
       - name: Run CI build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build jacocoTestReport --configuration-cache
+        run: ./gradlew check --configuration-cache
       - name: Publish Sonar report
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      

@@ -40,3 +40,6 @@ out/
 **/gradle/
 ### Antora ###
 build/site/
+
+### Jules ###
+*.log
