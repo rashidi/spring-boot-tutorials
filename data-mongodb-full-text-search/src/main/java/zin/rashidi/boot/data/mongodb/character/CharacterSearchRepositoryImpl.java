@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.index.TextIndexDefinition.TextIndexDefinitionBuilder;
+import org.springframework.data.mongodb.core.index.TextIndexDefinition;
 import org.springframework.data.mongodb.core.query.TextCriteria;
 import org.springframework.data.mongodb.core.query.TextQuery;
 
@@ -22,7 +22,7 @@ class CharacterSearchRepositoryImpl implements CharacterSearchRepository {
     @Override
     public List<Character> findByText(String text, Sort sort) {
         operations.indexOps(Character.class)
-                .createIndex(new TextIndexDefinitionBuilder().onFields("name", "publisher").build());
+                .createIndex(TextIndexDefinition.builder().onFields("name", "publisher").build());
 
         var parameters = text.split(" ");
         var query = TextQuery.queryText(new TextCriteria().matchingAny(parameters)).with(sort);

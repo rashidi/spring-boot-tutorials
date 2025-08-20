@@ -13,7 +13,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.index.TextIndexDefinition.TextIndexDefinitionBuilder;
+import org.springframework.data.mongodb.core.index.TextIndexDefinition;
 import org.springframework.data.mongodb.core.query.TextCriteria;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -40,7 +40,7 @@ class CharacterRepositoryTests {
     @DisplayName("Generated query: Search for 'captain marvel' should return 'Captain Marvel' and 'Thanos'")
     void withGeneratedQuery() {
         // Simulate predefined index
-        operations.indexOps(Character.class).ensureIndex(new TextIndexDefinitionBuilder().onFields("name", "publisher").build());
+        operations.indexOps(Character.class).ensureIndex(TextIndexDefinition.builder().onFields("name", "publisher").build());
 
         var characters = repository.findAllBy(new TextCriteria().matchingAny("captain", "marvel"), Sort.by("name"));
 
