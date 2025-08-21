@@ -26,6 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Configuration
 class UserJobConfiguration {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final MongoOperations mongo;
@@ -52,7 +54,7 @@ class UserJobConfiguration {
     private JsonItemReader<User> reader() throws MalformedURLException {
         JacksonJsonObjectReader<User> jsonObjectReader = new JacksonJsonObjectReader<>(User.class);
 
-        jsonObjectReader.setMapper(new ObjectMapper());
+        jsonObjectReader.setMapper(OBJECT_MAPPER);
 
         return new JsonItemReaderBuilder<User>()
                 .name("userReader")

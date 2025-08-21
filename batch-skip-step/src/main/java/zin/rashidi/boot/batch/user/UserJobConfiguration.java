@@ -7,7 +7,6 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.database.ItemPreparedStatementSetter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.json.JacksonJsonObjectReader;
@@ -19,8 +18,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 /**
  * @author Rashidi Zin
@@ -28,10 +25,12 @@ import java.sql.SQLException;
 @Configuration
 class UserJobConfiguration {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private JsonItemReader<UserFile> reader() {
         JacksonJsonObjectReader<UserFile> reader = new JacksonJsonObjectReader<>(UserFile.class);
 
-        reader.setMapper(new ObjectMapper());
+        reader.setMapper(OBJECT_MAPPER);
 
         return new JsonItemReaderBuilder<UserFile>()
                 .jsonObjectReader(reader)
