@@ -9,7 +9,7 @@ Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Sp
 with source code in individual submodules and can be found on {url-quickref}[GitHub].
 
 image:https://img.shields.io/badge/Java_-21-blue?style=flat-square[Static Badge]
-image:https://img.shields.io/badge/Spring_Boot-3.5.4-blue?style=flat-square&logo=springboot[Spring Boot version]
+image:https://img.shields.io/badge/Spring_Boot-3.5.5-blue?style=flat-square&logo=springboot[Spring Boot version]
 image:https://img.shields.io/github/license/rashidi/spring-boot-tutorials?style=flat-square&color=blue[GitHub License]
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/gradle-build.yml?style=flat-square&logo=githubactions&color=blue[Gradle Build]
 image:https://img.shields.io/sonar/coverage/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Coverage]
@@ -30,7 +30,7 @@ and always will be, my primary goal.
 
 With the help of https://github.com/dependabot[Dependabot], each tutorial is also kept up-to-date with the latest
 dependencies. Currently, we are using Java https://adoptium.net/en-GB/temurin/releases/?version=21[Temurin 21]
-with https://plugins.gradle.org/plugin/org.springframework.boot/3.5.4[Spring Boot 3.5.4].
+with https://plugins.gradle.org/plugin/org.springframework.boot/3.5.5[Spring Boot 3.5.5].
 
 == Documentation
 
@@ -69,4 +69,5 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:web-thymeleaf-xss[Spring Web: Preventing XSS with Thymeleaf] |Prevent Cross-Site Scripting (XSS) attacks in Spring Boot applications using Spring Security and Thymeleaf
 |link:modulith[Spring Modulith: Building Modular Monolithic Applications] | Structure Spring Boot applications into well-defined modules with clear boundaries
 |===
+
 
