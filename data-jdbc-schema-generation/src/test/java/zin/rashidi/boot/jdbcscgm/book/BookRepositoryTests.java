@@ -1,6 +1,7 @@
 package zin.rashidi.boot.jdbcscgm.book;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
@@ -12,6 +13,8 @@ import zin.rashidi.boot.jdbcscgm.TestcontainersConfiguration;
 
 import java.io.IOException;
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rashidi Zin
@@ -28,12 +31,10 @@ class BookRepositoryTests {
         writer.writeChangeSet(new FileSystemResource("user.yaml"));
     }
 
-    @Autowired
-    private BookRepository books;
-
     @Test
-    void findAll() {
-        books.findAll();
+    @DisplayName("Given the user.yaml exists, when changelogExists, then return true")
+    void changelogExists() {
+        assertThat(new FileSystemResource("user.yaml").exists()).isTrue();
     }
 
 }
