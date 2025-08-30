@@ -83,8 +83,8 @@ jobs:
 
   code-quality:
     name: Code Quality with Sonar
-    needs: check-changes
-    if: ${{ needs.check-changes.outputs.source-changes == 'true' }}
+    needs: [gradle-build, check-changes]
+    #if: ${{ needs.check-changes.outputs.source-changes == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -102,14 +102,10 @@ jobs:
           build-scan-publish: true
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
-      - name: Setup Testcontainers Cloud Client
-        uses: atomicjar/testcontainers-cloud-setup-action@v1
-        with:
-          token: ${{ secrets.TC_CLOUD_TOKEN }}
       - name: Publish Sonar report
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      
-        run: ./gradlew check sonar
+        run: ./gradlew sonar
       - name: Terminate Testcontainers Cloud Client active sessions
         uses: atomicjar/testcontainers-cloud-setup-action@v1
         with:
