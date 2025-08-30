@@ -40,7 +40,7 @@ class CharacterRepositoryTests {
     @DisplayName("Generated query: Search for 'captain marvel' should return 'Captain Marvel' and 'Thanos'")
     void withGeneratedQuery() {
         // Simulate predefined index
-        operations.indexOps(Character.class).ensureIndex(TextIndexDefinition.builder().onFields("name", "publisher").build());
+        operations.indexOps(Character.class).createIndex(TextIndexDefinition.builder().onFields("name", "publisher").build());
 
         var characters = repository.findAllBy(new TextCriteria().matchingAny("captain", "marvel"), Sort.by("name"));
 
