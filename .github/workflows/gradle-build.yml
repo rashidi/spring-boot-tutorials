@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       build-changes: ${{ steps.filter.outputs.build }}
+      source-changes: ${{ steps.filter.outputs.java }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -42,12 +43,49 @@ jobs:
               - '**/*.gradle.kts'
               - '**/gradle-build.yml'
               - 'gradle.properties'
+            java:
               - '**/*.java'
-
+    
   gradle-build:
     name: Build project with Gradle
     needs: check-changes
     if: ${{ needs.check-changes.outputs.build-changes == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0      
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          add-job-summary-as-pr-comment: on-failure
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes"
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Setup Testcontainers Cloud Client
+        uses: atomicjar/testcontainers-cloud-setup-action@v1
+        with:
+          token: ${{ secrets.TC_CLOUD_TOKEN }}          
+      - name: Run CI build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew check --configuration-cache
+      - name: Terminate Testcontainers Cloud Client active sessions
+        uses: atomicjar/testcontainers-cloud-setup-action@v1
+        with:
+          action: terminate
+
+  code-quality:
+    name: Code Quality with Sonar
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.source-changes == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -76,16 +114,12 @@ jobs:
       - name: Setup Testcontainers Cloud Client
         uses: atomicjar/testcontainers-cloud-setup-action@v1
         with:
-          token: ${{ secrets.TC_CLOUD_TOKEN }}          
-      - name: Run CI build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew check --configuration-cache
+          token: ${{ secrets.TC_CLOUD_TOKEN }}
       - name: Publish Sonar report
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      
-        run: ./gradlew sonar
+        run: ./gradlew check sonar
       - name: Terminate Testcontainers Cloud Client active sessions
         uses: atomicjar/testcontainers-cloud-setup-action@v1
         with:
-          action: terminate        
+          action: terminate
