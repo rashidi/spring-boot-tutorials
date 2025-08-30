@@ -92,7 +92,7 @@ jobs:
   code-quality:
     name: Code Quality with Sonar
     needs: [gradle-build, check-changes]
-    #if: ${{ needs.check-changes.outputs.source-changes == 'true' }}
+    if: ${{ needs.check-changes.outputs.source-changes == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

@@ -28,7 +28,7 @@ class CharacterRepositoryTests {
 
     @Container
     @ServiceConnection
-    private final static MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
 
     @Autowired
     private MongoOperations operations;
