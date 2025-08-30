@@ -87,7 +87,9 @@ jobs:
         id: upload-build-artifacts
         with:
           name: build-artifacts
-          path: '**/build/classes/'
+          path: |
+            '**/build/classes/'
+            './build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml'
 
   code-quality:
     name: Code Quality with Sonar
