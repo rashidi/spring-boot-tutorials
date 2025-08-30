@@ -49,7 +49,7 @@ jobs:
   gradle-build:
     name: Build project with Gradle
     needs: check-changes
-    if: ${{ needs.check-changes.outputs.build-changes == 'true' }}
+    if: ${{ needs.check-changes.outputs.build-changes == 'true'  || needs.check-changes.outputs.source-changes == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       build-artifacts: ${{ steps.upload-build-artifacts.outputs.artifact-id }}
