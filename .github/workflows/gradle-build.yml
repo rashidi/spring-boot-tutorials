@@ -51,6 +51,8 @@ jobs:
     needs: check-changes
     if: ${{ needs.check-changes.outputs.build-changes == 'true' }}
     runs-on: ubuntu-latest
+    outputs:
+      build-artifacts: ${{ steps.upload-build-artifacts.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -80,10 +82,16 @@ jobs:
         uses: atomicjar/testcontainers-cloud-setup-action@v1
         with:
           action: terminate
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        id: upload-build-artifacts
+        with:
+          name: build-artifacts
+          path: '**/build/'
 
   code-quality:
     name: Code Quality with Sonar
-    needs: check-changes
+    needs: [gradle-build, check-changes]
     if: ${{ needs.check-changes.outputs.source-changes == 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -102,15 +110,11 @@ jobs:
           build-scan-publish: true
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
-      - name: Setup Testcontainers Cloud Client
-        uses: atomicjar/testcontainers-cloud-setup-action@v1
+      - name: Download build artifacts
+        uses: actions/download-artifact@v5
         with:
-          token: ${{ secrets.TC_CLOUD_TOKEN }}
+          artifact-ids: ${{ needs.gradle-build.outputs.build-artifacts }}
       - name: Publish Sonar report
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      
-        run: ./gradlew check sonar
-      - name: Terminate Testcontainers Cloud Client active sessions
-        uses: atomicjar/testcontainers-cloud-setup-action@v1
-        with:
-          action: terminate
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew sonar
