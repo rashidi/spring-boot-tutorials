@@ -11,7 +11,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  */
 class UserDeletionTestExecutionListener extends AbstractTestExecutionListener {
 
-    private static Logger log = LoggerFactory.getLogger(UserDeletionTestExecutionListener.class);
+    private static final Logger log = LoggerFactory.getLogger(UserDeletionTestExecutionListener.class);
 
     @Override
     public void afterTestClass(TestContext testContext) {

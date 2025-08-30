@@ -13,7 +13,7 @@ class Subscription {
     private Long id;
     private final Long studentId;
     private final Long courseId;
-    private Status status;
+    private final Status status;
 
     public Subscription(Long studentId, Long courseId) {
         this.studentId = studentId;
