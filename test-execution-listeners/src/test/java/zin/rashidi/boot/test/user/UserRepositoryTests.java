@@ -13,7 +13,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 /**
  * @author Rashidi Zin

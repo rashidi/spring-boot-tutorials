@@ -10,7 +10,6 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.stereotype.Repository;
 
 import static org.springframework.context.annotation.FilterType.ANNOTATION;
-import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 /**
  * @author Rashidi Zin
