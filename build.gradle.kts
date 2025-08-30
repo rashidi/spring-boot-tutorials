@@ -34,7 +34,6 @@ sonar {
         property("sonar.projectKey", "rashidi_spring-boot-tutorials")
         property("sonar.organization", "rashidi-github")
         property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.java.binaries", "**/build/classes")
         property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml")
     }
 }
