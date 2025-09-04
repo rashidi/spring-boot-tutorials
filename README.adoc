@@ -8,6 +8,8 @@ Samples and tutorials for https://spring.io/projects/spring-boot[Spring Boot] mo
 Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial is equipped
 with source code in individual submodules and can be found on {url-quickref}[GitHub].
 
+image:https://img.shields.io/badge/Java_-21-blue?style=flat-square[Static Badge]
+image:https://img.shields.io/badge/Spring_Boot-3.5.5-blue?style=flat-square&logo=springboot[Spring Boot version]
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/gradle-build.yml?style=flat-square&logo=githubactions&color=blue[Gradle Build]
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/build-and-publish-antora.yml?style=flat-square&logo=antora&label=Antora&color=blue[Antora Site Status, link={url-docs}]
 image:https://img.shields.io/sonar/coverage/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Coverage]
@@ -65,6 +67,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:web-rest-client[Spring Web: REST Clients for calling Synchronous API] | Implement REST client to perform synchronous API calls
 |link:web-thymeleaf-xss[Spring Web: Preventing XSS with Thymeleaf] |Prevent Cross-Site Scripting (XSS) attacks in Spring Boot applications using Spring Security and Thymeleaf
 |===
+
 
 
 
