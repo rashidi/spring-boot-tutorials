@@ -8,13 +8,9 @@ Samples and tutorials for https://spring.io/projects/spring-boot[Spring Boot] mo
 Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial is equipped
 with source code in individual submodules and can be found on {url-quickref}[GitHub].
 
-image:https://img.shields.io/badge/Java_-21-blue?style=flat-square[Static Badge]
-image:https://img.shields.io/badge/Spring_Boot-3.5.5-blue?style=flat-square&logo=springboot[Spring Boot version]
-image:https://img.shields.io/github/license/rashidi/spring-boot-tutorials?style=flat-square&color=blue[GitHub License]
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/gradle-build.yml?style=flat-square&logo=githubactions&color=blue[Gradle Build]
-image:https://img.shields.io/sonar/coverage/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Coverage]
-image:https://img.shields.io/github/stars/rashidi/spring-boot-tutorials?style=flat-square&logo=github[GitHub Repo stars, link={url-quickref}]
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/build-and-publish-antora.yml?style=flat-square&logo=antora&label=Antora&color=blue[Antora Site Status, link={url-docs}]
+image:https://img.shields.io/sonar/coverage/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Coverage]
 
 == Motivation
 
@@ -61,13 +57,14 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:data-rest-validation[Spring Data REST: Validation] |Perform validation with Spring Data REST
 |link:graphql[Spring GraphQL Server] |Implement GraphQL server with Spring GraphQL Server
 |link:jooq[jOOQ] | Implement an alternative to Jpa using https://www.jooq.org/[jOOQ] and Gradle
+|link:modulith[Spring Modulith: Building Modular Monolithic Applications] | Structure Spring Boot applications into well-defined modules with clear boundaries
 |link:data-mongodb-tc-data-load[Spring Test: Load data with Testcontainers] |Load test data with Testcontainers instead of `BeforeEach`
 |link:test-execution-listeners[Spring Test: Test Execution Listeners] |Implement custom `TestExecutionListener` to manage data in tests
 |link:test-rest-assured[Spring Test: Integration with RestAssured] | Implement Behaviour Driven Development with https://rest-assured.io/[RestAssured]
 |link:test-slice-tests-rest[Spring Test: Implementing Slice Tests for REST application] | Dive into available options to implement tests with Spring Boot's test components
 |link:web-rest-client[Spring Web: REST Clients for calling Synchronous API] | Implement REST client to perform synchronous API calls
 |link:web-thymeleaf-xss[Spring Web: Preventing XSS with Thymeleaf] |Prevent Cross-Site Scripting (XSS) attacks in Spring Boot applications using Spring Security and Thymeleaf
-|link:modulith[Spring Modulith: Building Modular Monolithic Applications] | Structure Spring Boot applications into well-defined modules with clear boundaries
 |===
+
 
 
