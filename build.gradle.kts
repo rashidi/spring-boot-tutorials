@@ -13,7 +13,6 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        // Hint for the CodeQL autobuilder: sourceCompatibility = 25
         languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
