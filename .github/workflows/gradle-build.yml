@@ -91,7 +91,9 @@ jobs:
 
   dependecy-submission:
     name: Dependency Submission
+    needs: check-changes
     runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.build-changes == 'true' }}
     steps:
       - name: Checkout sources
         uses: actions/checkout@v5
