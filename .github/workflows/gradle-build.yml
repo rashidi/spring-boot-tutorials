@@ -89,6 +89,20 @@ jobs:
           name: build-artifacts
           path: '**/build/'
 
+  dependecy-submission:
+    name: Dependency Submission
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 25
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v4
+
   code-quality:
     name: Code Quality with Sonar
     needs: [gradle-build, check-changes]
