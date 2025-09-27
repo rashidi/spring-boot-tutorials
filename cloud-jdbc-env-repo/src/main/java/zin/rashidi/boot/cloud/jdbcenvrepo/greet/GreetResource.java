@@ -18,7 +18,7 @@ class GreetResource {
 
     @GetMapping("/greet")
     public String greet(@RequestParam String greeting) {
-        return String.format("%s, my name is %s", greeting, properties.name());
+        return "%s, my name is %s".formatted(greeting, properties.name());
     }
 
 }

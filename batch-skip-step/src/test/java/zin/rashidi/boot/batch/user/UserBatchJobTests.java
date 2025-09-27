@@ -68,7 +68,7 @@ class UserBatchJobTests {
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });
 
-        var users = jdbc.query("SELECT * FROM users", (rs, rowNum) ->
+        var users = jdbc.query("SELECT * FROM users", (rs, _) ->
                 new User(rs.getLong("id"), rs.getString("name"), rs.getString("username"))
         );
 

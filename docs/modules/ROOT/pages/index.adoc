@@ -20,4 +20,4 @@ best practices and keeping all dependencies up-to-date. The quality of these tut
 and always will be, my primary goal.
 
 With the help of https://github.com/dependabot[Dependabot], each tutorial is also kept up-to-date with the latest
-dependencies. Currently, we are using Java https://adoptium.net/en-GB/temurin/releases/?version=21[Temurin 21]
+dependencies. Currently, we are using Java https://adoptium.net/en-GB/temurin/releases/?version=25[Temurin 25]
