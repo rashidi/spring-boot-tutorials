@@ -36,7 +36,7 @@ class UserRestRepository implements UserRepository {
     public User findById(Long id) {
         return restClient.get().uri("/{id}", id)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
+                .onStatus(HttpStatusCode::is4xxClientError, ((_, _) -> {
                     throw new UserNotFoundException();
                 }))
                 .body(User.class);

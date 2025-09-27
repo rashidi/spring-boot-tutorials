@@ -56,7 +56,7 @@ class Book {
 
         @Override
         public String toString() {
-            return String.format("%d%d%d%d%d", prefix, group, registrant, publication, check);
+            return "%d%d%d%d%d".formatted(prefix, group, registrant, publication, check);
         }
 
     }
