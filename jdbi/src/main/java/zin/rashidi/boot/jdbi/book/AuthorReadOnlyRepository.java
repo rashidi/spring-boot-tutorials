@@ -18,9 +18,6 @@ interface AuthorReadOnlyRepository {
     @SqlQuery("SELECT * FROM author")
     Stream<Author> findAll();
 
-    @SqlQuery("SELECT * FROM author WHERE id = :id")
-    Optional<Author> findById(@Bind("id") Long id);
-
     @SqlQuery("SELECT * FROM author WHERE name = :name")
     Stream<Author> findByName(@Bind("name") String name);
 

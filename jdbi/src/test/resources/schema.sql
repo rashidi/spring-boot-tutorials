@@ -13,3 +13,5 @@ CREATE TABLE book
         FOREIGN KEY (author_id)
             REFERENCES author (id)
 );
+
+INSERT INTO author (name) VALUES ('Sun Tzu');
