@@ -70,18 +70,10 @@ jobs:
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      - name: Setup Testcontainers Cloud Client
-        uses: atomicjar/testcontainers-cloud-setup-action@v1
-        with:
-          token: ${{ secrets.TC_CLOUD_TOKEN }}          
       - name: Run CI build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew check --configuration-cache
-      - name: Terminate Testcontainers Cloud Client active sessions
-        uses: atomicjar/testcontainers-cloud-setup-action@v1
-        with:
-          action: terminate
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         id: upload-build-artifacts
