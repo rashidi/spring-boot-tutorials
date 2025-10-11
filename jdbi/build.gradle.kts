@@ -1,0 +1,37 @@
+plugins {
+    java
+    id("org.springframework.boot") version "3.5.6"
+    id("io.spring.dependency-management") version "1.1.7"
+}
+
+group = "zin.rashidi.boot"
+version = "0.0.1-SNAPSHOT"
+description = "jdbi"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(platform("org.jdbi:jdbi3-bom:3.49.6"))
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.jdbi:jdbi3-postgres")
+    implementation("org.jdbi:jdbi3-spring")
+    runtimeOnly("org.postgresql:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.jdbi:jdbi3-testcontainers")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
