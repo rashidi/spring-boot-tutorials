@@ -19,7 +19,11 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 @SpringBootTest(webEnvironment = NONE)
 @Import(TestcontainersConfiguration.class)
 @Transactional
-@Sql(scripts = "classpath:schema.sql", executionPhase = BEFORE_TEST_CLASS)
+@Sql(
+        scripts = "classpath:schema.sql",
+        statements = "INSERT INTO author (id, name) VALUES (1, 'Sun Tzu')",
+        executionPhase = BEFORE_TEST_CLASS
+)
 class AuthorReadOnlyRepositoryTests {
 
     @Autowired
