@@ -15,3 +15,5 @@ CREATE TABLE book
 );
 
 INSERT INTO author (name) VALUES ('Sun Tzu');
+
+INSERT INTO book (isbn, title, author_id) VALUES ('9780521531088', 'The Art of War', 1);

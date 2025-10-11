@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableJdbiRepositories(basePackages = "zin.rashidi.boot.jdbi")
-public class RepositoryConfiguration {
+class JdbiRepositoryConfiguration {
 
     @Bean
     public Jdbi jdbi(HikariDataSource dataSource) {
