@@ -24,8 +24,6 @@ on:
       - '**/*.java'
       - '**/*.gradle.kts'
       - '.github/workflows/codeql.yml'
-  schedule:
-    - cron: '25 21 * * 0'
 
 jobs:
   analyze:
