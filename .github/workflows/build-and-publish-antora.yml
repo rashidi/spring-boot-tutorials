@@ -10,6 +10,15 @@ on:
       - '.github/workflows/build-and-publish-antora.yml'
       - '**/README.adoc'
       - '**/**.hbs'
+  pull_request:
+    branches: [ "master" ]
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'docs/**'
+      - 'antora-playbook.yml'
+      - '.github/workflows/build-and-publish-antora.yml'
+      - '**/README.adoc'
+      - '**/**.hbs'    
   workflow_dispatch:
 
 jobs:
