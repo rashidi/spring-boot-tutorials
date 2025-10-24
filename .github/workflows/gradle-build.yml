@@ -73,7 +73,7 @@ jobs:
       - name: Run CI build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew check --configuration-cache
+        run: ./gradlew check --configuration-cache --parallel
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         id: upload-build-artifacts
