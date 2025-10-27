@@ -123,7 +123,7 @@ jobs:
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
       - name: Download build artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           artifact-ids: ${{ needs.gradle-build.outputs.build-artifacts }}
       - name: Publish Sonar report
