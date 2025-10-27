@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("org.springframework.modulith:spring-modulith-bom:1.4.3"))
+    implementation(platform("org.springframework.modulith:spring-modulith-bom:1.4.4"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.modulith:spring-modulith-starter-core")
