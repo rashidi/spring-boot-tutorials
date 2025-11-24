@@ -31,7 +31,7 @@ jobs:
       build-changes: ${{ steps.filter.outputs.build }}
       source-changes: ${{ steps.filter.outputs.java }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: dorny/paths-filter@v3
@@ -54,7 +54,7 @@ jobs:
     outputs:
       build-artifacts: ${{ steps.upload-build-artifacts.outputs.artifact-id }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0      
       - name: Set up JDK
@@ -88,7 +88,7 @@ jobs:
     if: ${{ needs.check-changes.outputs.build-changes == 'true' }}
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
@@ -107,7 +107,7 @@ jobs:
     if: ${{ needs.check-changes.outputs.source-changes == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0      
       - name: Set up JDK
