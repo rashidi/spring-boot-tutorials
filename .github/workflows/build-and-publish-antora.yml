@@ -31,7 +31,7 @@ jobs:
         run: antora --fetch antora-playbook.yml
 
       - name: Upload site as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: site
           path: build/site
