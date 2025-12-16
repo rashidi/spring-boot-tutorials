@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       build-changes: ${{ steps.filter.outputs.build }}
+      gradle-root-changes: ${{ steps.filter.output.gradle-root }}
       source-changes: ${{ steps.filter.outputs.java }}
     steps:
       - uses: actions/checkout@v6
@@ -43,6 +44,8 @@ jobs:
               - '**/*.gradle.kts'
               - '**/gradle-build.yml'
               - 'gradle.properties'
+            gradle-root:
+              - 'build.gradle.kts'
             java:
               - '**/*.java'
     
@@ -104,7 +107,7 @@ jobs:
   code-quality:
     name: Code Quality with Sonar
     needs: [gradle-build, check-changes]
-    if: ${{ needs.check-changes.outputs.source-changes == 'true' }}
+    if: ${{ needs.check-changes.outputs.source-changes == 'true' || needs.check-changes.outputs.gradle-root-changes == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
