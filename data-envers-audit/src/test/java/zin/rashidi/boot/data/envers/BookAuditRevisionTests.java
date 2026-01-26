@@ -12,10 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.history.Revision;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
+import org.testcontainers.mysql.MySQLContainer;
 import zin.rashidi.boot.data.envers.book.Book;
 import zin.rashidi.boot.data.envers.book.BookRepository;
 
@@ -28,7 +27,7 @@ class BookAuditRevisionTests {
 
     @Container
     @ServiceConnection
-    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:lts");
+    private static final MySQLContainer MYSQL = new MySQLContainer("mysql:lts");
 
     @Autowired
     private BookRepository repository;

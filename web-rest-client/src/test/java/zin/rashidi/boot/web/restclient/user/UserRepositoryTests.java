@@ -1,12 +1,12 @@
 package zin.rashidi.boot.web.restclient.user;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;
 import org.springframework.test.web.client.MockRestServiceServer;
+import tools.jackson.core.JacksonException;
 import zin.rashidi.boot.web.restclient.user.UserRestRepository.UserNotFoundException;
 
 import java.net.URI;
@@ -36,7 +36,7 @@ class UserRepositoryTests {
 
     @Test
     @DisplayName("When findAll Then all users should be returned")
-    void findAll() throws JsonProcessingException {
+    void findAll() throws JacksonException {
         var response = mapper.writeValueAsString(List.of(
                 new User(84L, "Rashidi Zin", "rashidi.zin", "rashidi@zin.my", URI.create("rashidi.zin.my")),
                 new User(87L, "Zaid Zin", "zaid.zin", "zaid@zin.my", URI.create("zaid.zin.my"))
@@ -51,7 +51,7 @@ class UserRepositoryTests {
 
     @Test
     @DisplayName("When an id is provided Then user with the id should be returned")
-    void findById() throws JsonProcessingException {
+    void findById() throws JacksonException {
         var response = mapper.writeValueAsString(
                 new User(84L, "Rashidi Zin", "rashidi.zin", "rashidi@zin.my", URI.create("rashidi.zin.my"))
         );

@@ -23,7 +23,7 @@ class JpaCustomBaseRepository<T, ID> extends SimpleJpaRepository<T, ID> {
     @Override
     public List<T> findAll() {
         var hasStatusField = Stream.of(ReflectionUtils.getDeclaredMethods(getDomainClass())).anyMatch(field -> field.getName().equals("status"));
-        return hasStatusField ? findAll((root, _, _) -> root.get("status").in(ACTIVE)) : super.findAll();
+        return hasStatusField ? findAll((root, query, builder) -> root.get("status").in(ACTIVE)) : super.findAll();
     }
 
 }

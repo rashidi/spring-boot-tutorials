@@ -1,3 +1,9 @@
-app:
-  greet:
-    name: Default
+app.greet.name: Default
+spring:
+  application.name: demo
+  cloud.config.server:
+    bootstrap: true
+    jdbc:
+      sql: SELECT `KEY`, `VALUE` from PROPERTIES where APPLICATION=? and PROFILE=? and LABEL=?
+      sql-without-profile: SELECT `KEY`, `VALUE` from PROPERTIES where APPLICATION=? and PROFILE='default' and LABEL=?
+  profiles.active: jdbc
