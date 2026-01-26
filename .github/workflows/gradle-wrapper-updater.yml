@@ -22,3 +22,4 @@ jobs:
         with:
           labels: dependencies
           merge-method: SQUASH
+          repo-token: ${{ secrets.GRADLE_UPDATE_PAT }}
