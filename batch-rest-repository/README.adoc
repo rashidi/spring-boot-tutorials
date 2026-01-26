@@ -52,7 +52,7 @@ class UserJobConfiguration {
     private JsonItemReader<User> reader() throws MalformedURLException {
         JacksonJsonObjectReader<User> jsonObjectReader = new JacksonJsonObjectReader<>(User.class);
 
-        jsonObjectReader.setMapper(new ObjectMapper());
+        jsonObjectReader.setMapper(new JsonMapper());
 
         return new JsonItemReaderBuilder<User>()
                 .name("userReader")
@@ -80,7 +80,7 @@ class UserJobConfiguration {
     private JsonItemReader<User> reader() throws MalformedURLException {
         JacksonJsonObjectReader<User> jsonObjectReader = new JacksonJsonObjectReader<>(User.class);
 
-        jsonObjectReader.setMapper(new ObjectMapper());
+        jsonObjectReader.setMapper(new JsonMapper());
 
         return new JsonItemReaderBuilder<User>()
                 .name("userReader")

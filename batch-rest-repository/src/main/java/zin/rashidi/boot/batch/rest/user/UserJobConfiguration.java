@@ -1,7 +1,5 @@
 package zin.rashidi.boot.batch.rest.user;
 
-import java.net.MalformedURLException;
-
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -17,8 +15,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.transaction.PlatformTransactionManager;
+import tools.jackson.databind.json.JsonMapper;
 
-import tools.jackson.databind.ObjectMapper;
+import java.net.MalformedURLException;
 
 /**
  * @author Rashidi Zin
@@ -26,7 +25,7 @@ import tools.jackson.databind.ObjectMapper;
 @Configuration
 class UserJobConfiguration {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final JsonMapper OBJECT_MAPPER = new JsonMapper();
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;

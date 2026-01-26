@@ -1,6 +1,5 @@
 package zin.rashidi.boot.batch.user;
 
-import tools.jackson.databind.ObjectMapper;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -16,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.PlatformTransactionManager;
+import tools.jackson.databind.json.JsonMapper;
 
 import javax.sql.DataSource;
 
@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 @Configuration
 class UserJobConfiguration {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final JsonMapper OBJECT_MAPPER = new JsonMapper();
 
     private JsonItemReader<UserFile> reader() {
         JacksonJsonObjectReader<UserFile> reader = new JacksonJsonObjectReader<>(UserFile.class);
