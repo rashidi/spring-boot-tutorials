@@ -114,7 +114,6 @@ class UserBatchJobTests {
     @TestConfiguration
     static class BatchTestConfiguration extends DefaultBatchConfiguration {
 
-        @Override
         @Bean
         protected DataSource getDataSource() {
             return DataSourceBuilder.create()

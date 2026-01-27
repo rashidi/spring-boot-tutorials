@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.PlatformTransactionManager;
-import tools.jackson.databind.json.JsonMapper;
 
 import javax.sql.DataSource;
 
@@ -25,12 +24,8 @@ import javax.sql.DataSource;
 @Configuration
 class UserJobConfiguration {
 
-    private static final JsonMapper OBJECT_MAPPER = new JsonMapper();
-
     private JsonItemReader<UserFile> reader() {
         JacksonJsonObjectReader<UserFile> reader = new JacksonJsonObjectReader<>(UserFile.class);
-
-        reader.setMapper(OBJECT_MAPPER);
 
         return new JsonItemReaderBuilder<UserFile>()
                 .jsonObjectReader(reader)
