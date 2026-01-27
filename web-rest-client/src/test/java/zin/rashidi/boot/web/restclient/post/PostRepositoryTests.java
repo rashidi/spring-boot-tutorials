@@ -1,13 +1,13 @@
 package zin.rashidi.boot.web.restclient.post;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.test.web.client.MockRestServiceServer;
+import tools.jackson.core.JacksonException;
 import zin.rashidi.boot.web.restclient.post.PostRepositoryConfiguration.PostErrorResponseHandler.PostNotFoundException;
 
 import java.util.List;
@@ -36,7 +36,7 @@ class PostRepositoryTests {
 
     @Test
     @DisplayName("When requesting for all posts then response should contain all posts available")
-    void findAll() throws JsonProcessingException {
+    void findAll() throws JacksonException {
         var content = mapper.writeValueAsString(posts());
 
         mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/posts")).andRespond(withSuccess(content, APPLICATION_JSON));
@@ -48,7 +48,7 @@ class PostRepositoryTests {
 
     @Test
     @DisplayName("Given a post with requested id is available When requested Then a post with the id should be returned")
-    void findById() throws JsonProcessingException {
+    void findById() throws JacksonException {
         var content = mapper.writeValueAsString(new Post(1L, 84L, "Spring Web: REST Clients Example with RESTClient", "An example of using RESTClient"));
 
         mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/posts/1")).andRespond(withSuccess(content, APPLICATION_JSON));

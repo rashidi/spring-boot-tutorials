@@ -29,7 +29,6 @@
 * Spring Test
 ** xref:data-mongodb-tc-data-load.adoc[Load data with Testcontainers]
 ** xref:test-execution-listeners.adoc[Test Execution Listeners]
-** xref:test-rest-assured.adoc[Integration with RestAssured]
 ** xref:test-slice-tests-rest.adoc[Implementing Slice Tests for REST application]
 * Spring Web
 ** xref:web-rest-client.adoc[REST Clients for calling Synchronous API]

@@ -62,7 +62,6 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:modulith[Spring Modulith: Building Modular Monolithic Applications] | Structure Spring Boot applications into well-defined modules with clear boundaries
 |link:data-mongodb-tc-data-load[Spring Test: Load data with Testcontainers] |Load test data with Testcontainers instead of `BeforeEach`
 |link:test-execution-listeners[Spring Test: Test Execution Listeners] |Implement custom `TestExecutionListener` to manage data in tests
-|link:test-rest-assured[Spring Test: Integration with RestAssured] | Implement Behaviour Driven Development with https://rest-assured.io/[RestAssured]
 |link:test-slice-tests-rest[Spring Test: Implementing Slice Tests for REST application] | Dive into available options to implement tests with Spring Boot's test components
 |link:web-rest-client[Spring Web: REST Clients for calling Synchronous API] | Implement REST client to perform synchronous API calls
 |link:web-thymeleaf-xss[Spring Web: Preventing XSS with Thymeleaf] |Prevent Cross-Site Scripting (XSS) attacks in Spring Boot applications using Spring Security and Thymeleaf
