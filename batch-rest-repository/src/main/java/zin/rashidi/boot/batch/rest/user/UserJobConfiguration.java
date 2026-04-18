@@ -18,15 +18,13 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import tools.jackson.databind.ObjectMapper;
-
 /**
  * @author Rashidi Zin
  */
 @Configuration
 class UserJobConfiguration {
 
-    private static final ObjectMapper OBJECT_MAPPER = new JsonMapper();
+    private static final JsonMapper OBJECT_MAPPER = new JsonMapper();
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;

@@ -4,7 +4,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
+import org.springframework.batch.core.configuration.support.JdbcDefaultBatchConfiguration;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
@@ -72,7 +72,7 @@ class UserBatchJobTests {
     }
 
     @TestConfiguration
-    static class BatchTestConfiguration extends DefaultBatchConfiguration {
+    static class BatchTestConfiguration extends JdbcDefaultBatchConfiguration {
 
         @Override
         protected DataSource getDataSource() {
