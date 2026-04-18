@@ -3,7 +3,7 @@ package zin.rashidi.boot.data.mongodb.user;
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.context.annotation.FilterType.ANNOTATION;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -27,7 +27,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.batch.core.ExitStatus.COMPLETED;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 import static zin.rashidi.boot.batch.user.UserBatchJobTests.BatchTestConfiguration;
 import static zin.rashidi.boot.batch.user.UserBatchJobTests.JdbcTestConfiguration;
 

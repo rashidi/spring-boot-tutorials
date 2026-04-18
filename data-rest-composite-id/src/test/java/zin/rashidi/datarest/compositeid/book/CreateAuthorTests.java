@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.lang3.math.NumberUtils;
 import zin.rashidi.datarest.compositeid.TestcontainersConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +47,7 @@ class CreateAuthorTests {
     }
 
     private Condition<String> numeric() {
-        return new Condition<>(NumberUtils::isDigits, "is a number");
+        return new Condition<>(s -> s != null && s.chars().allMatch(Character::isDigit), "is a number");
     }
 
     private String idFromLocation(String location) {

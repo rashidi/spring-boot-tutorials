@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.cache.autoconfigure.CacheAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -22,7 +22,7 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
  * @author Rashidi Zin
  */
 @Import(TestcontainersConfiguration.class)
-@ImportAutoConfiguration({ RedisAutoConfiguration.class, CacheAutoConfiguration.class })
+@ImportAutoConfiguration({ DataRedisAutoConfiguration.class, CacheAutoConfiguration.class })
 @Sql(executionPhase = BEFORE_TEST_CLASS, statements = "INSERT INTO customer (id, name) VALUES (1, 'Rashidi Zin')")
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", includeFilters = @Filter(EnableCaching.class))
 class CustomerRepositoryTests {

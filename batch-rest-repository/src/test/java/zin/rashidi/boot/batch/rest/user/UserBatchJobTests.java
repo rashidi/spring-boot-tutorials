@@ -29,7 +29,7 @@ import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.batch.core.ExitStatus.COMPLETED;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.BatchTestConfiguration;
 import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.MongoTestConfiguration;
 
