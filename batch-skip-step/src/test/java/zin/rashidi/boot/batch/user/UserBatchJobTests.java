@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.configuration.support.JdbcDefaultBatchConfiguration;
 import org.springframework.batch.core.job.JobExecution;
-import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.batch.test.JobOperatorTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -55,7 +55,7 @@ class UserBatchJobTests {
     private final static MySQLContainer MYSQL_CONTAINER = new MySQLContainer("mysql:lts");
 
     @Autowired
-    private JobLauncherTestUtils launcher;
+    private JobOperatorTestUtils operator;
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -65,7 +65,7 @@ class UserBatchJobTests {
     void findAll() {
 
         await().atMost(10, SECONDS).untilAsserted(() -> {
-            var execution = launcher.launchJob();
+            var execution = operator.startJob();
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });
 
@@ -81,7 +81,7 @@ class UserBatchJobTests {
     void skipByNullOutput() {
 
         await().atMost(10, SECONDS).untilAsserted(() -> {
-            var execution = launcher.launchJob();
+            var execution = operator.startJob();
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });
 
@@ -96,7 +96,7 @@ class UserBatchJobTests {
     void skipByException() {
 
         await().atMost(10, SECONDS).untilAsserted(() -> {
-            var execution = launcher.launchJob();
+            var execution = operator.startJob();
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });
 
