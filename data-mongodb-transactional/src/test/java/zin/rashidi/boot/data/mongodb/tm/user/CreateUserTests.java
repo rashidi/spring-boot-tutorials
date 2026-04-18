@@ -2,14 +2,15 @@ package zin.rashidi.boot.data.mongodb.tm.user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mongodb.MongoDBContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -20,6 +21,7 @@ import static zin.rashidi.boot.data.mongodb.tm.user.User.Status.ACTIVE;
 /**
  * @author Rashidi Zin
  */
+@AutoConfigureTestRestTemplate
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Testcontainers
 class CreateUserTests {

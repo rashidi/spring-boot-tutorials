@@ -8,9 +8,9 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.stereotype.Repository;
 import org.springframework.test.context.jdbc.Sql;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mysql.MySQLContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +24,7 @@ class UserRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final MySQLContainer<?> container = new MySQLContainer<>("mysql:lts");
+    private static final MySQLContainer container = new MySQLContainer("mysql:lts");
 
     @Autowired
     private UserRepository repository;

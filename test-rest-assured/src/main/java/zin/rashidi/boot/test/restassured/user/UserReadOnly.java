@@ -2,8 +2,8 @@ package zin.rashidi.boot.test.restassured.user;
 
 import org.bson.types.ObjectId;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ser.std.ToStringSerializer;
 
 /**
  * @author Rashidi Zin

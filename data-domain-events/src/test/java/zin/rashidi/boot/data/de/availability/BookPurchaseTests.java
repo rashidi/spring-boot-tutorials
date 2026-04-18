@@ -7,8 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 
 import zin.rashidi.boot.data.de.TestDataDomainEventsApplication;
 import zin.rashidi.boot.data.de.book.Book;
@@ -17,6 +18,7 @@ import zin.rashidi.boot.data.de.book.BookRepository;
 /**
  * @author Rashidi Zin
  */
+@AutoConfigureTestRestTemplate
 @SpringBootTest(
         classes = TestDataDomainEventsApplication.class,
         properties = "spring.jpa.hibernate.ddl-auto=create",

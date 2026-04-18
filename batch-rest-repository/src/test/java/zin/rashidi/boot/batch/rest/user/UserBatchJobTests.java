@@ -5,6 +5,7 @@ import com.mongodb.MongoClientSettings;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
+import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,10 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mongodb.MongoDBContainer;
+import org.testcontainers.mysql.MySQLContainer;
 
 import javax.sql.DataSource;
 
@@ -42,7 +43,7 @@ class UserBatchJobTests {
 
     @Container
     @ServiceConnection
-    private final static MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:lts")
+    private final static MySQLContainer MYSQL_CONTAINER = new MySQLContainer("mysql:lts")
             .withInitScript("org/springframework/batch/core/schema-mysql.sql");
 
     @Container
