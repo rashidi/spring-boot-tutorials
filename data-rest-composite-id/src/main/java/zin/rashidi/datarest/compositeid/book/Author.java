@@ -19,6 +19,7 @@ class Author {
     @Embeddable
     static class Id implements Serializable {
 
+        @GeneratedValue
         private Long id;
 
         public Long id() {

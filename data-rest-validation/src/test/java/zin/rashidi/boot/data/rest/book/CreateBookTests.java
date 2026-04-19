@@ -17,7 +17,6 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRe
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.rest.webmvc.support.RepositoryConstraintViolationExceptionMessage.ValidationError;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
@@ -73,6 +72,35 @@ class CreateBookTests {
         headers.setContentType(APPLICATION_JSON);
 
         return headers;
+    }
+
+    static class ValidationError {
+
+        private String entity;
+        private String property;
+        private Object invalidValue;
+        private String message;
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setEntity(String entity) {
+            this.entity = entity;
+        }
+
+        public void setProperty(String property) {
+            this.property = property;
+        }
+
+        public void setInvalidValue(Object invalidValue) {
+            this.invalidValue = invalidValue;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
     }
 
     static class RepositoryRestErrorResponse {
