@@ -28,7 +28,7 @@ class CreateUserTests {
 
     @Container
     @ServiceConnection
-    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest").withReplicaSet();
 
     @Autowired
     private TestRestTemplate restTemplate;

@@ -11,7 +11,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
  */
 @Configuration
 @EnableCaching
-class CacheConfiguration {
+public class CacheConfiguration {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
