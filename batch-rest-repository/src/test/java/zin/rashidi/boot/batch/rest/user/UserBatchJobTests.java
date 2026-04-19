@@ -38,7 +38,8 @@ import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.MongoTestConfig
  */
 @Testcontainers
 @SpringBatchTest
-@SpringBootTest(classes = { BatchTestConfiguration.class, MongoTestConfiguration.class, UserJobConfiguration.class }, webEnvironment = NONE)
+@SpringBootTest(classes = { BatchTestConfiguration.class, MongoTestConfiguration.class, UserJobConfiguration.class }, webEnvironment = NONE,
+        properties = "batch.users.resource=classpath:users.json")
 class UserBatchJobTests {
 
     @Container

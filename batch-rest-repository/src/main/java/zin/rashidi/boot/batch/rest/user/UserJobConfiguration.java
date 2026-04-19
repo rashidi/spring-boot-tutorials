@@ -13,9 +13,10 @@ import org.springframework.batch.infrastructure.item.data.builder.MongoItemWrite
 import org.springframework.batch.infrastructure.item.json.JacksonJsonObjectReader;
 import org.springframework.batch.infrastructure.item.json.JsonItemReader;
 import org.springframework.batch.infrastructure.item.json.builder.JsonItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -32,11 +33,14 @@ class UserJobConfiguration {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final MongoOperations mongo;
+    private final Resource usersResource;
 
-    UserJobConfiguration(JobRepository jobRepository, PlatformTransactionManager transactionManager, MongoOperations mongo) {
+    UserJobConfiguration(JobRepository jobRepository, PlatformTransactionManager transactionManager, MongoOperations mongo,
+                         @Value("${batch.users.resource:https://jsonplaceholder.typicode.com/users}") Resource usersResource) {
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.mongo = mongo;
+        this.usersResource = usersResource;
     }
 
     @Bean
@@ -53,7 +57,7 @@ class UserJobConfiguration {
                 .build();
     }
 
-    private JsonItemReader<User> reader() throws MalformedURLException {
+    private JsonItemReader<User> reader() {
         JacksonJsonObjectReader<User> jsonObjectReader = new JacksonJsonObjectReader<>(User.class);
 
         jsonObjectReader.setMapper(OBJECT_MAPPER);
@@ -61,7 +65,7 @@ class UserJobConfiguration {
         return new JsonItemReaderBuilder<User>()
                 .name("userReader")
                 .jsonObjectReader(jsonObjectReader)
-                .resource(new UrlResource("https://jsonplaceholder.typicode.com/users"))
+                .resource(usersResource)
                 .build();
     }
 

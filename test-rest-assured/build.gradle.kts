@@ -24,7 +24,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-mongodb")
-    testImplementation("io.rest-assured:rest-assured:5.5.2")
+    testImplementation("io.rest-assured:rest-assured:6.0.0")
     testImplementation("org.apache.httpcomponents.client5:httpclient5:5.4.4")
 }
 
