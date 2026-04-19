@@ -61,7 +61,8 @@ class UserJobConfiguration {
 
     private Step step(JobRepository jobRepository, PlatformTransactionManager transactionManager, DataSource dataSource) {
         return new StepBuilder("userStep", jobRepository)
-                .<UserFile, User>chunk(10, transactionManager)
+                .<UserFile, User>chunk(10)
+                .transactionManager(transactionManager)
                 .reader(reader())
                 .processor(processor())
                 .writer(writer(dataSource))

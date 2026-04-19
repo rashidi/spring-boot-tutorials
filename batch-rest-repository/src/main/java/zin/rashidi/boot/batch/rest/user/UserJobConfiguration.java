@@ -43,7 +43,8 @@ class UserJobConfiguration {
 
     private Step step() throws MalformedURLException {
         return new StepBuilder("userStep", jobRepository)
-                .<User, User>chunk(10, transactionManager)
+                .<User, User>chunk(10)
+                .transactionManager(transactionManager)
                 .reader(reader())
                 .writer(writer())
                 .build();
