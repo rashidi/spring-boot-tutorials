@@ -4,6 +4,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 /**
@@ -15,7 +16,9 @@ public class CacheConfiguration {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        return RedisCacheManager.create(connectionFactory);
+        var cacheWriter = RedisCacheWriter.create(connectionFactory,
+                configurer -> configurer.immediateWrites());
+        return RedisCacheManager.builder(cacheWriter).build();
     }
 
 }
