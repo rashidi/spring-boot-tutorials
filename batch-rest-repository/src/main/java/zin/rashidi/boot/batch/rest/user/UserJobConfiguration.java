@@ -1,6 +1,7 @@
 package zin.rashidi.boot.batch.rest.user;
 
 import java.net.MalformedURLException;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -24,7 +25,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 class UserJobConfiguration {
 
-    private static final JsonMapper OBJECT_MAPPER = new JsonMapper();
+    private static final JsonMapper OBJECT_MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+            .build();
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;

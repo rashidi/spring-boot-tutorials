@@ -1,5 +1,6 @@
 package zin.rashidi.boot.batch.user;
 
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -25,7 +26,9 @@ import javax.sql.DataSource;
 @Configuration
 class UserJobConfiguration {
 
-    private static final JsonMapper OBJECT_MAPPER = new JsonMapper();
+    private static final JsonMapper OBJECT_MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+            .build();
 
     private JsonItemReader<UserFile> reader() {
         JacksonJsonObjectReader<UserFile> reader = new JacksonJsonObjectReader<>(UserFile.class);
