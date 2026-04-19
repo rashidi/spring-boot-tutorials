@@ -115,7 +115,7 @@ class UserBatchJobTests {
     private final static MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
 
     @Autowired
-    private JobLauncherTestUtils launcher;
+    private JobOperatorTestUtils operator;
 
     @Autowired
     private MongoOperations mongoOperations;
@@ -125,7 +125,7 @@ class UserBatchJobTests {
     void launch() {
 
         await().atMost(ofSeconds(30)).untilAsserted(() -> {
-            var execution = launcher.launchJob();
+            var execution = operator.startJob();
 
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });

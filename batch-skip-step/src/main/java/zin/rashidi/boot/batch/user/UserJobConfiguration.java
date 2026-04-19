@@ -1,17 +1,18 @@
 package zin.rashidi.boot.batch.user;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
-import org.springframework.batch.item.json.JacksonJsonObjectReader;
-import org.springframework.batch.item.json.JsonItemReader;
-import org.springframework.batch.item.json.builder.JsonItemReaderBuilder;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.infrastructure.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.infrastructure.item.json.JacksonJsonObjectReader;
+import org.springframework.batch.infrastructure.item.json.JsonItemReader;
+import org.springframework.batch.infrastructure.item.json.builder.JsonItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -25,7 +26,9 @@ import javax.sql.DataSource;
 @Configuration
 class UserJobConfiguration {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final JsonMapper OBJECT_MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+            .build();
 
     private JsonItemReader<UserFile> reader() {
         JacksonJsonObjectReader<UserFile> reader = new JacksonJsonObjectReader<>(UserFile.class);
@@ -61,7 +64,8 @@ class UserJobConfiguration {
 
     private Step step(JobRepository jobRepository, PlatformTransactionManager transactionManager, DataSource dataSource) {
         return new StepBuilder("userStep", jobRepository)
-                .<UserFile, User>chunk(10, transactionManager)
+                .<UserFile, User>chunk(10)
+                .transactionManager(transactionManager)
                 .reader(reader())
                 .processor(processor())
                 .writer(writer(dataSource))

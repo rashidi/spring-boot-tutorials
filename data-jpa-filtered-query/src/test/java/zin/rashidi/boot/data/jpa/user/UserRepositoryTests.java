@@ -4,13 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mysql.MySQLContainer;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ class UserRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:lts");
+    private static final MySQLContainer mysql = new MySQLContainer("mysql:lts");
 
     @Autowired
     private UserRepository users;

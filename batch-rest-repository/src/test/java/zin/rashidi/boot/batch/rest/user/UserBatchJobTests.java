@@ -4,8 +4,9 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
-import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.batch.core.configuration.support.JdbcDefaultBatchConfiguration;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.test.JobOperatorTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -17,10 +18,10 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mongodb.MongoDBContainer;
+import org.testcontainers.mysql.MySQLContainer;
 
 import javax.sql.DataSource;
 
@@ -28,7 +29,7 @@ import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.batch.core.ExitStatus.COMPLETED;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.BatchTestConfiguration;
 import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.MongoTestConfiguration;
 
@@ -37,12 +38,13 @@ import static zin.rashidi.boot.batch.rest.user.UserBatchJobTests.MongoTestConfig
  */
 @Testcontainers
 @SpringBatchTest
-@SpringBootTest(classes = { BatchTestConfiguration.class, MongoTestConfiguration.class, UserJobConfiguration.class }, webEnvironment = NONE)
+@SpringBootTest(classes = { BatchTestConfiguration.class, MongoTestConfiguration.class, UserJobConfiguration.class }, webEnvironment = NONE,
+        properties = "batch.users.resource=classpath:users.json")
 class UserBatchJobTests {
 
     @Container
     @ServiceConnection
-    private final static MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:lts")
+    private final static MySQLContainer MYSQL_CONTAINER = new MySQLContainer("mysql:lts")
             .withInitScript("org/springframework/batch/core/schema-mysql.sql");
 
     @Container
@@ -50,7 +52,7 @@ class UserBatchJobTests {
     private final static MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
 
     @Autowired
-    private JobLauncherTestUtils launcher;
+    private JobOperatorTestUtils operator;
 
     @Autowired
     private MongoOperations mongoOperations;
@@ -60,7 +62,7 @@ class UserBatchJobTests {
     void launch() {
 
         await().atMost(ofSeconds(30)).untilAsserted(() -> {
-            var execution = launcher.launchJob();
+            var execution = operator.startJob();
 
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });
@@ -71,7 +73,7 @@ class UserBatchJobTests {
     }
 
     @TestConfiguration
-    static class BatchTestConfiguration extends DefaultBatchConfiguration {
+    static class BatchTestConfiguration extends JdbcDefaultBatchConfiguration {
 
         @Override
         protected DataSource getDataSource() {

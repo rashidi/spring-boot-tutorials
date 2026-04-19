@@ -3,8 +3,9 @@ package zin.rashidi.boot.batch.user;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
-import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.batch.core.configuration.support.JdbcDefaultBatchConfiguration;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.test.JobOperatorTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -16,9 +17,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mysql.MySQLContainer;
 
 import javax.sql.DataSource;
 
@@ -26,7 +27,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.batch.core.ExitStatus.COMPLETED;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 import static zin.rashidi.boot.batch.user.UserBatchJobTests.BatchTestConfiguration;
 import static zin.rashidi.boot.batch.user.UserBatchJobTests.JdbcTestConfiguration;
 
@@ -51,10 +52,10 @@ class UserBatchJobTests {
 
     @Container
     @ServiceConnection
-    private final static MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:lts");
+    private final static MySQLContainer MYSQL_CONTAINER = new MySQLContainer("mysql:lts");
 
     @Autowired
-    private JobLauncherTestUtils launcher;
+    private JobOperatorTestUtils operator;
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -64,7 +65,7 @@ class UserBatchJobTests {
     void findAll() {
 
         await().atMost(10, SECONDS).untilAsserted(() -> {
-            var execution = launcher.launchJob();
+            var execution = operator.startJob();
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });
 
@@ -80,7 +81,7 @@ class UserBatchJobTests {
     void skipByNullOutput() {
 
         await().atMost(10, SECONDS).untilAsserted(() -> {
-            var execution = launcher.launchJob();
+            var execution = operator.startJob();
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });
 
@@ -95,7 +96,7 @@ class UserBatchJobTests {
     void skipByException() {
 
         await().atMost(10, SECONDS).untilAsserted(() -> {
-            var execution = launcher.launchJob();
+            var execution = operator.startJob();
             assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
         });
 
@@ -111,7 +112,7 @@ class UserBatchJobTests {
     }
 
     @TestConfiguration
-    static class BatchTestConfiguration extends DefaultBatchConfiguration {
+    static class BatchTestConfiguration extends JdbcDefaultBatchConfiguration {
 
         @Override
         @Bean
