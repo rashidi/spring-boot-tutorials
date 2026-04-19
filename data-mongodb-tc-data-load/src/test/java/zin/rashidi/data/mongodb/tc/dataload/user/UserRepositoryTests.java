@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.repository.init.Jackson2RepositoryPopulatorFactoryBean;
+import org.springframework.data.repository.init.JacksonRepositoryPopulatorFactoryBean;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.mongodb.MongoDBContainer;
@@ -54,8 +54,8 @@ class UserRepositoryTests {
     static class RepositoryPopulatorTestConfiguration {
 
         @Bean
-        public Jackson2RepositoryPopulatorFactoryBean jacksonRepositoryPopulator() {
-            var populator = new Jackson2RepositoryPopulatorFactoryBean();
+        public JacksonRepositoryPopulatorFactoryBean jacksonRepositoryPopulator() {
+            var populator = new JacksonRepositoryPopulatorFactoryBean();
             populator.setResources(new Resource[] { new ClassPathResource("users.json") });
             return populator;
         }
