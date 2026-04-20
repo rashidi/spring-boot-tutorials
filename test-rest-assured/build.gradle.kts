@@ -25,7 +25,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-mongodb")
     testImplementation("io.rest-assured:rest-assured:6.0.0")
-    testImplementation("org.apache.httpcomponents.client5:httpclient5:5.4.4")
+    testImplementation("org.apache.httpcomponents.client5:httpclient5:5.6.1")
 }
 
 tasks.named<Test>("test") {
