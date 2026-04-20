@@ -163,7 +163,7 @@ First, we will have to add `jackson-databind` as our dependency in link:${url-qu
 [source,groovy]
 ----
 dependencies {
-    testImplementation "com.fasterxml.jackson.core:jackson-databind"
+    testImplementation "tools.jackson.core:jackson-databind"
 }
 ----
 
