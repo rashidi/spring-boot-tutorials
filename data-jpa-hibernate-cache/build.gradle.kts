@@ -18,7 +18,11 @@ repositories {
 }
 
 dependencies {
-	implementation("org.ehcache:ehcache:3.10.9:jakarta")
+	implementation("org.ehcache:ehcache") {
+		artifact {
+			classifier = "jakarta"
+		}
+	}
 	implementation("org.hibernate.orm:hibernate-jcache")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	runtimeOnly("org.postgresql:postgresql")
