@@ -28,6 +28,7 @@ repositories {
 dependencies {
     implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"))
 
+    implementation("org.springframework.boot:spring-boot-restclient")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.cloud:spring-cloud-starter-bootstrap")
     implementation("org.springframework.cloud:spring-cloud-config-server")
