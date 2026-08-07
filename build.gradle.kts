@@ -30,6 +30,7 @@ dependencies {
 
 subprojects {
     apply(plugin = "jacoco")
+    apply(plugin = "org.sonarqube")
 
     // Only configure the test task if it exists
     tasks.matching { it.name == "test" }.configureEach {
