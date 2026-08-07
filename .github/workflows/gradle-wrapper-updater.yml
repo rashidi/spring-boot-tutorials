@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: "0 0 * * 5"
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-gradle-wrapper:
     runs-on: ubuntu-latest
@@ -24,4 +28,4 @@ jobs:
         with:
           labels: dependencies
           merge-method: SQUASH
-          repo-token: ${{ secrets.GRADLE_UPDATE_PAT }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
