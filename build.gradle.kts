@@ -4,7 +4,7 @@ plugins {
     java
     id("org.springframework.boot") version "4.1.0" apply false
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.sonarqube") version "7.3.1.8318"
+    id("org.sonarqube") version "7.4.0.8496"
     id("jacoco-report-aggregation")
 }
 
