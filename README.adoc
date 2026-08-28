@@ -1,11 +1,14 @@
-= Spring Boot: Samples &amp; Tutorials
-:nofooter:
+= Spring Boot Tutorials
+Rashidi Zin <rashidi@zin.my>
+1.0, July 20, 2023: Initial version
+:toc:
 :icons: font
+:source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials
 :url-docs: https://rashidi.github.io/spring-boot-tutorials
 
-Samples and tutorials for https://spring.io/projects/spring-boot[Spring Boot] modules such as, but not limited to,
-Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial is equipped
+Spring Boot Tutorials contains various tutorials for various Spring projects such as Spring Boot, Spring Security,
+Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Modulith. Each tutorial comes
 with source code in individual submodules and can be found on {url-quickref}[GitHub].
 
 image:https://img.shields.io/badge/Java_-25-blue?style=flat-square[Static Badge]
@@ -13,17 +16,15 @@ image:https://img.shields.io/badge/Spring_Boot-4.1.1-blue?style=flat-square&logo
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/gradle-build.yml?style=flat-square&logo=githubactions&color=blue[Gradle Build]
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/build-and-publish-antora.yml?style=flat-square&logo=antora&label=Antora&color=blue[Antora Site Status, link={url-docs}]
 image:https://img.shields.io/sonar/coverage/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Coverage]
+image:https://img.shields.io/sonar/tech_debt/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Tech Debt]
+image:https://img.shields.io/sonar/quality_gate/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Quality Gate]
+image:https://img.shields.io/github/license/rashidi/spring-boot-tutorials?style=flat-square&color=blue[License - Unlicense]
 
 == Motivation
 
-While it is common to find https://spring.io/projects/spring-boot[Spring Boot] tutorials on the Internet, it is
-challenging to find tutorials that are up-to-date and include automated tests to demonstrate the implementation and
-ensure stability.
-
-== Commitment
-
-Continual improvement is fundamental in software development. This repository is committed in ensuring adherence to
-best practices and keeping all dependencies up-to-date. The quality of these tutorials and the knowledge imparted is,
+These tutorials are created with testing and best practices in mind, inspired by daily work and questions from the
+community. The goal is to provide a reference for developers to learn and apply in their projects. I have chosen not to
+use mock frameworks in tests, opting instead to write integration tests with actual databases and services. This is,
 and always will be, my primary goal.
 
 With the help of https://github.com/dependabot[Dependabot], each tutorial is also kept up-to-date with the latest
@@ -32,12 +33,11 @@ with https://plugins.gradle.org/plugin/org.springframework.boot/4.1.1[Spring Boo
 
 == Documentation
 
-All tutorials are documented in AsciiDoc format and published as an https://antora.org/[Antora] site at {url-docs}[Spring Boot Tutorials]. The documentation is automatically generated and published whenever changes are made to the documentation files or the tutorials themselves.
-
-== Topics
+All tutorials are documented in AsciiDoc format and published as an https://antora.org[Antora] site at
+{url-docs}[rashidi.github.io/spring-boot-tutorials].
 
 |===
-|Topic |Description
+|Tutorial |Description
 
 |link:batch-rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
 |link:batch-skip-step[Spring Batch: Skip Specific Data] |Skip processing specific data based on business logic in Spring Batch
@@ -45,6 +45,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:data-domain-events[Spring Data Domain Events] |Publish Domain Events with Spring Data
 |link:data-envers-audit[Spring Data Envers Audit] |Enable with Entity Revisions using Spring Data Envers
 |link:data-jdbc-audit[Spring Data JDBC Audit] |Enable Audit with Spring Data JDBC
+|link:data-jdbc-optimistic-locking[Spring Data JDBC: Optimistic Locking] |Implement Optimistic Locking with Spring Data JDBC using @Version
 |link:data-jdbc-schema-generation[Spring Data JDBC: Generate Liquibase Changeset] |Generate Liquibase changeset with Spring Data JDBC
 |link:data-jpa-audit[Spring Data JPA Audit] |Enable Audit with Spring Data JPA
 |link:data-jpa-event[Spring Data JPA: Event Driven] |Implement `Entity` validation at `Repository` level through `EventListeners`
@@ -53,21 +54,17 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:data-redis-cache[Spring Data Redis: Implementing Caching with Spring Data Redis] |Implement caching with Spring Data Redis to improve application performance and compare with Hibernate second level caching
 |link:data-mongodb-audit[Spring Data MongoDB Audit] |Enable Audit with Spring Data MongoDB
 |link:data-mongodb-full-text-search[Spring Data MongoDB: Full Text Search] |Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with Spring Data MongoDB
+|link:data-mongodb-tc-data-load[Spring Data MongoDB: Data Load with Testcontainers] |Load data dynamically with Testcontainers for Spring Data MongoDB
 |link:data-mongodb-transactional[Spring Data MongoDB: Transactional] |Enable `@Transactional` support for Spring Data MongoDB
-|link:data-repository-definition[Spring Data: Repository Definition] |Implement custom repository interfaces with `@RepositoryDefinition` annotation
-|link:data-rest-composite-id[Spring Data REST with Composite ID] |Implementing and exposing entities with composite IDs through Spring Data REST
-|link:data-rest-validation[Spring Data REST: Validation] |Perform validation with Spring Data REST
-|link:graphql[Spring GraphQL Server] |Implement GraphQL server with Spring GraphQL Server
-|link:jooq[jOOQ] | Implement an alternative to Jpa using https://www.jooq.org/[jOOQ] and Gradle
-|link:modulith[Spring Modulith: Building Modular Monolithic Applications] | Structure Spring Boot applications into well-defined modules with clear boundaries
-|link:data-mongodb-tc-data-load[Spring Test: Load data with Testcontainers] |Load test data with Testcontainers instead of `BeforeEach`
-|link:test-execution-listeners[Spring Test: Test Execution Listeners] |Implement custom `TestExecutionListener` to manage data in tests
-|link:test-rest-assured[Spring Test: Integration with RestAssured] | Implement Behaviour Driven Development with https://rest-assured.io/[RestAssured]
-|link:test-slice-tests-rest[Spring Test: Implementing Slice Tests for REST application] | Dive into available options to implement tests with Spring Boot's test components
-|link:web-rest-client[Spring Web: REST Clients for calling Synchronous API] | Implement REST client to perform synchronous API calls
-|link:web-thymeleaf-xss[Spring Web: Preventing XSS with Thymeleaf] |Prevent Cross-Site Scripting (XSS) attacks in Spring Boot applications using Spring Security and Thymeleaf
+|link:data-repository-definition[Spring Data Repository Definition] |Customize Spring Data Repository with `@RepositoryDefinition`
+|link:data-rest-composite-id[Spring Data REST: Composite Id] |Expose entities with composite ID using Spring Data REST
+|link:data-rest-validation[Spring Data REST: Custom Validation] |Implement custom validation for Spring Data REST endpoints
+|link:graphql[Spring GraphQL] |Getting started with Spring GraphQL
+|link:jooq[jOOQ] |Typesafe SQL with jOOQ and Spring Boot
+|link:modulith[Spring Modulith] |Building modular applications with Spring Modulith
+|link:test-execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
+|link:test-rest-assured[Spring Test: REST Assured Integration] |Integration testing with REST Assured
+|link:test-slice-tests-rest[Spring Test: Slice Tests for REST Application] |Implementing Slice Tests for REST application
+|link:web-rest-client[Spring Web: Synchronous REST Clients] |Implement synchronous REST client using `RestClient`, `WebClient`, and `RestTemplate`
+|link:web-thymeleaf-xss[Spring Web: Cross-Site Scripting (XSS) with Thymeleaf] |Prevent Cross-Site Scripting (XSS) with Thymeleaf
 |===
-
-
-
-

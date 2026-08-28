@@ -8,6 +8,7 @@
 ** xref:data-domain-events.adoc[Domain Events]
 ** xref:data-envers-audit.adoc[Envers Audit]
 ** xref:data-jdbc-audit.adoc[JDBC Audit]
+** xref:data-jdbc-optimistic-locking.adoc[JDBC Optimistic Locking]
 ** xref:data-jdbc-schema-generation.adoc[JDBC Schema Generation]
 ** xref:data-jpa-audit.adoc[JPA Audit]
 ** xref:data-jpa-event.adoc[Event Driven]
@@ -15,6 +16,7 @@
 ** xref:data-jpa-hibernate-cache.adoc[Implement Hibernate Second Level Caching]
 ** xref:data-mongodb-audit.adoc[MongoDB Audit]
 ** xref:data-mongodb-full-text-search.adoc[MongoDB Full Text Search]
+** xref:data-mongodb-tc-data-load.adoc[Load data with Testcontainers]
 ** xref:data-mongodb-transactional.adoc[MongoDB Transactional]
 ** xref:data-redis-cache.adoc[Implement Caching with Spring Data Redis]
 ** xref:data-repository-definition.adoc[Repository Definition]
@@ -27,10 +29,9 @@
 * jOOQ
 ** xref:jooq.adoc[jOOQ]
 * Spring Test
-** xref:data-mongodb-tc-data-load.adoc[Load data with Testcontainers]
 ** xref:test-execution-listeners.adoc[Test Execution Listeners]
 ** xref:test-rest-assured.adoc[Integration with RestAssured]
 ** xref:test-slice-tests-rest.adoc[Implementing Slice Tests for REST application]
 * Spring Web
 ** xref:web-rest-client.adoc[REST Clients for calling Synchronous API]
-** xref:web-thymeleaf-xss.adoc[]
+** xref:web-thymeleaf-xss.adoc[Cross-Site Scripting (XSS) with Thymeleaf]
