@@ -2,11 +2,13 @@
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, September 25, 2023
+:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-mongodb-full-text-search
 
 Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with link:https://spring.io/projects/spring-data-mongodb[Spring Data MongoDB].
+
 
 == Background
 

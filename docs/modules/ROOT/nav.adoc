@@ -35,3 +35,4 @@
 * Spring Web
 ** xref:web-rest-client.adoc[REST Clients for calling Synchronous API]
 ** xref:web-thymeleaf-xss.adoc[Cross-Site Scripting (XSS) with Thymeleaf]
+* xref:modulith-events.adoc[Spring Modulith: Event Publication Registry with PostgreSQL]

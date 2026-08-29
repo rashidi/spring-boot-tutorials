@@ -1,8 +1,10 @@
 = Spring Data Redis: Implementing Caching with Spring Data Redis
 :source-highlighter: highlight.js
-:highlightjs-languages: java, kotlin
+:highlightjs-languages: java, groovy
 Rashidi Zin <rashidi@zin.my>
 1.0, July 20, 2025: Initial version
+:toc:
+:nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-redis-cache
 

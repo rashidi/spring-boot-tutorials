@@ -1,6 +1,7 @@
 = Spring Data JDBC: Generate Liquibase Changeset
 Rashidi Zin <rashidi@zin.my>
 1.0, April 13, 2025: Initial version
+:toc:
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jdbc-schema-generation
@@ -121,10 +122,10 @@ Let's break down the key parts of this code:
 1. We use `@DataJdbcTest` to set up a Spring Data JDBC test environment.
 
 2. The `@BeforeAll` method is where we generate the changeset:
-- We inject the `RelationalMappingContext` which contains metadata about our entities
-- We set the initial entity set to include our `Author` and `Book` classes
-- We create a new `LiquibaseChangeSetWriter` with the context
-- We write the changeset to a file named "user.yaml"
+   - We inject the `RelationalMappingContext` which contains metadata about our entities
+   - We set the initial entity set to include our `Author` and `Book` classes
+   - We create a new `LiquibaseChangeSetWriter` with the context
+   - We write the changeset to a file named "user.yaml"
 
 == Test Configuration
 

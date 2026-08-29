@@ -2,6 +2,7 @@
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.1, November 26, 2024
+:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-envers-audit

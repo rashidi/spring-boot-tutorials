@@ -2,6 +2,8 @@
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, July 19, 2025
+:toc:
+:nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-hibernate-cache
 
@@ -153,10 +155,10 @@ This test does the following:
 4. Orders the tests to ensure they run in sequence
 5. Gets the Hibernate Statistics object from the EntityManagerFactory
 6. In the first test (`initial`), it verifies that on the initial retrieval:
-* The data is fetched from the database and stored in the cache (cache put count = 1)
-* The data is not fetched from the cache (cache hit count = 0)
+   * The data is fetched from the database and stored in the cache (cache put count = 1)
+   * The data is not fetched from the cache (cache hit count = 0)
 7. In the second test (`subsequent`), it verifies that on subsequent retrieval:
-* The data is fetched from the cache (cache hit count = 1)
+   * The data is fetched from the cache (cache hit count = 1)
 
 The test configuration uses a simple Testcontainers setup:
 

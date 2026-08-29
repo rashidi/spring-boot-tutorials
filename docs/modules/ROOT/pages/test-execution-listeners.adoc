@@ -2,11 +2,13 @@
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, September 19, 2023
+:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-execution-listeners
 
 We often make use of `@BeforeEach` and `@AfterEach` methods to prepare and clean up test data. However, this approach is not scalable and can be difficult to maintain. In this article, we will look at how we can use `TestExecutionListener` to manage test data.
+
 
 == Background
 

@@ -1,6 +1,7 @@
 = Spring Data JDBC: Implement Auditing
 Rashidi Zin <rashidi@zin.my>
 1.0, December 20, 2024: Initial version
+:toc:
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jdbc-audit
@@ -8,6 +9,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jdbc
 
 We have explored on how to implement auditing with link:../data-jpa-audit/[Spring Data Jpa], link:../data-envers-audit/[Spring Data Enver], and link:../data-mongodb-audit/[Spring Data Mongo]. In this tutorial, we will implement auditing with https://spring.io/projects/spring-data-jdbc[Spring Data JDBC].
+
 
 == Background
 
@@ -168,3 +170,5 @@ class UserAuditTests {
 
 }
 ----
+
+Full implementation of the test can be found in link:{source-test}/user/UserAuditTests.java[`UserAuditTests`].

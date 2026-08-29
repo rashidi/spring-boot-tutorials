@@ -2,11 +2,13 @@
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, September 3, 2023
+:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/graphql
 
 Implementing https://graphql.org/[GraphQL] server with https://spring.io/guides/gs/graphql-server/[Spring Boot GraphQL Server].
+
 
 == Background
 

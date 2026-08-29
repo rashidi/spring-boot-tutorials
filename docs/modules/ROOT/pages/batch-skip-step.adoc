@@ -2,11 +2,13 @@
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.0, October 1, 2023
+:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch-skip-step
 
 Skip processing specific data through business logic in Spring Batch.
+
 
 == Background
 

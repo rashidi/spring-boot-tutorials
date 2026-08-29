@@ -2,11 +2,13 @@
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, October 12, 2023
+:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-filtered-query
 
 Implement global filter query which involves several `Entity` with Spring Data Jpa.
+
 
 == Background
 

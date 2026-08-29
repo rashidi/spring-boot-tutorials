@@ -3,11 +3,13 @@
 :highlightjs-languages: java, groovy
 Rashidi Zin <rashidi@zin.my>
 1.0, November 08, 2023: Initial version
+:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/jooq
 
 While JPA is commonly used in Java applications, it is not the only option. In this tutorial, we will look at how to use jOOQ with Spring Boot and Gradle.
+
 
 == Background
 

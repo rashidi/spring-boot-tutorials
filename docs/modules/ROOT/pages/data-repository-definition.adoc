@@ -2,11 +2,13 @@
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, March 22, 2025
+:toc:
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-repository-definition
 
 Implement custom repository interfaces with @RepositoryDefinition annotation.
+
 
 == Background
 
@@ -94,3 +96,5 @@ The test verifies that our repository method `findByTitleContainingIgnoreCase` c
 == Conclusion
 
 The `@RepositoryDefinition` annotation provides a way to create custom repository interfaces with only the methods you need, without inheriting all the methods from base interfaces. This gives you more control over your repository's API and makes your code more explicit about what operations are supported.
+
+While extending base interfaces like `CrudRepository` or `JpaRepository` is convenient for most cases, using `@RepositoryDefinition` can be a good choice when you want to limit the operations that can be performed on your entities or when you want to create a more focused and explicit API.

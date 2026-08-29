@@ -2,8 +2,9 @@
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, May 25, 2023
+:toc:
+:nofooter:
 :icons: font
-:source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web-thymeleaf-xss
 
 Prevent Cross-Site Scripting (XSS) attacks in Spring Boot applications using Spring Security and Thymeleaf.
