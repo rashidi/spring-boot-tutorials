@@ -19,10 +19,6 @@ on:
       - '**/gradle-build.yml'
       - 'gradle.properties'
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   check-changes:
     name: Check for file changes
@@ -54,6 +50,8 @@ jobs:
     needs: check-changes
     if: ${{ needs.check-changes.outputs.build-changes == 'true'  || needs.check-changes.outputs.source-changes == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     outputs:
       build-artifacts: ${{ steps.upload-build-artifacts.outputs.artifact-id }}
     steps:
@@ -88,6 +86,8 @@ jobs:
     name: Dependency Submission
     needs: check-changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     if: ${{ needs.check-changes.outputs.build-changes == 'true' }}
     steps:
       - name: Checkout sources
@@ -109,6 +109,8 @@ jobs:
     needs: [gradle-build, check-changes]
     if: ${{ needs.check-changes.outputs.source-changes == 'true' || needs.check-changes.outputs.gradle-root-changes == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
