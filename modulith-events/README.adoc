@@ -146,6 +146,12 @@ class ModulithEventsApplicationTests {
         modules.verify();
     }
 
+    @Test
+    @DisplayName("Generate module documentation")
+    void renderDocumentation() {
+        new Documenter(modules).writeDocumentation();
+    }
+
 }
 ----
 

@@ -21,9 +21,7 @@ class ModulithEventsApplicationTests {
     @Test
     @DisplayName("Generate module documentation")
     void renderDocumentation() {
-        new Documenter(modules)
-                .writeDocumentation()
-                .writeIndividualFilesAsPlantUml();
+        new Documenter(modules).writeDocumentation();
     }
 
 }
