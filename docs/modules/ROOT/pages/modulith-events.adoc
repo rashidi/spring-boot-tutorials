@@ -1,6 +1,6 @@
 = Spring Modulith: Event Publication Registry with PostgreSQL
 Rashidi Zin <rashidi@zin.my>
-1.0, August 29, 2026: Initial version
+1.1, August 29, 2026: Initial version
 :toc:
 :icons: font
 :source-highlighter: highlight.js
