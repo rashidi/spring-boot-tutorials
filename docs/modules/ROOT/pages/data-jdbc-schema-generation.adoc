@@ -1,0 +1,234 @@
+= Spring Data JDBC: Generate Liquibase Changeset
+Rashidi Zin <rashidi@zin.my>
+1.0, April 13, 2025: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jdbc-schema-generation
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/jdbcscgm
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/jdbcscgm
+
+This tutorial demonstrates how to generate a Liquibase changeset from Spring Data JDBC entities. This is useful when you want to automatically create database schema migration scripts based on your domain model.
+
+== Background
+
+https://www.liquibase.org/[Liquibase] is a database schema migration tool that helps manage database changes across different environments. Spring Data JDBC provides a convenient way to generate Liquibase changesets from your entity classes using the `LiquibaseChangeSetWriter` class.
+
+This approach allows you to:
+
+- Automatically generate database schema from your domain model
+- Keep your database schema in sync with your code
+- Version control your database changes
+- Apply changes consistently across different environments
+
+== Domain Model
+
+For this tutorial, we'll use a simple book catalog domain model with two entities: `Book` and `Author`.
+
+=== Book Entity
+
+The `Book` entity represents a book in our catalog:
+
+[source,java]
+----
+@Table
+class Book {
+
+    @Id
+    private Long isbn;
+    private String title;
+
+    @MappedCollection
+    private Author author;
+
+}
+----
+
+link:{source-main}/book/Book.java[`Book`] is a simple POJO with an ISBN as the primary key, a title, and a reference to an `Author` using the `@MappedCollection` annotation.
+
+=== Author Entity
+
+The `Author` entity represents the author of a book:
+
+[source,java]
+----
+@Table
+class Author {
+
+    @Id
+    private Long id;
+    private String name;
+
+}
+----
+
+link:{source-main}/book/Author.java[`Author`] is also a simple POJO with an ID and a name.
+
+== Repository Interfaces
+
+We'll need repository interfaces for our entities to enable Spring Data JDBC functionality:
+
+[source,java]
+----
+interface BookRepository extends CrudRepository<Book, Long> {
+}
+----
+
+[source,java]
+----
+interface AuthorRepository extends CrudRepository<Author, Long> {
+}
+----
+
+These interfaces extend `CrudRepository` to provide basic CRUD operations for our entities.
+
+== Generating the Changeset
+
+To generate a Liquibase changeset from our entities, we'll use the `LiquibaseChangeSetWriter` class from Spring Data JDBC. This can be done in a test class:
+
+[source,java]
+----
+@Import(TestcontainersConfiguration.class)
+@DataJdbcTest(properties = "spring.liquibase.enabled=false")
+class BookRepositoryTests {
+
+    @BeforeAll
+    static void generateSchema(@Autowired RelationalMappingContext context) throws IOException {
+        context.setInitialEntitySet(Set.of(Author.class, Book.class));
+
+        var writer = new LiquibaseChangeSetWriter(context);
+        writer.writeChangeSet(new FileSystemResource("user.yaml"));
+    }
+
+    @Autowired
+    private BookRepository books;
+
+    @Test
+    void findAll() {
+        books.findAll();
+    }
+
+}
+----
+
+[WARNING]
+====
+When you run this test for the first time, it will fail because the changeset for Book and Author is missing. The test will generate the changeset file, but it won't be applied automatically. After the first run, you'll need to move the generated changeset to your Liquibase changelog directory and configure Liquibase to use it.
+Once done, remove the configuration that disables Liquibase (`"spring.liquibase.enabled=false"`)
+====
+
+Let's break down the key parts of this code:
+
+1. We use `@DataJdbcTest` to set up a Spring Data JDBC test environment.
+
+2. The `@BeforeAll` method is where we generate the changeset:
+   - We inject the `RelationalMappingContext` which contains metadata about our entities
+   - We set the initial entity set to include our `Author` and `Book` classes
+   - We create a new `LiquibaseChangeSetWriter` with the context
+   - We write the changeset to a file named "user.yaml"
+
+== Test Configuration
+
+For testing, we use Testcontainers to provide a PostgreSQL database:
+
+[source,java]
+----
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgresContainer() {
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+    }
+
+}
+----
+
+This configuration creates a PostgreSQL container for our tests and automatically configures the connection using Spring Boot's `@ServiceConnection` annotation.
+
+== Generated Changeset
+
+The generated changeset will look something like this:
+
+[source,yaml]
+----
+databaseChangeLog:
+- changeSet:
+    id: '1744500868871'
+    author: Spring Data Relational
+    objectQuotingStrategy: LEGACY
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: name
+            type: VARCHAR(255 BYTE)
+        - column:
+            constraints:
+              nullable: false
+            name: book
+            type: BIGINT
+        tableName: author
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: true
+              primaryKey: true
+            name: isbn
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: true
+            name: title
+            type: VARCHAR(255 BYTE)
+        tableName: book
+    - addForeignKeyConstraint:
+        baseColumnNames: book
+        baseTableName: author
+        constraintName: book_isbn_fk
+        referencedColumnNames: isbn
+        referencedTableName: book
+----
+
+This changeset includes:
+- Creation of the `author` table with columns for id, name, and a foreign key to book
+- Creation of the `book` table with columns for isbn and title
+- Addition of a foreign key constraint from author to book
+
+== Using the Generated Changeset
+
+To use the generated changeset in your application:
+
+1. Move the generated file to your Liquibase changelog directory (e.g., `src/main/resources/db/changelog/`)
+2. Include it in your master changelog file:
+
+[source,yaml]
+----
+databaseChangeLog:
+  - include:
+      file: db/changelog/user.yaml
+----
+
+== Conclusion
+
+In this tutorial, we've demonstrated how to generate a Liquibase changeset from Spring Data JDBC entities. This approach provides a convenient way to keep your database schema in sync with your domain model, making it easier to manage database changes across different environments.
+
+The key components we used are:
+- Spring Data JDBC entities with appropriate annotations
+- Repository interfaces extending `CrudRepository`
+- `LiquibaseChangeSetWriter` to generate the changeset
+- Testcontainers for testing with a real database
+
+By following this approach, you can automate the creation of database migration scripts and ensure that your database schema always matches your domain model.
