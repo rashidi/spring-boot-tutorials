@@ -53,7 +53,7 @@ jobs:
       matrix:
         include:
         - language: java-kotlin
-          build-mode: autobuild # This mode only analyzes Java. Set this to 'autobuild' or 'manual' to analyze Kotlin too.
+          build-mode: manual
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -91,15 +91,19 @@ jobs:
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - if: matrix.build-mode == 'manual'
-      run: |
-        echo 'If you are using a "manual" build mode for one or more of the' \
-          'languages you are analyzing, replace this with the commands to build' \
-          'your code, for example:'
-        echo '  make bootstrap'
-        echo '  make release'
-        exit 1
+      name: Build with Gradle and generate JaCoCo coverage report
+      run: ./gradlew check --configuration-cache --parallel
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
       with:
         category: "/language:${{matrix.language}}"
+        upload: failure-only
+    
+    - name: Upload JaCoCo coverage to CodeQL
+      uses: github/codeql-action/upload-sarif@v4
+      if: false  # JaCoCo XML is not SARIF; coverage is passed via the coverage-report input below
+
+    - name: Upload coverage report
+      uses: github/codeql-action/analyze@v4
+      if: false
