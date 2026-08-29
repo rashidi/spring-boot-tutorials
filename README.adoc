@@ -1,7 +1,6 @@
 = Spring Boot Tutorials
 Rashidi Zin <rashidi@zin.my>
 1.0, July 20, 2023: Initial version
-:toc:
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials
@@ -14,7 +13,6 @@ with source code in individual submodules and can be found on {url-quickref}[Git
 image:https://img.shields.io/badge/Java_-25-blue?style=flat-square[Static Badge]
 image:https://img.shields.io/badge/Spring_Boot-4.1.1-blue?style=flat-square&logo=springboot[Spring Boot version]
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/gradle-build.yml?style=flat-square&logo=githubactions&color=blue[Gradle Build]
-image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/build-and-publish-antora.yml?style=flat-square&logo=antora&label=Antora&color=blue[Antora Site Status, link={url-docs}]
 image:https://img.shields.io/sonar/coverage/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Coverage]
 image:https://img.shields.io/sonar/tech_debt/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Tech Debt]
 image:https://img.shields.io/sonar/quality_gate/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Quality Gate]
