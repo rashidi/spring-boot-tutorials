@@ -4,13 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.modulith.events.core.EventPublicationRepository;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
-import zin.rashidi.boot.modulith.events.ModulithEventsApplication;
+import zin.rashidi.boot.modulith.events.TestcontainersConfiguration;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -21,13 +17,9 @@ import static org.awaitility.Awaitility.await;
 /**
  * @author Rashidi Zin
  */
-@Testcontainers
-@SpringBootTest(classes = ModulithEventsApplication.class)
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest
 class OrderEventPublicationTests {
-
-    @Container
-    @ServiceConnection
-    private static final PostgreSQLContainer postgres = new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
 
     @Autowired
     private OrderService orderService;

@@ -4,7 +4,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 /**
  * @author Rashidi Zin
@@ -13,7 +12,7 @@ import java.util.UUID;
 class Order {
 
     @Id
-    private UUID id;
+    private Long id;
 
     private final String customerEmail;
     private final BigDecimal totalAmount;
@@ -25,7 +24,7 @@ class Order {
         this.status = status;
     }
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 

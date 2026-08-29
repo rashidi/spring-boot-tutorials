@@ -17,10 +17,11 @@ repositories {
     mavenCentral()
 }
 
-extra["springModulithVersion"] = "2.1.1"
-
 dependencies {
+    implementation(platform("org.springframework.modulith:spring-modulith-bom:2.1.0"))
+
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.modulith:spring-modulith-starter-core")
     implementation("org.springframework.modulith:spring-modulith-starter-jdbc")
     implementation("org.springframework.modulith:spring-modulith-events-jdbc")
     runtimeOnly("org.postgresql:postgresql")
@@ -33,12 +34,6 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("org.awaitility:awaitility")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.modulith:spring-modulith-bom:${property("springModulithVersion")}")
-    }
 }
 
 tasks.named<Test>("test") {
