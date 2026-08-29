@@ -15,16 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Master Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: master
           fetch-depth: 0
 
       - name: Checkout Antora Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: antora
           path: antora
+          token: '${{ secrets.ANTORA_FILE_SYNC }}'
 
       - name: Sync Files and Update Nav
         run: |
