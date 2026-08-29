@@ -1,4 +1,4 @@
- Spring Boot: Samples & Tutorials
+= Spring Boot: Samples & Tutorials
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials
