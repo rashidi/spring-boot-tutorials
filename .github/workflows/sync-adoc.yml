@@ -1,0 +1,78 @@
+name: Sync Submodule READMEs to Antora
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/README.adoc'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-to-antora:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master Branch
+        uses: actions/checkout@v4
+        with:
+          path: master
+          fetch-depth: 0
+
+      - name: Checkout Antora Branch
+        uses: actions/checkout@v4
+        with:
+          ref: antora
+          path: antora
+
+      - name: Sync Files and Update Nav
+        run: |
+          cd master
+          
+          # Find all README.adoc files in subdirectories (ignores root README.adoc)
+          find . -mindepth 2 -name "README.adoc" | while read file; do
+            # Extract the submodule folder name (e.g., 'batch-skip-step')
+            MODULE_NAME=$(basename $(dirname "$file"))
+          
+            # Define destination paths on the antora branch
+            DEST_DIR="../antora/docs/modules/ROOT/pages"
+            DEST_DOC="${DEST_DIR}/${MODULE_NAME}.adoc"
+            NAV_FILE="../antora/docs/modules/ROOT/nav.adoc"
+          
+            # Ensure destination directory exists and copy the file
+            mkdir -p "$DEST_DIR"
+            cp "$file" "$DEST_DOC"
+          
+            # Extract the AsciiDoc Title (First line starting with '= ')
+            TITLE=$(grep -m 1 "^= " "$file" | sed 's/^= //')
+          
+            # Fallback to the module name if the README lacks a formal title
+            if [ -z "$TITLE" ]; then
+              TITLE="$MODULE_NAME"
+            fi
+          
+            # Append to nav.adoc if the entry does not already exist
+            NAV_ENTRY="* xref:${MODULE_NAME}.adoc[${TITLE}]"
+            if ! grep -q "xref:${MODULE_NAME}.adoc" "$NAV_FILE"; then
+              echo "$NAV_ENTRY" >> "$NAV_FILE"
+            fi
+          done
+
+      - name: Commit and Push to Antora
+        run: |
+          cd antora
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Stage the specific documentation paths
+          git add docs/modules/ROOT/pages/*.adoc
+          git add docs/modules/ROOT/nav.adoc
+          
+          # Commit only if there are actual changes
+          if git diff --staged --quiet; then
+            echo "No README changes to sync."
+          else
+            git commit -m "docs: sync updated README.adoc files from master"
+            git push origin antora
+          fi
