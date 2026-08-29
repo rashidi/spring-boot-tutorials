@@ -1,0 +1,163 @@
+= Spring Data JDBC: Optimistic Locking with @Version
+Rashidi Zin <rashidi@zin.my>
+1.0, August 29, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jdbc-optimistic-locking
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jdbc/locking
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jdbc/locking
+
+In concurrent database operations, preventing lost updates when multiple transactions modify the same record is crucial. In this tutorial, we will explore how to implement optimistic locking with https://spring.io/projects/spring-data-jdbc[Spring Data JDBC] using the `@Version` annotation.
+
+== Background
+
+Optimistic locking assumes that multiple transactions can complete without affecting each other. Before committing an update or delete, the transaction verifies that no other transaction has modified the record.
+
+Spring Data JDBC supports optimistic locking natively via the `@Version` annotation on numeric fields (such as `Long` or `Integer`). When updating an entity, Spring Data JDBC issues an update statement with the version included in the `WHERE` clause:
+
+[source,sql]
+----
+UPDATE users SET name = :name, username = :username, version = :newVersion WHERE id = :id AND version = :version
+----
+
+If the row count returned by the update is `0`, indicating that another transaction has modified or deleted the row concurrently, Spring Data JDBC throws an `OptimisticLockingFailureException`.
+
+== Entity Class
+
+Let's define our aggregate root `User` class with `@Id` and `@Version` annotations:
+
+[source,java]
+----
+@Table("users")
+class User {
+
+    @Id
+    private Long id;
+
+    @Version
+    private Long version;
+
+    private final String name;
+    private String username;
+
+    User(String name, String username) {
+        this.name = name;
+        this.username = username;
+    }
+
+    public User username(String username) {
+        this.username = username;
+        return this;
+    }
+
+}
+----
+
+link:{source-main}/user/User.java[`User`] entity has the `version` field marked with `@Version`. Spring Data JDBC automatically handles initializing and incrementing this field during persistence operations.
+
+== Repository Interface
+
+Next, we create the repository interface - link:{source-main}/user/UserRepository.java[`UserRepository`] which extends Spring Data's `CrudRepository`:
+
+[source,java]
+----
+interface UserRepository extends CrudRepository<User, Long> {
+}
+----
+
+== Verification
+
+We will verify our optimistic locking implementation using database integration tests with `@Testcontainers`, `@DataJdbcTest`, and PostgreSQL.
+
+Spring Data JDBC does not automatically generate database schemas, so we will use `@Sql` to create the `users` table including the `version` column before running the tests:
+
+[source,java]
+----
+@Testcontainers
+@DataJdbcTest
+@Sql(
+        executionPhase = BEFORE_TEST_CLASS,
+        statements = "CREATE TABLE users (id BIGSERIAL PRIMARY KEY, version BIGINT, name TEXT NOT NULL, username TEXT NOT NULL)"
+)
+class UserOptimisticLockingTests {
+
+    @Container
+    @ServiceConnection
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+
+    @Autowired
+    private UserRepository repository;
+
+}
+----
+
+=== Initial Persistence
+
+When persisting a new `User`, Spring Data JDBC automatically initializes the `version` field to `1`:
+
+[source,java]
+----
+class UserOptimisticLockingTests {
+
+    @Test
+    @DisplayName("When a user is persisted Then version field is set to 1")
+    void create() {
+        var user = repository.save(new User("Rashidi Zin", "rashidi"));
+
+        assertThat(ReflectionTestUtils.getField(user, "version")).isEqualTo(1L);
+    }
+
+}
+----
+
+=== Incremental Updates
+
+When updating an existing entity, Spring Data JDBC increments the `version` field automatically:
+
+[source,java]
+----
+class UserOptimisticLockingTests {
+
+    @Test
+    @DisplayName("Given an existing user When I update its username Then version field is incremented")
+    @Sql(statements = "INSERT INTO users (id, version, name, username) VALUES (84, 1, 'Rashidi Zin', 'rashidi');")
+    void update() {
+        var user = repository.findById(84L).orElseThrow();
+        user.username("rashidi.zin");
+
+        var updatedUser = repository.save(user);
+
+        assertThat(ReflectionTestUtils.getField(updatedUser, "version")).isEqualTo(2L);
+    }
+
+}
+----
+
+=== Concurrent Modification Detection
+
+If a transaction attempts to update a record using an outdated version, Spring Data JDBC detects that no rows were updated and throws an `OptimisticLockingFailureException`:
+
+[source,java]
+----
+class UserOptimisticLockingTests {
+
+    @Test
+    @DisplayName("Given an outdated version When updating the user Then OptimisticLockingFailureException should be thrown")
+    @Sql(statements = "INSERT INTO users (id, version, name, username) VALUES (85, 1, 'Rashidi Zin', 'rashidi');")
+    void concurrentUpdate() {
+        var firstCopy = repository.findById(85L).orElseThrow();
+        var secondCopy = repository.findById(85L).orElseThrow();
+
+        firstCopy.username("rashidi.updated");
+        repository.save(firstCopy);
+
+        secondCopy.username("rashidi.concurrent");
+        assertThatThrownBy(() -> repository.save(secondCopy))
+                .isInstanceOf(OptimisticLockingFailureException.class);
+    }
+
+}
+----
+
+Full implementation of the test can be found in link:{source-test}/user/UserOptimisticLockingTests.java[`UserOptimisticLockingTests`].
