@@ -1,4 +1,4 @@
-package zin.rashidi.boot.data.jdbc;
+package zin.rashidi.boot.data.jdbc.locking;
 
 import org.springframework.boot.SpringApplication;
 

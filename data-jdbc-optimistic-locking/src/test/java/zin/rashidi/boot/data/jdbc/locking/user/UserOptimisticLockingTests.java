@@ -1,4 +1,4 @@
-package zin.rashidi.boot.data.jdbc.user;
+package zin.rashidi.boot.data.jdbc.locking.user;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
