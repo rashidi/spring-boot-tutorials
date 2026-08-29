@@ -62,6 +62,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:graphql[Spring GraphQL] |Getting started with Spring GraphQL
 |link:jooq[jOOQ] |Typesafe SQL with jOOQ and Spring Boot
 |link:modulith[Spring Modulith] |Building modular applications with Spring Modulith
+|link:modulith-events[Spring Modulith: Event Publication Registry] |Implement resilient event publication with Spring Modulith and PostgreSQL Outbox
 |link:test-execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
 |link:test-rest-assured[Spring Test: REST Assured Integration] |Integration testing with REST Assured
 |link:test-slice-tests-rest[Spring Test: Slice Tests for REST Application] |Implementing Slice Tests for REST application
