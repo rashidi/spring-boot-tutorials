@@ -8,9 +8,9 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,34 +30,34 @@ class UserOptimisticLockingTests {
 
     @Container
     @ServiceConnection
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+    private static final PostgreSQLContainer postgres = new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
 
     @Autowired
     private UserRepository repository;
 
     @Test
-    @DisplayName("When a user is persisted Then version field is set to 1")
+    @DisplayName("When a user is persisted Then version field is set to 0")
     void create() {
         var user = repository.save(new User("Rashidi Zin", "rashidi"));
 
-        assertThat(ReflectionTestUtils.getField(user, "version")).isEqualTo(1L);
+        assertThat(ReflectionTestUtils.getField(user, "version")).isEqualTo(0L);
     }
 
     @Test
     @DisplayName("Given an existing user When I update its username Then version field is incremented")
-    @Sql(statements = "INSERT INTO users (id, version, name, username) VALUES (84, 1, 'Rashidi Zin', 'rashidi');")
+    @Sql(statements = "INSERT INTO users (id, version, name, username) VALUES (84, 0, 'Rashidi Zin', 'rashidi');")
     void update() {
         var user = repository.findById(84L).orElseThrow();
         user.username("rashidi.zin");
 
         var updatedUser = repository.save(user);
 
-        assertThat(ReflectionTestUtils.getField(updatedUser, "version")).isEqualTo(2L);
+        assertThat(ReflectionTestUtils.getField(updatedUser, "version")).isEqualTo(1L);
     }
 
     @Test
     @DisplayName("Given an outdated version When updating the user Then OptimisticLockingFailureException should be thrown")
-    @Sql(statements = "INSERT INTO users (id, version, name, username) VALUES (85, 1, 'Rashidi Zin', 'rashidi');")
+    @Sql(statements = "INSERT INTO users (id, version, name, username) VALUES (85, 0, 'Rashidi Zin', 'rashidi');")
     void concurrentUpdate() {
         var firstCopy = repository.findById(85L).orElseThrow();
         var secondCopy = repository.findById(85L).orElseThrow();
