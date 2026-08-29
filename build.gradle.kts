@@ -4,7 +4,6 @@ plugins {
     java
     id("org.springframework.boot") version "4.1.1" apply false
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.sonarqube") version "7.4.0.8496"
     id("jacoco-report-aggregation")
 }
 
@@ -26,16 +25,6 @@ dependencies {
 
     subprojects.forEach { p ->
         implementation(project(":${p.name}"))
-    }
-}
-
-sonar {
-    properties {
-        property("sonar.projectKey", "rashidi_spring-boot-tutorials")
-        property("sonar.organization", "rashidi-github")
-        property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.java.binaries", "**/build/classes")
-        property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml")
     }
 }
 
