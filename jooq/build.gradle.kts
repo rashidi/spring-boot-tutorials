@@ -2,7 +2,6 @@ import nu.studer.gradle.jooq.JooqEdition
 import org.jooq.meta.kotlin.*
 
 plugins {
-    id("jacoco-conventions")
     java
     id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"

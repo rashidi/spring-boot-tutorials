@@ -28,6 +28,17 @@ dependencies {
     }
 }
 
+subprojects {
+    apply(plugin = "jacoco")
+
+    // Only configure the test task if it exists
+    tasks.matching { it.name == "test" }.configureEach {
+        if (this is Test) {
+            finalizedBy("jacocoTestReport")
+        }
+    }
+}
+
 tasks.check {
     dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
 }
