@@ -103,35 +103,3 @@ jobs:
           build-scan-publish: true
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
-
-  code-quality:
-    name: Code Quality with Sonar
-    needs: [gradle-build, check-changes]
-    if: ${{ needs.check-changes.outputs.source-changes == 'true' || needs.check-changes.outputs.gradle-root-changes == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0      
-      - name: Set up JDK
-        uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6.3.0
-        with:
-          add-job-summary-as-pr-comment: on-failure
-          build-scan-publish: true
-          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
-          build-scan-terms-of-use-agree: "yes"
-      - name: Download build artifacts
-        uses: actions/download-artifact@v8
-        with:
-          artifact-ids: ${{ needs.gradle-build.outputs.build-artifacts }}
-      - name: Publish Sonar report
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar
