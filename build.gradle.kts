@@ -25,17 +25,7 @@ dependencies {
 
     subprojects.forEach { p ->
         implementation(project(":${p.name}"))
-    }
-}
-
-subprojects {
-    apply(plugin = "jacoco")
-
-    // Only configure the test task if it exists
-    tasks.matching { it.name == "test" }.configureEach {
-        if (this is Test) {
-            finalizedBy("jacocoTestReport")
-        }
+        jacocoAggregation(project(p.path))
     }
 }
 
