@@ -4,6 +4,7 @@ plugins {
     java
     id("org.springframework.boot") version "4.1.1" apply false
     id("io.spring.dependency-management") version "1.1.7"
+    id("jacoco-report-aggregation")
 }
 
 group = "zin.rashidi.boot"
@@ -25,4 +26,19 @@ dependencies {
     subprojects.forEach { p ->
         implementation(project(":${p.name}"))
     }
+}
+
+subprojects {
+    apply(plugin = "jacoco")
+
+    // Only configure the test task if it exists
+    tasks.matching { it.name == "test" }.configureEach {
+        if (this is Test) {
+            finalizedBy("jacocoTestReport")
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
 }
