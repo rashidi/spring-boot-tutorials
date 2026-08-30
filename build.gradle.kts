@@ -23,20 +23,35 @@ repositories {
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
 
-    subprojects.forEach { p ->
-        implementation(project(":${p.name}"))
-    }
-}
-
-subprojects {
-    apply(plugin = "jacoco")
-
-    // Only configure the test task if it exists
-    tasks.matching { it.name == "test" }.configureEach {
-        if (this is Test) {
-            finalizedBy("jacocoTestReport")
-        }
-    }
+    jacocoAggregation(project(":batch-rest-repository"))
+    jacocoAggregation(project(":batch-skip-step"))
+    jacocoAggregation(project(":cloud-jdbc-env-repo"))
+    jacocoAggregation(project(":data-domain-events"))
+    jacocoAggregation(project(":data-envers-audit"))
+    jacocoAggregation(project(":data-jdbc-audit"))
+    jacocoAggregation(project(":data-jdbc-optimistic-locking"))
+    jacocoAggregation(project(":data-jdbc-schema-generation"))
+    jacocoAggregation(project(":data-jpa-audit"))
+    jacocoAggregation(project(":data-jpa-event"))
+    jacocoAggregation(project(":data-jpa-filtered-query"))
+    jacocoAggregation(project(":data-jpa-hibernate-cache"))
+    jacocoAggregation(project(":data-mongodb-audit"))
+    jacocoAggregation(project(":data-mongodb-full-text-search"))
+    jacocoAggregation(project(":data-mongodb-tc-data-load"))
+    jacocoAggregation(project(":data-mongodb-transactional"))
+    jacocoAggregation(project(":data-redis-cache"))
+    jacocoAggregation(project(":data-repository-definition"))
+    jacocoAggregation(project(":data-rest-composite-id"))
+    jacocoAggregation(project(":data-rest-validation"))
+    jacocoAggregation(project(":graphql"))
+    jacocoAggregation(project(":jooq"))
+    jacocoAggregation(project(":modulith"))
+    jacocoAggregation(project(":modulith-events"))
+    jacocoAggregation(project(":test-execution-listeners"))
+    jacocoAggregation(project(":test-rest-assured"))
+    jacocoAggregation(project(":test-slice-tests-rest"))
+    jacocoAggregation(project(":web-rest-client"))
+    jacocoAggregation(project(":web-thymeleaf-xss"))
 }
 
 tasks.check {
