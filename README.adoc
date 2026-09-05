@@ -34,6 +34,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |===
 |Tutorial |Description
 
+|link:ai-pgvector[Spring AI: Vector Similarity Search with PgVector] |Semantic vector similarity search using Spring AI and PostgreSQL pgvector with Testcontainers
 |link:batch-rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
 |link:batch-skip-step[Spring Batch: Skip Specific Data] |Skip processing specific data based on business logic in Spring Batch
 |link:cloud-jdbc-env-repo[Spring Cloud Environment Repository] |Store environment properties in MySQL database with Spring Cloud Environment Repository

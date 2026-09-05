@@ -1,0 +1,239 @@
+= Spring AI: Vector Similarity Search with PgVector
+Rashidi Zin <rashidi@zin.my>
+1.0, September 05, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/ai-pgvector
+:source-main: src/main/java/zin/rashidi/boot/ai/pgvector
+:source-test: src/test/java/zin/rashidi/boot/ai/pgvector
+
+Traditional keyword searches rely on lexical matching and token stemming, which often fall short when queries express intent through synonyms or contextual descriptions rather than exact terms.
+
+Vector similarity search solves this by transforming unstructured text into dense vector embeddings where semantic proximity is represented geometrically. In this tutorial, we will explore how to implement vector similarity search using https://spring.io/projects/spring-ai[Spring AI] with PostgreSQL's `pgvector` extension and verify the implementation using https://testcontainers.com/[Testcontainers].
+
+== Why PgVector?
+
+Adopting an isolated vector database introduces operational overhead and distributed consistency challenges. By utilizing PostgreSQL with the `pgvector` extension, we gain:
+
+* *ACID Transactions*: Vector updates occur atomically alongside relational tables.
+* *Unified Querying*: Combine semantic vector distance queries with relational `WHERE` clauses and `JOIN` operations.
+* *Operational Simplicity*: Reuse existing backup, migration, and monitoring workflows.
+
+== Dependencies
+
+We include `spring-ai-starter-vector-store-pgvector` alongside PostgreSQL and Testcontainers in `build.gradle.kts`:
+
+[source,kotlin]
+----
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
+
+    runtimeOnly("org.postgresql:postgresql")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.ai:spring-ai-bom:1.0.0-M6")
+    }
+}
+----
+
+== Configuration
+
+Configure the `PgVectorStore` parameters in `src/main/resources/application.properties`:
+
+[source,properties]
+----
+spring.application.name=ai-pgvector
+
+spring.ai.vectorstore.pgvector.initialize-schema=true
+spring.ai.vectorstore.pgvector.index-type=HNSW
+spring.ai.vectorstore.pgvector.distance-type=COSINE_DISTANCE
+spring.ai.vectorstore.pgvector.dimensions=384
+----
+
+`HNSW` (Hierarchical Navigable Small World) provides high-speed approximate nearest neighbor search, while `COSINE_DISTANCE` computes similarity based on vector angles.
+
+== Implementation
+
+=== Document Model
+
+link:{source-main}/DocumentItem.java[`DocumentItem`] serves as the domain record for ingesting content and metadata:
+
+[source,java]
+----
+package zin.rashidi.boot.ai.pgvector;
+
+import java.util.Map;
+
+public record DocumentItem(
+    String id,
+    String content,
+    Map<String, Object> metadata
+) {}
+----
+
+=== Semantic Search Service
+
+link:{source-main}/SemanticSearchService.java[`SemanticSearchService`] wraps Spring AI's `VectorStore` to ingest documents and execute similarity searches:
+
+[source,java]
+----
+package zin.rashidi.boot.ai.pgvector;
+
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class SemanticSearchService {
+
+    private final VectorStore vectorStore;
+
+    public SemanticSearchService(VectorStore vectorStore) {
+        this.vectorStore = vectorStore;
+    }
+
+    public void addDocuments(List<DocumentItem> items) {
+        var documents = items.stream()
+            .map(item -> new Document(item.id(), item.content(), item.metadata()))
+            .toList();
+        vectorStore.add(documents);
+    }
+
+    public List<Document> search(String query, int topK, double similarityThreshold) {
+        return vectorStore.similaritySearch(
+            SearchRequest.builder()
+                .query(query)
+                .topK(topK)
+                .similarityThreshold(similarityThreshold)
+                .build()
+        );
+    }
+}
+----
+
+== Integration Testing with Testcontainers
+
+We verify vector storage and retrieval against a real PostgreSQL instance provisioned with the `pgvector/pgvector:pg16` Docker image.
+
+=== Testcontainers Configuration
+
+link:{source-test}/TestcontainersConfiguration.java[`TestcontainersConfiguration`] wires the PostgreSQL container with `@ServiceConnection`:
+
+[source,java]
+----
+package zin.rashidi.boot.ai.pgvector;
+
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.testcontainers.containers.PostgreSQLContainer;
+
+@TestConfiguration(proxyBeanMethods = false)
+class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgresContainer() {
+        return new PostgreSQLContainer<>("pgvector/pgvector:pg16");
+    }
+}
+----
+
+=== Deterministic Test Embedding Model
+
+To ensure tests execute hermetically without external API dependencies or rate limits, link:{source-test}/SemanticSearchIntegrationTests.java[`SemanticSearchIntegrationTests`] defines an in-memory `EmbeddingModel`.
+
+Rather than using arbitrary string hashing (which produces identical cosine distances across unrelated texts), it clusters domain keywords into explicit vector dimensions so that the query vector aligns deterministically with the target document:
+
+[source,java]
+----
+@TestConfiguration
+static class TestEmbeddingConfiguration {
+
+    @Bean
+    @Primary
+    EmbeddingModel testEmbeddingModel() {
+        return new EmbeddingModel() {
+
+            private float[] createVector(String text) {
+                var vector = new float[384];
+                var lower = (text != null) ? text.toLowerCase() : "";
+
+                // Microservices / Spring cluster -> dimension 0
+                if (lower.contains("microservice") || lower.contains("spring")) {
+                    vector[0] = 1.0f;
+                }
+                // Testing / Testcontainers cluster -> dimension 1
+                else if (lower.contains("testcontainer") || lower.contains("testing")) {
+                    vector[1] = 1.0f;
+                }
+                // Fallback -> dimension 2
+                else {
+                    vector[2] = 1.0f;
+                }
+
+                return vector;
+            }
+
+            @Override
+            public EmbeddingResponse call(EmbeddingRequest request) {
+                return request.getInstructions().stream()
+                        .map(text -> new org.springframework.ai.embedding.Embedding(createVector(text), 0))
+                        .collect(collectingAndThen(toUnmodifiableList(), EmbeddingResponse::new));
+            }
+
+            @Override
+            public float[] embed(Document document) {
+                return createVector(document.getText());
+            }
+
+        };
+    }
+}
+----
+
+=== Verifying Retrieval
+
+[source,java]
+----
+@Test
+@DisplayName("should index documents and retrieve semantically similar content")
+void searchReturnsSemanticallyRelevantDocuments() {
+    var doc1 = new DocumentItem(
+        "doc-1",
+        "Spring Boot simplifies microservice development with convention over configuration.",
+        Map.of("category", "framework")
+    );
+    var doc2 = new DocumentItem(
+        "doc-2",
+        "Testcontainers provides disposable, real database containers for integration tests.",
+        Map.of("category", "testing")
+    );
+
+    searchService.addDocuments(List.of(doc1, doc2));
+
+    var results = searchService.search("microservices in Java", 1, 0.5);
+
+    assertThat(results)
+        .isNotEmpty()
+        .hasSize(1);
+    assertThat(results.getFirst().getText())
+        .isEqualTo("Spring Boot simplifies microservice development with convention over configuration.");
+}
+----
+
+== Summary
+
+By pairing Spring AI with PostgreSQL's `pgvector` extension and Testcontainers, we can build and verify semantic search capabilities within our standard relational infrastructure while maintaining reliable, self-contained CI test execution.
