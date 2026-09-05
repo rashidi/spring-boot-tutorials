@@ -65,7 +65,7 @@ spring.ai.vectorstore.pgvector.dimensions=384
 
 === Document Model
 
-link:{source-main}/DocumentItem.java[`DocumentItem`] serves as the domain record for ingesting content and metadata:
+link:{source-main}/document/DocumentItem.java[`DocumentItem`] serves as the domain record for ingesting content and metadata:
 
 [source,java]
 ----
@@ -82,7 +82,7 @@ public record DocumentItem(
 
 === Semantic Search Service
 
-link:{source-main}/SemanticSearchService.java[`SemanticSearchService`] wraps Spring AI's `VectorStore` to ingest documents and execute similarity searches:
+link:{source-main}/document/DocumentSearchService.java[`DocumentSearchService`] wraps Spring AI's `VectorStore` to ingest documents and execute similarity searches:
 
 [source,java]
 ----
@@ -96,7 +96,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class SemanticSearchService {
+public class DocumentSearchService {
 
     private final VectorStore vectorStore;
 
@@ -153,7 +153,7 @@ class TestcontainersConfiguration {
 
 === Deterministic Test Embedding Model
 
-To ensure tests execute hermetically without external API dependencies or rate limits, link:{source-test}/SemanticSearchIntegrationTests.java[`SemanticSearchIntegrationTests`] defines an in-memory `EmbeddingModel`.
+To ensure tests execute hermetically without external API dependencies or rate limits, link:{source-test}/document/DocumentSearchTests.java[`DocumentSearchTests`] defines an in-memory `EmbeddingModel`.
 
 Rather than using arbitrary string hashing (which produces identical cosine distances across unrelated texts), it clusters domain keywords into explicit vector dimensions so that the query vector aligns deterministically with the target document:
 
