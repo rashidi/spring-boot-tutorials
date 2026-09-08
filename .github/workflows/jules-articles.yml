@@ -24,4 +24,4 @@ jobs:
             5. The code should adhere to Java and Spring Boot's best practices.
             6. The tutorial should be equipped with integration tests using Testcontainers to demonstrate that it is working.
             7. A README.adoc should be included in the submodule which explains the implementation in the form of tutorial. Look at the existing submodules for references.
-            Create a pull request with your changes once complete.
+            Create a pull request with your changes once complete. If you failed to build the module locally, proceed to create the pull request and I will have a look.
