@@ -1,0 +1,192 @@
+= Spring Web: Virtual Threads
+Rashidi Zin <rashidi@zin.my>
+1.0, September 05, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web-virtual-threads
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/web/virtualthreads
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/web/virtualthreads
+
+Handling high concurrency in web applications often hits a bottleneck when interacting with blocking I/O, such as relational databases. Traditional thread-per-request models limit scalability because OS threads are expensive and quickly exhaust system resources.
+
+Project Loom introduces *Virtual Threads*—lightweight threads that drastically reduce the overhead of concurrent operations. In this tutorial, we will explore how to enable virtual threads in Spring Boot to efficiently handle web requests and block on database queries without exhausting OS threads. We will verify the implementation using https://testcontainers.com/[Testcontainers].
+
+== Why Virtual Threads?
+
+Before virtual threads, developers often resorted to reactive programming (like WebFlux and R2DBC) to scale properly. While powerful, reactive paradigms introduce complex abstractions and steep learning curves. By utilizing virtual threads, we gain:
+
+* *Simplified Code*: Write standard, synchronous blocking code without the cognitive load of reactive chains.
+* *High Throughput*: Handle thousands of concurrent requests by suspending virtual threads during I/O operations.
+* *Seamless Integration*: Works out of the box with traditional `spring-webmvc` and `spring-data-jpa`.
+
+== Dependencies
+
+We include standard Spring Web, Spring Data JPA, alongside PostgreSQL and Testcontainers in `build.gradle.kts`:
+
+[source,kotlin]
+----
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-restclient")
+    runtimeOnly("org.postgresql:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+----
+
+== Configuration
+
+Configure the application to enable virtual threads in `src/main/resources/application.properties`:
+
+[source,properties]
+----
+spring.application.name=web-virtual-threads
+
+spring.threads.virtual.enabled=true
+spring.jpa.hibernate.ddl-auto=create-drop
+----
+
+Setting `spring.threads.virtual.enabled=true` instructs Tomcat (or your chosen embedded web server) to use an `Executor` backed by virtual threads for handling HTTP requests.
+
+== Implementation
+
+=== User Model and Repository
+
+Let's define our simple domain model and repository:
+
+[source,java]
+----
+package zin.rashidi.boot.web.virtualthreads.user;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    // Constructors, Getters, Setters
+}
+----
+
+[source,java]
+----
+package zin.rashidi.boot.web.virtualthreads.user;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+}
+----
+
+=== Thread Info Controller
+
+`UserController` exposes a REST endpoint to query database records and return thread information, proving the request runs on a virtual thread despite making a blocking I/O call:
+
+[source,java]
+----
+package zin.rashidi.boot.web.virtualthreads.user;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.Map;
+
+@RestController
+public class UserController {
+
+    private final UserRepository repository;
+
+    public UserController(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @GetMapping("/thread-info")
+    public Map<String, Object> getThreadInfo() {
+        var count = repository.count(); // Simulated blocking DB IO
+        var thread = Thread.currentThread();
+
+        return Map.of(
+                "isVirtual", thread.isVirtual(),
+                "threadName", thread.getName(),
+                "userCount", count
+        );
+    }
+}
+----
+
+== Integration Testing with Testcontainers
+
+We verify virtual thread execution and database connectivity against a real PostgreSQL instance.
+
+=== Testcontainers Configuration
+
+Using `@ServiceConnection`, we easily wire a PostgreSQL container:
+
+[source,java]
+----
+package zin.rashidi.boot.web.virtualthreads;
+
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.testcontainers.containers.PostgreSQLContainer;
+
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgresContainer() {
+        return new PostgreSQLContainer<>("postgres:latest");
+    }
+}
+----
+
+=== Verifying Virtual Thread Execution
+
+[source,java]
+----
+@AutoConfigureTestRestTemplate
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", webEnvironment = RANDOM_PORT)
+class UserControllerTests {
+
+    @Autowired
+    private TestRestTemplate restClient;
+
+    @Autowired
+    private UserRepository em;
+
+    @Test
+    @DisplayName("Should process web request and database query on a Virtual Thread")
+    void virtualThreadEnabled() {
+        em.save(new User("Rashidi"));
+
+        var response = restClient.getForEntity("/thread-info", Map.class);
+
+        assertThat(response)
+                .extracting("statusCode", "body.isVirtual", "body.userCount")
+                .containsOnly(OK, true, 1);
+    }
+
+}
+----
+
+== Summary
+
+By enabling virtual threads with a single configuration property, Spring Boot allows standard Spring WebMVC applications to achieve high concurrency without transitioning to complex reactive frameworks, even while performing blocking relational database queries.
