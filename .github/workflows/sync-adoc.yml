@@ -29,35 +29,134 @@ jobs:
 
       - name: Sync Files and Update Nav
         run: |
+          set -euo pipefail
           cd master
-          
+
+          DEST_DIR="../antora/docs/modules/ROOT/pages"
+          NAV_FILE="../antora/docs/modules/ROOT/nav.adoc"
+
+          mkdir -p "$DEST_DIR"
+          touch "$NAV_FILE"
+
           # Find all README.adoc files in subdirectories (ignores root README.adoc)
-          find . -mindepth 2 -name "README.adoc" | while read file; do
-            # Extract the submodule folder name (e.g., 'batch-skip-step')
-            MODULE_NAME=$(basename $(dirname "$file"))
-          
-            # Define destination paths on the antora branch
-            DEST_DIR="../antora/docs/modules/ROOT/pages"
+          find . -mindepth 2 -name "README.adoc" | while read -r file; do
+            RELATIVE_PATH="${file#./}"
+            CATEGORY=$(printf '%s\n' "$RELATIVE_PATH" | cut -d/ -f1)
+            MODULE_NAME=$(basename "$(dirname "$file")")
+
             DEST_DOC="${DEST_DIR}/${MODULE_NAME}.adoc"
-            NAV_FILE="../antora/docs/modules/ROOT/nav.adoc"
-          
-            # Ensure destination directory exists and copy the file
-            mkdir -p "$DEST_DIR"
             cp "$file" "$DEST_DOC"
-          
-            # Extract the AsciiDoc Title (First line starting with '= ')
-            TITLE=$(grep -m 1 "^= " "$file" | sed 's/^= //')
-          
-            # Fallback to the module name if the README lacks a formal title
+
+            TITLE=$(grep -m 1 "^= " "$file" | sed 's/^= //' || true)
             if [ -z "$TITLE" ]; then
               TITLE="$MODULE_NAME"
             fi
-          
-            # Append to nav.adoc if the entry does not already exist
-            NAV_ENTRY="* xref:${MODULE_NAME}.adoc[${TITLE}]"
-            if ! grep -q "xref:${MODULE_NAME}.adoc" "$NAV_FILE"; then
-              echo "$NAV_ENTRY" >> "$NAV_FILE"
+
+            case "$CATEGORY" in
+              ai-*|spring-ai)
+                CATEGORY_TITLE="Spring AI"
+                ;;
+              batch-*|spring-batch)
+                CATEGORY_TITLE="Spring Batch"
+                ;;
+              cloud-*|spring-cloud)
+                CATEGORY_TITLE="Spring Cloud"
+                ;;
+              data-*|spring-data)
+                CATEGORY_TITLE="Spring Data"
+                ;;
+              graphql|spring-graphql)
+                CATEGORY_TITLE="Spring GraphQL"
+                ;;
+              jooq)
+                CATEGORY_TITLE="jOOQ"
+                ;;
+              modulith*|spring-modulith)
+                CATEGORY_TITLE="Spring Modulith"
+                ;;
+              test-*|spring-test)
+                CATEGORY_TITLE="Spring Test"
+                ;;
+              web-*|spring-web)
+                CATEGORY_TITLE="Spring Web"
+                ;;
+              *)
+                CATEGORY_TITLE=$(printf '%s\n' "$CATEGORY" | sed -E 's/(^|-)([a-z])/\U\2/g; s/-/ /g; s/\bAi\b/AI/g')
+                ;;
+            esac
+
+            SECTION_LINE="* ${CATEGORY_TITLE}"
+            ENTRY_LINE="** xref:${MODULE_NAME}.adoc[${TITLE}]"
+
+            if ! grep -Fxq "$SECTION_LINE" "$NAV_FILE"; then
+              if [ -s "$NAV_FILE" ]; then
+                printf "\n" >> "$NAV_FILE"
+              fi
+              printf "%s\n" "$SECTION_LINE" >> "$NAV_FILE"
             fi
+
+            sed -i "\|^\*\*\? xref:${MODULE_NAME}\.adoc\[|d" "$NAV_FILE"
+
+            awk -v section="$SECTION_LINE" -v entry="$ENTRY_LINE" '
+              function sort_key(line, key) {
+                key = line
+                sub(/^[^[]*\[/, "", key)
+                sub(/\][^]]*$/, "", key)
+                return tolower(key)
+              }
+
+              function flush_section(   i, j, tmp) {
+                if (!in_section) {
+                  return
+                }
+
+                if (!inserted) {
+                  children[++n] = entry
+                  inserted = 1
+                }
+
+                for (i = 1; i <= n; i++) {
+                  for (j = i + 1; j <= n; j++) {
+                    if (sort_key(children[i]) > sort_key(children[j])) {
+                      tmp = children[i]
+                      children[i] = children[j]
+                      children[j] = tmp
+                    }
+                  }
+                }
+
+                for (i = 1; i <= n; i++) {
+                  print children[i]
+                }
+
+                delete children
+                n = 0
+                in_section = 0
+              }
+
+              /^\* / {
+                flush_section()
+                print
+                in_section = ($0 == section)
+                next
+              }
+
+              in_section && /^\*\* xref:/ {
+                children[++n] = $0
+                next
+              }
+
+              {
+                if (in_section) {
+                  flush_section()
+                }
+                print
+              }
+
+              END {
+                flush_section()
+              }
+            ' "$NAV_FILE" > "$NAV_FILE.tmp" && mv "$NAV_FILE.tmp" "$NAV_FILE"
           done
 
       - name: Commit and Push to Antora
