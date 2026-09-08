@@ -27,14 +27,16 @@ We include standard Spring Web, Spring Data JPA, alongside PostgreSQL and Testco
 [source,kotlin]
 ----
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-restclient")
     runtimeOnly("org.postgresql:postgresql")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 ----
 
@@ -159,47 +161,29 @@ public class TestcontainersConfiguration {
 
 [source,java]
 ----
-package zin.rashidi.boot.web.virtualthreads.user;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import java.util.Map;
-import static org.assertj.core.api.Assertions.assertThat;
-import zin.rashidi.boot.web.virtualthreads.TestcontainersConfiguration;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestRestTemplate
 @Import(TestcontainersConfiguration.class)
+@SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", webEnvironment = RANDOM_PORT)
 class UserControllerTests {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private TestRestTemplate restClient;
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository em;
 
     @Test
     @DisplayName("Should process web request and database query on a Virtual Thread")
-    void testVirtualThread() {
-        repository.save(new User("Rashidi"));
+    void virtualThreadEnabled() {
+        em.save(new User("Rashidi"));
 
-        var response = restTemplate.getForEntity("/thread-info", Map.class);
+        var response = restClient.getForEntity("/thread-info", Map.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        var body = response.getBody();
-        assertThat(body).isNotNull();
-
-        // Assert that the request was processed by a virtual thread
-        assertThat((Boolean) body.get("isVirtual")).isTrue();
-
-        // Assert that the virtual thread can successfully interact with the blocking database
-        assertThat((Integer) body.get("userCount")).isGreaterThan(0);
+        assertThat(response)
+                .extracting("statusCode", "body.isVirtual", "body.userCount")
+                .containsOnly(OK, true, 1);
     }
+
 }
 ----
 

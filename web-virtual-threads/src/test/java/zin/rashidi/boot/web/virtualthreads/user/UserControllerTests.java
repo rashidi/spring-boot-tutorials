@@ -3,42 +3,39 @@ package zin.rashidi.boot.web.virtualthreads.user;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
+import zin.rashidi.boot.web.virtualthreads.TestcontainersConfiguration;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import zin.rashidi.boot.web.virtualthreads.TestcontainersConfiguration;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpStatus.OK;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestRestTemplate
 @Import(TestcontainersConfiguration.class)
+@SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", webEnvironment = RANDOM_PORT)
 class UserControllerTests {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private TestRestTemplate restClient;
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository em;
 
     @Test
     @DisplayName("Should process web request and database query on a Virtual Thread")
-    void testVirtualThread() {
-        repository.save(new User("Rashidi"));
+    void virtualThreadEnabled() {
+        em.save(new User("Rashidi"));
 
-        var response = restTemplate.getForEntity("/thread-info", Map.class);
+        var response = restClient.getForEntity("/thread-info", Map.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        var body = response.getBody();
-        assertThat(body).isNotNull();
-
-        // Assert that the request was processed by a virtual thread
-        assertThat((Boolean) body.get("isVirtual")).isTrue();
-
-        // Assert that the virtual thread can successfully interact with the blocking database
-        assertThat((Integer) body.get("userCount")).isGreaterThan(0);
+        assertThat(response)
+                .extracting("statusCode", "body.isVirtual", "body.userCount")
+                .containsOnly(OK, true, 1);
     }
+
 }
