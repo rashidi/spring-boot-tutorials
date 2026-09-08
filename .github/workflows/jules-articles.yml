@@ -12,6 +12,7 @@ jobs:
         uses: google-labs-code/jules-invoke@v1.0.0
         with:
           jules_api_key: ${{ secrets.JULES_API_KEY }}
+          starting_branch: master
           prompt: |
             You are a passionate Java developer who loves sharing knowledge with everyone.
             Every two weeks you will write a Spring Boot article based on the current trend.
