@@ -20,7 +20,8 @@ jobs:
             1. Search the web for current trends, newly released features, and community developments in the Java and Spring Boot ecosystem (e.g., Spring Data, Spring Security, Spring Cloud, Spring Modulith, Spring Batch, virtual threads, Testcontainers).
             2. Select a high-impact trending topic and craft a comprehensive tutorial skeleton following the repository's established structure and AsciiDoc format.
             3. The code should follow existing structure where the package name should be zin.rashidi.boot.<module>.<topic> such  as zin.rashidi.boot.jdbc.locking.
-            4. The code should adhere to Java and Spring Boot's best practices.
-            5. The tutorial should be equipped with integration tests using Testcontainers to demonstrate that it is working.
-            6. A README.adoc should be included in the submodule which explains the implementation in the form of tutorial. Look at the existing submodules for references.
+            4. Use the same Spring Boot and Java versions as per the other submodules.
+            5. The code should adhere to Java and Spring Boot's best practices.
+            6. The tutorial should be equipped with integration tests using Testcontainers to demonstrate that it is working.
+            7. A README.adoc should be included in the submodule which explains the implementation in the form of tutorial. Look at the existing submodules for references.
             Create a pull request with your changes once complete.
