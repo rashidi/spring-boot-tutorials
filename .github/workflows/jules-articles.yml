@@ -5,11 +5,11 @@ on:
   workflow_dispatch: # Allows manual execution for testing
 
 jobs:
-  refactor:
+  authoring:
     runs-on: ubuntu-latest
     steps:
       - name: Invoke Jules Agent
-        uses: google-labs-code/jules-invoke@v1
+        uses: google-labs-code/jules-invoke@v1.0.0
         with:
           jules_api_key: ${{ secrets.JULES_API_KEY }}
           prompt: |
