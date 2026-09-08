@@ -1,4 +1,6 @@
 * xref:index.adoc[Home]
+* Spring AI
+** xref:ai-pgvector.adoc[Vector Similarity Search with PgVector]
 * Spring Batch
 ** xref:batch-rest-repository.adoc[Batch Job With REST API source]
 ** xref:batch-skip-step.adoc[Skip Specific Data]
@@ -36,5 +38,4 @@
 * Spring Web
 ** xref:web-rest-client.adoc[REST Clients for calling Synchronous API]
 ** xref:web-thymeleaf-xss.adoc[Cross-Site Scripting (XSS) with Thymeleaf]
-* xref:ai-pgvector.adoc[Spring AI: Vector Similarity Search with PgVector]
-* xref:web-virtual-threads.adoc[Spring Web: Virtual Threads]
+** xref:web-virtual-threads.adoc[Virtual Threads]
