@@ -64,4 +64,5 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:test-slice-tests-rest[Spring Test: Slice Tests for REST Application] |Implementing Slice Tests for REST application
 |link:web-rest-client[Spring Web: Synchronous REST Clients] |Implement synchronous REST client using `RestClient`, `WebClient`, and `RestTemplate`
 |link:web-thymeleaf-xss[Spring Web: Cross-Site Scripting (XSS) with Thymeleaf] |Prevent Cross-Site Scripting (XSS) with Thymeleaf
+|link:web-virtual-threads[Spring Web: Virtual Threads] |Enable Virtual Threads in Spring Boot to handle high concurrency with blocking I/O
 |===
