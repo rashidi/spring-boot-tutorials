@@ -29,7 +29,6 @@ We include standard Spring Web, Spring Data JPA, alongside PostgreSQL and Testco
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
-    implementation("org.springframework.boot:spring-boot-restclient")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
@@ -49,7 +48,6 @@ Configure the application to enable virtual threads in `src/main/resources/appli
 spring.application.name=web-virtual-threads
 
 spring.threads.virtual.enabled=true
-spring.jpa.hibernate.ddl-auto=create-drop
 ----
 
 Setting `spring.threads.virtual.enabled=true` instructs Tomcat (or your chosen embedded web server) to use an `Executor` backed by virtual threads for handling HTTP requests.
@@ -161,27 +159,27 @@ public class TestcontainersConfiguration {
 
 [source,java]
 ----
-@AutoConfigureTestRestTemplate
+@AutoConfigureRestTestClient
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", webEnvironment = RANDOM_PORT)
 class UserControllerTests {
 
     @Autowired
-    private TestRestTemplate restClient;
+    private RestTestClient restClient;
 
     @Autowired
-    private UserRepository em;
+    private UserRepository users;
 
     @Test
     @DisplayName("Should process web request and database query on a Virtual Thread")
     void virtualThreadEnabled() {
-        em.save(new User("Rashidi"));
+        users.save(new User("Rashidi"));
 
-        var response = restClient.getForEntity("/thread-info", Map.class);
-
-        assertThat(response)
-                .extracting("statusCode", "body.isVirtual", "body.userCount")
-                .containsOnly(OK, true, 1);
+        restClient.get().uri("/thread-info").exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.isVirtual").isEqualTo(true)
+                .jsonPath("$.userCount").isEqualTo(1);
     }
 
 }

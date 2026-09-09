@@ -1,41 +1,41 @@
 * xref:index.adoc[Home]
 * Spring AI
-** xref:ai-pgvector.adoc[Vector Similarity Search with PgVector]
+** xref:ai-pgvector.adoc[Spring AI: Vector Similarity Search with PgVector]
 * Spring Batch
-** xref:batch-rest-repository.adoc[Batch Job With REST API source]
-** xref:batch-skip-step.adoc[Skip Specific Data]
+** xref:batch-skip-step.adoc[Spring Batch: Skip Specific Data]
+** xref:batch-rest-repository.adoc[Spring Batch: Working With REST Resources]
 * Spring Cloud
-** xref:cloud-jdbc-env-repo.adoc[Environment Repository]
+** xref:cloud-jdbc-env-repo.adoc[Spring Cloud: JDBCEnvironmentRepository Sample Application]
 * Spring Data
-** xref:data-domain-events.adoc[Domain Events]
-** xref:data-envers-audit.adoc[Envers Audit]
-** xref:data-jdbc-audit.adoc[JDBC Audit]
-** xref:data-jdbc-optimistic-locking.adoc[JDBC Optimistic Locking]
-** xref:data-jdbc-schema-generation.adoc[JDBC Schema Generation]
-** xref:data-jpa-audit.adoc[JPA Audit]
-** xref:data-jpa-event.adoc[Event Driven]
-** xref:data-jpa-filtered-query.adoc[Global Filtered Query]
-** xref:data-jpa-hibernate-cache.adoc[Implement Hibernate Second Level Caching]
-** xref:data-mongodb-audit.adoc[MongoDB Audit]
-** xref:data-mongodb-full-text-search.adoc[MongoDB Full Text Search]
-** xref:data-mongodb-tc-data-load.adoc[Load data with Testcontainers]
-** xref:data-mongodb-transactional.adoc[MongoDB Transactional]
-** xref:data-redis-cache.adoc[Implement Caching with Spring Data Redis]
-** xref:data-repository-definition.adoc[Repository Definition]
-** xref:data-rest-composite-id.adoc[Composite Id with Spring Data REST]
-** xref:data-rest-validation.adoc[REST Validation]
+** xref:data-mongodb-transactional.adoc[@Transactional with Spring Data MongoDB]
+** xref:data-envers-audit.adoc[Spring Data Envers: Audit With Entity Revisions]
+** xref:data-jdbc-schema-generation.adoc[Spring Data JDBC: Generate Liquibase Changeset]
+** xref:data-jdbc-audit.adoc[Spring Data JDBC: Implement Auditing]
+** xref:data-jdbc-optimistic-locking.adoc[Spring Data JDBC: Optimistic Locking with @Version]
+** xref:data-jpa-audit.adoc[Spring Data Jpa Audit Example]
+** xref:data-jpa-filtered-query.adoc[Spring Data Jpa: Global Filter Query]
+** xref:data-jpa-hibernate-cache.adoc[Spring Data JPA: Hibernate Second Level Caching with EhCache]
+** xref:data-jpa-event.adoc[Spring Data JPA: Perform Entity Validation at Repository Level through Event Driven]
+** xref:data-mongodb-audit.adoc[Spring Data MongoDB Audit Example]
+** xref:data-mongodb-tc-data-load.adoc[Spring Data MongoDb with Testcontainers]
+** xref:data-mongodb-full-text-search.adoc[Spring Data MongoDB: Full Text Search]
+** xref:data-redis-cache.adoc[Spring Data Redis: Implementing Caching with Spring Data Redis]
+** xref:data-rest-composite-id.adoc[Spring Data REST with Composite ID]
+** xref:data-rest-validation.adoc[Spring Data REST: Validation]
+** xref:data-domain-events.adoc[Spring Data: Domain Events Example]
+** xref:data-repository-definition.adoc[Spring Data: Repository Definition]
 * Spring GraphQL
-** xref:graphql.adoc[GraphQL Server]
+** xref:graphql.adoc[GraphQL With Spring Boot]
 * Spring Modulith
-** xref:modulith.adoc[Building Modular Monolithic Applications]
-** xref:modulith-events.adoc[Event Publication Registry with PostgreSQL]
+** xref:modulith.adoc[Spring Modulith: Building Modular Monolithic Applications]
+** xref:modulith-events.adoc[Spring Modulith: Event Publication Registry with PostgreSQL]
 * jOOQ
-** xref:jooq.adoc[jOOQ]
+** xref:jooq.adoc[jOOQ: Implement jOOQ with Spring Boot and Gradle]
 * Spring Test
-** xref:test-execution-listeners.adoc[Test Execution Listeners]
-** xref:test-rest-assured.adoc[Integration with RestAssured]
-** xref:test-slice-tests-rest.adoc[Implementing Slice Tests for REST application]
+** xref:test-rest-assured.adoc[Spring Test: Implement BDD with RestAssured]
+** xref:test-execution-listeners.adoc[Spring Test: Managing Test Data with `TestExecutionListener`]
+** xref:test-slice-tests-rest.adoc[Spring Test: Slice Testing a REST Application]
 * Spring Web
-** xref:web-rest-client.adoc[REST Clients for calling Synchronous API]
-** xref:web-thymeleaf-xss.adoc[Cross-Site Scripting (XSS) with Thymeleaf]
-** xref:web-virtual-threads.adoc[Virtual Threads]
+** xref:web-thymeleaf-xss.adoc[Preventing XSS with Spring Security and Thymeleaf]
+** xref:web-rest-client.adoc[Spring Web: REST Clients for calling Synchronous API]
+** xref:web-virtual-threads.adoc[Spring Web: Virtual Threads]
