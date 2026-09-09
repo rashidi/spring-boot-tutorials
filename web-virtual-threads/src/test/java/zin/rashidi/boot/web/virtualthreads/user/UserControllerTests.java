@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import zin.rashidi.boot.web.virtualthreads.TestcontainersConfiguration;
@@ -16,9 +15,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", webEnvironment = RANDOM_PORT)
 class UserControllerTests {
-
-    @LocalServerPort
-    private int port;
 
     @Autowired
     private RestTestClient restClient;

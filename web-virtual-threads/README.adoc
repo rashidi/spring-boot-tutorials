@@ -164,9 +164,6 @@ public class TestcontainersConfiguration {
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", webEnvironment = RANDOM_PORT)
 class UserControllerTests {
 
-    @LocalServerPort
-    private int port;
-
     @Autowired
     private RestTestClient restClient;
 
