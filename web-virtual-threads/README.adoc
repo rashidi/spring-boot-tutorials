@@ -49,7 +49,6 @@ Configure the application to enable virtual threads in `src/main/resources/appli
 spring.application.name=web-virtual-threads
 
 spring.threads.virtual.enabled=true
-spring.jpa.hibernate.ddl-auto=create-drop
 ----
 
 Setting `spring.threads.virtual.enabled=true` instructs Tomcat (or your chosen embedded web server) to use an `Executor` backed by virtual threads for handling HTTP requests.
@@ -161,23 +160,29 @@ public class TestcontainersConfiguration {
 
 [source,java]
 ----
-@AutoConfigureTestRestTemplate
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", webEnvironment = RANDOM_PORT)
 class UserControllerTests {
 
-    @Autowired
-    private TestRestTemplate restClient;
+    @LocalServerPort
+    private int port;
+
+    private RestClient restClient;
 
     @Autowired
-    private UserRepository em;
+    private UserRepository users;
+
+    @BeforeEach
+    void setup(@Autowired RestClient.Builder restClientBuilder) {
+        restClient = restClientBuilder.baseUrl("http://localhost:" + port).build();
+    }
 
     @Test
     @DisplayName("Should process web request and database query on a Virtual Thread")
     void virtualThreadEnabled() {
-        em.save(new User("Rashidi"));
+        users.save(new User("Rashidi"));
 
-        var response = restClient.getForEntity("/thread-info", Map.class);
+        var response = restClient.get().uri("/thread-info").retrieve().toEntity(Map.class);
 
         assertThat(response)
                 .extracting("statusCode", "body.isVirtual", "body.userCount")
