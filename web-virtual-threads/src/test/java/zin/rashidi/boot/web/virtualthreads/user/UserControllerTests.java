@@ -3,39 +3,35 @@ package zin.rashidi.boot.web.virtualthreads.user;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.TestRestTemplate;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.web.servlet.client.RestTestClient;
 import zin.rashidi.boot.web.virtualthreads.TestcontainersConfiguration;
 
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.OK;
 
-@AutoConfigureTestRestTemplate
+@AutoConfigureRestTestClient
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", webEnvironment = RANDOM_PORT)
 class UserControllerTests {
 
     @Autowired
-    private TestRestTemplate restClient;
+    private RestTestClient restClient;
 
     @Autowired
-    private UserRepository em;
+    private UserRepository users;
 
     @Test
     @DisplayName("Should process web request and database query on a Virtual Thread")
     void virtualThreadEnabled() {
-        em.save(new User("Rashidi"));
+        users.save(new User("Rashidi"));
 
-        var response = restClient.getForEntity("/thread-info", Map.class);
-
-        assertThat(response)
-                .extracting("statusCode", "body.isVirtual", "body.userCount")
-                .containsOnly(OK, true, 1);
+        restClient.get().uri("/thread-info").exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.isVirtual").isEqualTo(true)
+                .jsonPath("$.userCount").isEqualTo(1);
     }
 
 }
