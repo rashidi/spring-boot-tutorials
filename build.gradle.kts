@@ -39,6 +39,28 @@ subprojects {
     }
 }
 
+val coverageVerification = tasks.register<JacocoCoverageVerification>("testCodeCoverageVerification") {
+    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
+    violationRules {
+        rule {
+            limit {
+                counter = "INSTRUCTION"
+                minimum = "0.90".toBigDecimal()
+            }
+        }
+    }
+    executionData(
+        fileTree(layout.buildDirectory.dir("jacoco")).matching { include("**/*.exec") }
+    )
+    classDirectories.setFrom(
+        subprojects.map { p -> fileTree("${p.projectDir}/build/classes/java/main") }
+    )
+    sourceDirectories.setFrom(
+        subprojects.map { p -> fileTree("${p.projectDir}/src/main/java") }
+    )
+}
+
 tasks.check {
     dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
+    dependsOn(coverageVerification)
 }
