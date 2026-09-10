@@ -177,14 +177,18 @@ class CloudJdbcEnvRepoApplicationTests {
     private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:lts");
 
     @Autowired
-    private TestRestTemplate restClient;
+    private RestTestClient restClient;
 
 	@Test
     @DisplayName("Given app.greet.name is configured to Demo in the database When I call greet Then I should get Hello, my name is Demo")
 	void greet() {
-        var response = restClient.getForEntity("/greet?greeting={0}", String.class, "Hello");
+        var response = restClient.get().uri("/greet?greeting={0}", "Hello")
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(String.class)
+                .getResponseBody();
 
-        assertThat(response.getBody()).isEqualTo("Hello, my name is Demo");
+        assertThat(response).isEqualTo("Hello, my name is Demo");
 	}
 
 }

@@ -90,7 +90,7 @@ We will perform a `POST` request to create a `Book` with an `Author` that is `IN
 class CreateBookTests {
 
     @Autowired
-    private TestRestTemplate restClient;
+    private RestTestClient restClient;
 
     @Test
     @DisplayName("When I create a Book with an inactive Author, I should get a Bad Request response")
@@ -102,11 +102,14 @@ class CreateBookTests {
                 }
                 """.formatted(authorUri());
 
-        var response = restClient.exchange("/books", POST, new HttpEntity<>(body, headers()), RepositoryRestErrorResponse.class);
+        var response = restClient.post().uri("/books")
+                .contentType(APPLICATION_JSON)
+                .body(body)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .returnResult(RepositoryRestErrorResponse.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
-
-        assertThat(response.getBody().getErrors())
+        assertThat(response.getResponseBody().getErrors())
                 .hasSize(1)
                 .extracting(ValidationError::getMessage)
                 .containsExactly("Author is inactive");
@@ -120,9 +123,14 @@ class CreateBookTests {
                 }
                 """;
 
-        return restClient.exchange("/authors", POST, new HttpEntity<>(body, headers()), Void.class)
-                .getHeaders()
-                .getLocation();
+        return URI.create(restClient.post().uri("/authors")
+                .contentType(APPLICATION_JSON)
+                .body(body)
+                .exchange()
+                .expectStatus().isCreated()
+                .returnResult(Void.class)
+                .getResponseHeaders()
+                .getLocation().toString());
     }
 
 }

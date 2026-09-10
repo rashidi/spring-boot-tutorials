@@ -2,7 +2,6 @@ package zin.rashidi.boot.data.rest.book;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -13,11 +12,10 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.boot.test.autoconfigure.resttestclient.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
 import zin.rashidi.boot.data.rest.TestDataRestValidationApplication;
@@ -25,13 +23,13 @@ import zin.rashidi.boot.data.rest.TestDataRestValidationApplication;
 /**
  * @author Rashidi Zin
  */
-@AutoConfigureTestRestTemplate
+@AutoConfigureRestTestClient
 @Import(TestDataRestValidationApplication.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 class CreateBookTests {
 
     @Autowired
-    private TestRestTemplate restClient;
+    private RestTestClient restClient;
 
     @Test
     @DisplayName("When I create a Book with an inactive Author, I should get a Bad Request response")
@@ -43,11 +41,14 @@ class CreateBookTests {
                 }
                 """.formatted(authorUri());
 
-        var response = restClient.exchange("/books", POST, new HttpEntity<>(body, headers()), RepositoryRestErrorResponse.class);
+        var response = restClient.post().uri("/books")
+                .contentType(APPLICATION_JSON)
+                .body(body)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .returnResult(RepositoryRestErrorResponse.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
-
-        assertThat(response.getBody().getErrors())
+        assertThat(response.getResponseBody().getErrors())
                 .hasSize(1)
                 .extracting(ValidationError::getMessage)
                 .containsExactly("Author is inactive");
@@ -61,17 +62,14 @@ class CreateBookTests {
                 }
                 """;
 
-        return restClient.exchange("/authors", POST, new HttpEntity<>(body, headers()), Void.class)
-                .getHeaders()
-                .getLocation();
-    }
-
-    private HttpHeaders headers() {
-        var headers = new HttpHeaders();
-
-        headers.setContentType(APPLICATION_JSON);
-
-        return headers;
+        return URI.create(restClient.post().uri("/authors")
+                .contentType(APPLICATION_JSON)
+                .body(body)
+                .exchange()
+                .expectStatus().isCreated()
+                .returnResult(Void.class)
+                .getResponseHeaders()
+                .getLocation().toString());
     }
 
     static class ValidationError {

@@ -1,51 +1,62 @@
-= @Transactional with Spring Data MongoDB
+= Testcontainers setup with Replica Set
 :source-highlighter: highlight.js
-Rashidi Zin <rashidi@zin.my>
-2.0, October 12, 2023
-:toc:
-:nofooter:
-:icons: font
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-mongodb-transactional
 
-Guide to utilise `@Transactional` with Spring Data MongoDB.
+The simplest and most secure way to connect Testcontainers `MongoDBContainer` is by using `@ServiceConnection`. However, Spring Boot tests currently do not automatically handle MongoDB's *Replica Set*. Given `@Transactional` requires a *Replica Set*, the application will encounter an error during startup.
 
-
-== Background
-
-Unlike Spring Data JPA, Spring Data MongoDB does not support `@Transactional` out of the box. In this guide, we will explore how to implement `@Transactional` with Spring Data MongoDB.
-
-== Scenario
-
-We will implement based on the following scenario:
-
-[,text]
+[source,text]
 ----
-When a new User is created
-Then the status should be ACTIVE
+MongoClientException: Sessions are not supported by the MongoDB cluster to which this client is connected
 ----
 
-== Implementation
+We must manually define `.withReplicaSet()` to run tests that interact with transactional operations. Let's see how it is done in action.
 
-=== Integration Test
+== Initial Setup
 
-We will verify our implementation through integration test whereby we will create a new `User` and verify that the status is `ACTIVE`.
+We will create a `User` document that is managed by `UserRepository` and exposed via `UserController` to process creation request. When the user is created, the system must set the `status` to `ACTIVE`.
 
 [source,java]
 ----
+@RestController
+class UserController {
+
+    private final UserRepository repository;
+
+    UserController(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping("/users")
+    @Transactional
+    public User create(@RequestBody User user) {
+        user.setStatus(ACTIVE);
+
+        return repository.save(user);
+    }
+
+}
+----
+
+== Integration Testing with Testcontainers
+
+Now we can proceed to prepare the test. We will use `RestTestClient` to perform a `POST` request and verify if `status` is set to `ACTIVE`. Notice `MongoDBContainer` is defined with `.withReplicaSet()`? That will ensure the container is started with a _Replica Set_.
+
+[source,java]
+----
+@AutoConfigureRestTestClient
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Testcontainers
 class CreateUserTests {
 
     @Container
     @ServiceConnection
-    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest");
+    private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest").withReplicaSet();
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private RestTestClient restTemplate;
 
     @Test
     void create() {
-        var headers = new HttpHeaders() {{ setContentType(APPLICATION_JSON); }};
+
         var body = """
                 {
                   "username": "rashidi.zin",
@@ -53,80 +64,17 @@ class CreateUserTests {
                 }
                 """;
 
-        var response = restTemplate.exchange("/users", POST, new HttpEntity<>(body, headers), User.class);
-        var createdUser = response.getBody();
+        var response = restTemplate.post().uri("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(User.class);
+
+        var createdUser = response.getResponseBody();
 
         assertThat(createdUser).extracting("status").isEqualTo(ACTIVE);
     }
 
 }
 ----
-
-=== Event Listener
-
-We will start by implementing an `EventListener` that will be responsible to assign the status to `ACTIVE` when a new `User` is created.
-
-[source,java]
-----
-@Component
-class UpdateUserStatus {
-
-    @TransactionalEventListener
-    public void onBeforeSave(BeforeSaveEvent<User> event) {
-        var user = event.getSource();
-
-        user.status(ACTIVE);
-    }
-
-}
-----
-
-As we can see, `onBeforeSave` is annotated with `@TransactionalEventListener`. This annotation will ensure that the event listener will be
-executed within a transaction.
-
-=== Transactional Method
-
-Next, we will implement a transactional method that will create a new `User`.
-
-[source,java]
-----
-@RestController
-class UserResource {
-
-    private final UserRepository repository;
-
-    UserResource(UserRepository repository) {
-        this.repository = repository;
-    }
-
-    @PostMapping("/users")
-    @ResponseStatus(CREATED)
-    @Transactional
-    public User add(@RequestBody User user) {
-        return repository.save(user);
-    }
-
-}
-----
-
-=== Configuration Class
-
-Finally, we will configure `MongoTransactionManager` to enable transaction support for MongoDB.
-
-[source,java]
-----
-@Configuration
-@EnableTransactionManagement
-class MongoTransactionManagerConfiguration {
-
-    @Bean
-    public PlatformTransactionManager transactionManager(MongoDatabaseFactory factory) {
-        return new MongoTransactionManager(factory);
-    }
-
-}
-----
-
-=== Verification
-
-In order to ensure that our implementation is working as expected, the test implemented in link:{url-quickref}/src/test/java/zin/rashidi/boot/data/mongodb/tm/user/CreateUserTests.java[CreateUserTests] should pass.

@@ -11,7 +11,7 @@ val springCloudVersion = "2025.1.3"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 

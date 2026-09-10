@@ -2,26 +2,23 @@ package zin.rashidi.boot.data.mongodb.tm.user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.mongodb.MongoDBContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static zin.rashidi.boot.data.mongodb.tm.user.User.Status.ACTIVE;
 
 /**
  * @author Rashidi Zin
  */
-@AutoConfigureTestRestTemplate
+@AutoConfigureRestTestClient
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Testcontainers
 class CreateUserTests {
@@ -31,11 +28,10 @@ class CreateUserTests {
     private static final MongoDBContainer mongo = new MongoDBContainer("mongo:latest").withReplicaSet();
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private RestTestClient restTemplate;
 
     @Test
     void create() {
-        var headers = new HttpHeaders() {{ setContentType(APPLICATION_JSON); }};
         var body = """
                 {
                   "username": "rashidi.zin",
@@ -43,8 +39,14 @@ class CreateUserTests {
                 }
                 """;
 
-        var response = restTemplate.exchange("/users", POST, new HttpEntity<>(body, headers), User.class);
-        var createdUser = response.getBody();
+        var response = restTemplate.post().uri("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(User.class);
+
+        var createdUser = response.getResponseBody();
 
         assertThat(createdUser).extracting("status").isEqualTo(ACTIVE);
     }
