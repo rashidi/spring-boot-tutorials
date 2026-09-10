@@ -85,12 +85,13 @@ We will perform a `POST` request to create a `Book` with an `Author` that is `IN
 
 [source,java]
 ----
+@AutoConfigureRestTestClient
 @Import(TestDataRestValidationApplication.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 class CreateBookTests {
 
     @Autowired
-    private TestRestTemplate restClient;
+    private RestTestClient restClient;
 
     @Test
     @DisplayName("When I create a Book with an inactive Author, I should get a Bad Request response")
@@ -102,14 +103,13 @@ class CreateBookTests {
                 }
                 """.formatted(authorUri());
 
-        var response = restClient.exchange("/books", POST, new HttpEntity<>(body, headers()), RepositoryRestErrorResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
-
-        assertThat(response.getBody().getErrors())
-                .hasSize(1)
-                .extracting(ValidationError::getMessage)
-                .containsExactly("Author is inactive");
+        var response = restClient.post().uri("/books")
+                .headers(httpHeaders -> httpHeaders.addAll(headers()))
+                .body(body)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.errors[0].message").isEqualTo("Author is inactive");
     }
 
     private URI authorUri() {
@@ -120,9 +120,23 @@ class CreateBookTests {
                 }
                 """;
 
-        return restClient.exchange("/authors", POST, new HttpEntity<>(body, headers()), Void.class)
-                .getHeaders()
+        return restClient.post().uri("/authors")
+                .headers(httpHeaders -> httpHeaders.addAll(headers()))
+                .body(body)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .returnResult()
+                .getResponseHeaders()
                 .getLocation();
+    }
+
+    private HttpHeaders headers() {
+        var headers = new HttpHeaders();
+
+        headers.setContentType(APPLICATION_JSON);
+
+        return headers;
     }
 
 }

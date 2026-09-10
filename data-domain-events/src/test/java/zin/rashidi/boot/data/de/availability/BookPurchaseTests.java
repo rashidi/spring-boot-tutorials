@@ -7,9 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
 import zin.rashidi.boot.data.de.TestDataDomainEventsApplication;
 import zin.rashidi.boot.data.de.book.Book;
@@ -18,7 +18,7 @@ import zin.rashidi.boot.data.de.book.BookRepository;
 /**
  * @author Rashidi Zin
  */
-@AutoConfigureTestRestTemplate
+@AutoConfigureRestTestClient
 @SpringBootTest(
         classes = TestDataDomainEventsApplication.class,
         properties = "spring.jpa.hibernate.ddl-auto=create",
@@ -33,7 +33,7 @@ class BookPurchaseTests {
     private BookRepository books;
 
     @Autowired
-    private TestRestTemplate client;
+    private RestTestClient client;
 
     private Book book;
 
@@ -47,7 +47,9 @@ class BookPurchaseTests {
     @Test
     @DisplayName("Given total book availability is 100 When a book is purchased Then total book availability should be 99")
     void purchase() {
-        client.delete("/books/{id}/purchase", book.getId());
+        client.delete().uri("/books/{id}/purchase", book.getId())
+                .exchange()
+                .expectStatus().isOk();
 
         var availability = availabilities.findByIsbn(book.getIsbn());
 
