@@ -10,7 +10,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.mysql.MySQLContainer;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @AutoConfigureRestTestClient
@@ -27,14 +26,10 @@ class CloudJdbcEnvRepoApplicationTests {
 	@Test
     @DisplayName("Given app.greet.name is configured to Demo in the database When I call greet Then I should get Hello, my name is Demo")
 	void greet() {
-        var response = restClient.get().uri("/greet?greeting={greeting}", "Hello")
+        restClient.get().uri("/greet?greeting={greeting}", "Hello")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        assertThat(response).isEqualTo("Hello, my name is Demo");
+                .expectBody().jsonPath("$").isEqualTo("Hello, my name is Demo");
 	}
 
 }

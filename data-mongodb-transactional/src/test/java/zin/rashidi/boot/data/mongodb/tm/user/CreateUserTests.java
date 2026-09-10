@@ -10,7 +10,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.mongodb.MongoDBContainer;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static zin.rashidi.boot.data.mongodb.tm.user.User.Status.ACTIVE;
@@ -39,16 +38,13 @@ class CreateUserTests {
                 }
                 """;
 
-        var createdUser = restTemplate.post().uri("/users")
+        restTemplate.post().uri("/users")
                 .contentType(APPLICATION_JSON)
                 .body(body)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectBody(User.class)
-                .returnResult()
-                .getResponseBody();
-
-        assertThat(createdUser).extracting("status").isEqualTo(ACTIVE);
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("ACTIVE");
     }
 
 }

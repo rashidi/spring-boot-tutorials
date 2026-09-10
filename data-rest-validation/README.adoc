@@ -108,14 +108,8 @@ class CreateBookTests {
                 .body(body)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody(RepositoryRestErrorResponse.class)
-                .returnResult()
-                .getResponseBody();
-
-        assertThat(response.getErrors())
-                .hasSize(1)
-                .extracting(ValidationError::getMessage)
-                .containsExactly("Author is inactive");
+                .expectBody()
+                .jsonPath("$.errors[0].message").isEqualTo("Author is inactive");
     }
 
     private URI authorUri() {
@@ -135,6 +129,14 @@ class CreateBookTests {
                 .returnResult()
                 .getResponseHeaders()
                 .getLocation();
+    }
+
+    private HttpHeaders headers() {
+        var headers = new HttpHeaders();
+
+        headers.setContentType(APPLICATION_JSON);
+
+        return headers;
     }
 
 }

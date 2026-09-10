@@ -175,7 +175,7 @@ Next we will have link:{url-quickref}/src/test/java/zin/rashidi/boot/cloud/jdbce
 class CloudJdbcEnvRepoApplicationTests {
 
     @Container
-    private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:lts");
+    private static final MySQLContainer MYSQL = new MySQLContainer("mysql:lts");
 
     @Autowired
     private RestTestClient restClient;
@@ -183,14 +183,10 @@ class CloudJdbcEnvRepoApplicationTests {
 	@Test
     @DisplayName("Given app.greet.name is configured to Demo in the database When I call greet Then I should get Hello, my name is Demo")
 	void greet() {
-        var response = restClient.get().uri("/greet?greeting={greeting}", "Hello")
+        restClient.get().uri("/greet?greeting={greeting}", "Hello")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        assertThat(response).isEqualTo("Hello, my name is Demo");
+                .expectBody().jsonPath("$").isEqualTo("Hello, my name is Demo");
 	}
 
 }

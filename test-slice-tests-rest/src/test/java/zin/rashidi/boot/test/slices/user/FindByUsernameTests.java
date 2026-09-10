@@ -10,10 +10,8 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import zin.rashidi.boot.test.slices.TestcontainersConfiguration;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_CLASS;
-import static zin.rashidi.boot.test.slices.user.User.Status.ACTIVE;
 
 /**
  * @author Rashidi Zin
@@ -34,17 +32,14 @@ class FindByUsernameTests {
     @Test
     @DisplayName("Given username rashidi.zin exists When I request for the username Then response status should be OK and it should contain the summary of the user")
     void withExistingUsername() {
-        var user = restClient.get().uri("/users/{username}", "rashidi.zin")
+        restClient.get().uri("/users/{username}", "rashidi.zin")
                 .headers(headers -> headers.setBasicAuth("rashidi.zin", "jU$7d3m0pL3a$eRe|ax"))
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(UserWithoutId.class)
-                .returnResult()
-                .getResponseBody();
-
-        assertThat(user)
-                .extracting("name", "username", "status")
-                .containsExactly("Rashidi Zin", "rashidi.zin", ACTIVE);
+                .expectBody()
+                .jsonPath("$.name").isEqualTo("Rashidi Zin")
+                .jsonPath("$.username").isEqualTo("rashidi.zin")
+                .jsonPath("$.status").isEqualTo("ACTIVE");
     }
 
     @Test
