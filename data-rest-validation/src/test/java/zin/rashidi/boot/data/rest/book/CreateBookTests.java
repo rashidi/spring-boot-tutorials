@@ -13,25 +13,24 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
 import zin.rashidi.boot.data.rest.TestDataRestValidationApplication;
 
 /**
  * @author Rashidi Zin
  */
-@AutoConfigureTestRestTemplate
+@AutoConfigureRestTestClient
 @Import(TestDataRestValidationApplication.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 class CreateBookTests {
 
     @Autowired
-    private TestRestTemplate restClient;
+    private RestTestClient restClient;
 
     @Test
     @DisplayName("When I create a Book with an inactive Author, I should get a Bad Request response")
@@ -43,11 +42,16 @@ class CreateBookTests {
                 }
                 """.formatted(authorUri());
 
-        var response = restClient.exchange("/books", POST, new HttpEntity<>(body, headers()), RepositoryRestErrorResponse.class);
+        var response = restClient.post().uri("/books")
+                .headers(httpHeaders -> httpHeaders.addAll(headers()))
+                .body(body)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(RepositoryRestErrorResponse.class)
+                .returnResult()
+                .getResponseBody();
 
-        assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
-
-        assertThat(response.getBody().getErrors())
+        assertThat(response.getErrors())
                 .hasSize(1)
                 .extracting(ValidationError::getMessage)
                 .containsExactly("Author is inactive");
@@ -61,8 +65,14 @@ class CreateBookTests {
                 }
                 """;
 
-        return restClient.exchange("/authors", POST, new HttpEntity<>(body, headers()), Void.class)
-                .getHeaders()
+        return restClient.post().uri("/authors")
+                .headers(httpHeaders -> httpHeaders.addAll(headers()))
+                .body(body)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .returnResult()
+                .getResponseHeaders()
                 .getLocation();
     }
 
