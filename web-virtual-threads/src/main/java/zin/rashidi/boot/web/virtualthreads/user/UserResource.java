@@ -1,16 +1,18 @@
 package zin.rashidi.boot.web.virtualthreads.user;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
 @RestController
-class UserController {
+@Transactional(readOnly=true)
+class UserResource {
 
     private final UserRepository repository;
 
-    public UserController(UserRepository repository) {
+    public UserResource(UserRepository repository) {
         this.repository = repository;
     }
 
