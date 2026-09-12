@@ -37,5 +37,6 @@
 ** xref:test-slice-tests-rest.adoc[Spring Test: Slice Testing a REST Application]
 * Spring Web
 ** xref:web-thymeleaf-xss.adoc[Preventing XSS with Spring Security and Thymeleaf]
+** xref:web-problem-details.adoc[Spring Web: Problem Details for HTTP APIs]
 ** xref:web-rest-client.adoc[Spring Web: REST Clients for calling Synchronous API]
 ** xref:web-virtual-threads.adoc[Spring Web: Virtual Threads]
