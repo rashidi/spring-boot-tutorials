@@ -1,0 +1,243 @@
+= Spring AI: Vector Similarity Search with Redis
+Rashidi Zin <rashidi@zin.my>
+1.0, September 13, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/ai-redis
+:source-main: src/main/java/zin/rashidi/boot/ai/redis
+:source-test: src/test/java/zin/rashidi/boot/ai/redis
+
+Traditional keyword searches rely on lexical matching and token stemming, which often fall short when queries express intent through synonyms or contextual descriptions rather than exact terms.
+
+Vector similarity search solves this by transforming unstructured text into dense vector embeddings where semantic proximity is represented geometrically. In this tutorial, we will explore how to implement vector similarity search using https://spring.io/projects/spring-ai[Spring AI] with Redis as a Vector Store and verify the implementation using https://testcontainers.com/[Testcontainers].
+
+== Why Redis?
+
+Redis with RediSearch and RedisJSON modules (available in Redis Stack) provides an efficient, low-latency platform for vector similarity search, caching, and serving as a database. By utilizing Redis for vector embeddings:
+
+* *In-Memory Performance*: Benefit from Redis's ultra-low latency for search queries.
+* *Versatility*: Perform hybrid queries combining vector similarity with text search or metadata filtering.
+* *Operational Simplicity*: Easily integrate as a high-speed caching and query layer in modern application architectures.
+
+== Dependencies
+
+We include `spring-ai-starter-vector-store-redis` and Jedis alongside Testcontainers in `build.gradle.kts`, using the Spring AI BOM to manage Spring AI dependency versions:
+
+[source,kotlin]
+----
+val springAiVersion = "2.0.1"
+
+dependencies {
+    implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
+
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.ai:spring-ai-starter-vector-store-redis")
+    implementation("redis.clients:jedis")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.springframework.ai:spring-ai-spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("com.redis:testcontainers-redis:2.2.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+----
+
+== Configuration
+
+Configure the `RedisVectorStore` parameters in `src/main/resources/application.properties`:
+
+[source,properties]
+----
+spring.application.name=ai-redis
+spring.ai.vectorstore.redis.index-name=spring-ai-document-index
+spring.ai.vectorstore.redis.prefix=spring-ai-document:
+spring.data.redis.client-type=jedis
+spring.ai.vectorstore.redis.initialize-schema=true
+----
+
+Setting `initialize-schema=true` prompts Spring AI to create the requisite index for storing the vectors. `index-name` selects the index name, while `spring.data.redis.client-type=jedis` selects the Redis client used by the vector store.
+
+== Implementation
+
+=== Document Model
+
+link:{source-main}/document/DocumentItem.java[`DocumentItem`] serves as the domain record for ingesting content and metadata:
+
+[source,java]
+----
+package zin.rashidi.boot.ai.redis.document;
+
+import java.util.Map;
+import java.util.UUID;
+
+public record DocumentItem(
+    UUID id,
+    String text,
+    Map<String, Object> metadata
+) {}
+----
+
+=== Semantic Search Service
+
+link:{source-main}/document/DocumentSearchService.java[`DocumentSearchService`] wraps Spring AI's `VectorStore` to ingest documents and execute similarity searches:
+
+[source,java]
+----
+package zin.rashidi.boot.ai.redis.document;
+
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class DocumentSearchService {
+
+    private final VectorStore vectorStore;
+
+    public DocumentSearchService(VectorStore vectorStore) {
+        this.vectorStore = vectorStore;
+    }
+
+    public void add(List<DocumentItem> items) {
+        var documents = items.stream()
+            .map(item -> new Document(item.id().toString(), item.text(), item.metadata()))
+            .toList();
+        vectorStore.add(documents);
+    }
+
+    public List<Document> search(String query, int topK, double similarityThreshold) {
+        return vectorStore.similaritySearch(
+            SearchRequest.builder()
+                .query(query)
+                .topK(topK)
+                .similarityThreshold(similarityThreshold)
+                .build()
+        );
+    }
+}
+----
+
+== Integration Testing with Testcontainers
+
+We verify vector storage and retrieval against a real Redis instance (Redis Stack) provisioned with the Testcontainers Redis image.
+
+=== Testcontainers Configuration
+
+link:{source-test}/TestcontainersConfiguration.java[`TestcontainersConfiguration`] wires the Redis container with `@ServiceConnection`:
+
+[source,java]
+----
+package zin.rashidi.boot.ai.redis;
+
+import com.redis.testcontainers.RedisStackContainer;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection("redis")
+    RedisStackContainer redisContainer() {
+        return new RedisStackContainer(RedisStackContainer.DEFAULT_IMAGE_NAME.withTag("latest"));
+    }
+
+}
+----
+
+=== Deterministic Test Embedding Model
+
+To ensure tests execute hermetically without external API dependencies or rate limits, link:{source-test}/document/DocumentSearchTests.java[`DocumentSearchTests`] defines an in-memory `EmbeddingModel`.
+
+It clusters domain keywords into explicit vector dimensions so that the query vector aligns deterministically with the target document:
+
+[source,java]
+----
+    @TestConfiguration
+    static class TestEmbeddingConfiguration {
+
+        @Bean
+        @Primary
+        EmbeddingModel testEmbeddingModel() {
+            return new EmbeddingModel() {
+
+                private float[] createVector(String text) {
+                    var vector = new float[384];
+                    var lower = (text != null) ? text.toLowerCase() : "";
+
+                    // Microservices / Spring cluster -> dimension 0
+                    if (lower.contains("microservice") || lower.contains("spring")) {
+                        vector[0] = 1.0f;
+                    }
+
+                    // Testing / Testcontainers cluster -> dimension 1
+                    else if (lower.contains("testcontainer") || lower.contains("testing")) {
+                        vector[1] = 1.0f;
+                    }
+
+                    // Default / fallback -> dimension 2
+                    else {
+                        vector[2] = 1.0f;
+                    }
+
+                    return vector;
+                }
+
+                @Override
+                public EmbeddingResponse call(EmbeddingRequest request) {
+                    return request.getInstructions().stream()
+                            .map(text -> new Embedding(createVector(text), 0))
+                            .collect(collectingAndThen(toUnmodifiableList(), EmbeddingResponse::new));
+                }
+
+                @Override
+                public float[] embed(Document document) {
+                    return createVector(document.getText());
+                }
+
+            };
+        }
+    }
+----
+
+=== Verifying Retrieval
+
+[source,java]
+----
+    @BeforeEach
+    void add() {
+        documents.add(List.of(
+                new DocumentItem(
+                        UUID.randomUUID(),
+                        "Spring Boot simplifies microservice development with convention over configuration.",
+                        Map.of("category", "framework")
+                ),
+                new DocumentItem(
+                        UUID.randomUUID(),
+                        "Testcontainers provides disposable, real database containers for integration tests.",
+                        Map.of("category", "testing")
+                )
+        ));
+    }
+
+    @Test
+    @DisplayName("should index documents and retrieve semantically similar content")
+    void searchReturnsSemanticallyRelevantDocuments() {
+        var results = documents.search("microservices in Java", 1, 0.0);
+
+        assertThat(results)
+                .hasSize(1)
+                .first()
+                .extracting("text").isEqualTo("Spring Boot simplifies microservice development with convention over configuration.");
+    }
+----
+
+== Summary
+
+By pairing Spring AI with Redis vector capabilities and Testcontainers, we can build and verify semantic search capabilities within a fast, memory-optimized infrastructure while maintaining reliable, self-contained integration tests.
