@@ -22,19 +22,24 @@ Redis with RediSearch and RedisJSON modules (available in Redis Stack) provides 
 
 == Dependencies
 
-We include `spring-ai-starter-vector-store-redis` alongside Testcontainers in `build.gradle.kts`:
+We include `spring-ai-starter-vector-store-redis` and Jedis alongside Testcontainers in `build.gradle.kts`, using the Spring AI BOM to manage Spring AI dependency versions:
 
 [source,kotlin]
 ----
+val springAiVersion = "2.0.1"
+
 dependencies {
+    implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
+
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.ai:spring-ai-starter-vector-store-redis")
+    implementation("redis.clients:jedis")
 
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.ai:spring-ai-spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
-    testImplementation("com.redis.testcontainers:testcontainers-redis:2.2.3")
+    testImplementation("com.redis:testcontainers-redis:2.2.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 ----
@@ -46,13 +51,13 @@ Configure the `RedisVectorStore` parameters in `src/main/resources/application.p
 [source,properties]
 ----
 spring.application.name=ai-redis
-
+spring.ai.vectorstore.redis.index-name=spring-ai-document-index
+spring.ai.vectorstore.redis.prefix=spring-ai-document:
+spring.data.redis.client-type=jedis
 spring.ai.vectorstore.redis.initialize-schema=true
-spring.ai.vectorstore.redis.index=document_index
-spring.ai.vectorstore.redis.prefix=document:
 ----
 
-Setting `initialize-schema=true` prompts Spring AI to create the requisite index for storing the vectors.
+Setting `initialize-schema=true` prompts Spring AI to create the requisite index for storing the vectors. `index-name` selects the index name, while `spring.data.redis.client-type=jedis` selects the Redis client used by the vector store.
 
 == Implementation
 
@@ -129,7 +134,7 @@ link:{source-test}/TestcontainersConfiguration.java[`TestcontainersConfiguration
 ----
 package zin.rashidi.boot.ai.redis;
 
-import com.redis.testcontainers.RedisContainer;
+import com.redis.testcontainers.RedisStackContainer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -138,9 +143,9 @@ import org.springframework.context.annotation.Bean;
 public class TestcontainersConfiguration {
 
     @Bean
-    @ServiceConnection
-    RedisContainer redisContainer() {
-        return new RedisContainer(RedisContainer.DEFAULT_IMAGE_NAME.withTag("7.2.4-v2"));
+    @ServiceConnection("redis")
+    RedisStackContainer redisContainer() {
+        return new RedisStackContainer(RedisStackContainer.DEFAULT_IMAGE_NAME.withTag("latest"));
     }
 
 }

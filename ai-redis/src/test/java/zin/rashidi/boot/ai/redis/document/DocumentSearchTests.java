@@ -1,5 +1,6 @@
 package zin.rashidi.boot.ai.redis.document;
 
+import com.redis.testcontainers.RedisStackContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import zin.rashidi.boot.ai.redis.TestcontainersConfiguration;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,6 +32,9 @@ class DocumentSearchTests {
 
     @Autowired
     private DocumentSearchService documents;
+
+    @Autowired
+    private RedisStackContainer redis;
 
     @BeforeEach
     void add() {
@@ -56,6 +61,15 @@ class DocumentSearchTests {
                 .hasSize(1)
                 .first()
                 .extracting("text").isEqualTo("Spring Boot simplifies microservice development with convention over configuration.");
+    }
+
+    @Test
+    @DisplayName("should create the configured Redis vector index")
+    void createsConfiguredIndex() throws IOException, InterruptedException {
+        var result = redis.execInContainer("redis-cli", "FT._LIST");
+
+        assertThat(result.getExitCode()).isZero();
+        assertThat(result.getStdout().lines()).contains("spring-ai-document-index");
     }
 
     @TestConfiguration
