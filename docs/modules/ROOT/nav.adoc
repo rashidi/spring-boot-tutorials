@@ -1,6 +1,7 @@
 * xref:index.adoc[Home]
 * Spring AI
 ** xref:ai-pgvector.adoc[Spring AI: Vector Similarity Search with PgVector]
+** xref:ai-redis.adoc[Spring AI: Vector Similarity Search with Redis]
 * Spring Batch
 ** xref:batch-skip-step.adoc[Spring Batch: Skip Specific Data]
 ** xref:batch-rest-repository.adoc[Spring Batch: Working With REST Resources]
