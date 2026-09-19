@@ -1,5 +1,6 @@
 rootProject.name = "spring-boot-tutorials"
 
+include("ai-neo4j")
 include("ai-pgvector")
 include("ai-redis")
 include("batch-rest-repository")
