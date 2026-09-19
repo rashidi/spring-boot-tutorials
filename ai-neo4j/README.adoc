@@ -1,0 +1,180 @@
+= Vector Search with Spring AI and Neo4j
+
+This tutorial explains how to implement vector search in a Spring Boot application using Spring AI and Neo4j. We will create a `DocumentSearchService` to index documents and perform similarity searches. Finally, we'll verify the implementation using Testcontainers.
+
+== Dependencies
+
+We need to include the `spring-ai-starter-vector-store-neo4j` dependency to our project. This starter will automatically configure the `Neo4jVectorStore` and `Neo4jClient` beans for us.
+
+[source,kotlin]
+----
+dependencies {
+    implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
+
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.ai:spring-ai-starter-vector-store-neo4j")
+}
+----
+
+== Configuration
+
+By default, Spring AI requires the schema to be initialized. We can enable this by setting the following property in our `application.properties` file:
+
+[source,properties]
+----
+spring.ai.vectorstore.neo4j.initialize-schema=true
+spring.ai.vectorstore.neo4j.index-name=spring-ai-document-index
+----
+
+== DocumentSearchService
+
+We will create a `DocumentSearchService` that uses `VectorStore` to index and search documents. The `VectorStore` interface provides methods for adding and searching documents. Spring AI will inject the `Neo4jVectorStore` implementation for us since we included the `spring-ai-starter-vector-store-neo4j` dependency.
+
+[source,java]
+----
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class DocumentSearchService {
+
+    private final VectorStore vectorStore;
+
+    public DocumentSearchService(VectorStore vectorStore) {
+        this.vectorStore = vectorStore;
+    }
+
+    public void add(DocumentItem item) {
+        var document = new Document(item.id(), item.content(), Map.of());
+        this.vectorStore.add(List.of(document));
+    }
+
+    public List<DocumentItem> search(String query) {
+        var searchRequest = SearchRequest.builder()
+                .query(query)
+                .topK(1)
+                .similarityThreshold(0.0)
+                .build();
+
+        return this.vectorStore.similaritySearch(searchRequest).stream()
+                .map(document -> new DocumentItem(document.getId(), document.getText()))
+                .toList();
+    }
+}
+----
+
+== Integration Testing
+
+We can verify our implementation using Testcontainers. We will use the `Neo4jContainer` to start a Neo4j database instance.
+
+[source,java]
+----
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.testcontainers.containers.Neo4jContainer;
+import org.testcontainers.utility.DockerImageName;
+
+@TestConfiguration(proxyBeanMethods = false)
+class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    Neo4jContainer<?> neo4jContainer() {
+        return new Neo4jContainer<>(DockerImageName.parse("neo4j:5.23.0"))
+                .withRandomPassword();
+    }
+
+}
+----
+
+Now, we can write our integration test. We will add three documents to the vector store and search for a query. We expect the search result to contain only the document that is similar to the query.
+
+[source,java]
+----
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest
+@Import(TestcontainersConfiguration.class)
+class DocumentSearchTests {
+
+    @Autowired
+    private DocumentSearchService documentSearchService;
+
+    @Test
+    @DisplayName("Should return similar documents based on the query")
+    void search() {
+        var firstItem = new DocumentItem(UUID.randomUUID().toString(), "Spring Boot is a Java-based framework used to create a micro Service.");
+        var secondItem = new DocumentItem(UUID.randomUUID().toString(), "Spring AI is a project that provides a Spring-friendly API for artificial intelligence.");
+        var thirdItem = new DocumentItem(UUID.randomUUID().toString(), "Testcontainers is an open source framework for providing throwaway, lightweight instances of databases, message brokers, web browsers, or just about anything that can run in a Docker container.");
+
+        documentSearchService.add(firstItem);
+        documentSearchService.add(secondItem);
+        documentSearchService.add(thirdItem);
+
+        var results = documentSearchService.search("What is Spring Boot?");
+
+        assertThat(results)
+                .extracting(DocumentItem::content)
+                .contains(firstItem.content())
+                .doesNotContain(secondItem.content(), thirdItem.content());
+    }
+
+    @TestConfiguration
+    static class TestEmbeddingConfiguration {
+
+        @Bean
+        @Primary
+        EmbeddingModel testEmbeddingModel() {
+            return new EmbeddingModel() {
+
+                private float[] createVector(String text) {
+                    var vector = new float[384];
+                    var lower = (text != null) ? text.toLowerCase() : "";
+
+                    if (lower.contains("micro service") || lower.contains("spring boot")) {
+                        vector[0] = 1.0f;
+                    }
+                    else if (lower.contains("artificial intelligence") || lower.contains("spring ai")) {
+                        vector[1] = 1.0f;
+                    }
+                    else if (lower.contains("testcontainers") || lower.contains("docker")) {
+                        vector[2] = 1.0f;
+                    }
+                    else {
+                        vector[3] = 1.0f;
+                    }
+
+                    return vector;
+                }
+
+                @Override
+                public EmbeddingResponse call(EmbeddingRequest request) {
+                    return request.getInstructions().stream()
+                            .map(text -> new Embedding(createVector(text), 0))
+                            .collect(collectingAndThen(toUnmodifiableList(), EmbeddingResponse::new));
+                }
+
+                @Override
+                public float[] embed(Document document) {
+                    return createVector(document.getText());
+                }
+
+            };
+        }
+    }
+}
+----

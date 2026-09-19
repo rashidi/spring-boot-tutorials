@@ -34,6 +34,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |===
 |Tutorial |Description
 
+|link:ai-neo4j[Spring AI: Vector Similarity Search with Neo4j] |Semantic vector similarity search using Spring AI and Neo4j Vector Store with Testcontainers
 |link:ai-pgvector[Spring AI: Vector Similarity Search with PgVector] |Semantic vector similarity search using Spring AI and PostgreSQL pgvector with Testcontainers
 |link:ai-redis[Spring AI: Vector Store with Redis] |Semantic vector similarity search using Spring AI and Redis Vector Store with Testcontainers
 |link:batch-rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
