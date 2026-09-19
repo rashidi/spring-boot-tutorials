@@ -29,7 +29,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.ai:spring-ai-spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
-    testImplementation("org.testcontainers:neo4j")
+    testImplementation("org.testcontainers:neo4j:1.20.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
