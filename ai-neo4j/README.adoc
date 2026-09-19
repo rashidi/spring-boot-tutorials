@@ -62,7 +62,7 @@ public class DocumentSearchService {
                 .build();
 
         return this.vectorStore.similaritySearch(searchRequest).stream()
-                .map(document -> new DocumentItem(document.getId(), document.getContent()))
+                .map(document -> new DocumentItem(document.getId(), document.getText()))
                 .toList();
     }
 }
