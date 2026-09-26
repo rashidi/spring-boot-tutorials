@@ -1,0 +1,247 @@
+= Architecture: Hexagonal Architecture
+Rashidi Zin <rashidi@zin.my>
+1.0, September 26, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/architecture-hexagonal
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/architecture/hexagonal
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/architecture/hexagonal
+
+Hexagonal Architecture, also known as Ports and Adapters pattern, aims to create loosely coupled application components that can be easily connected to their software environment by means of ports and adapters. This makes components exchangeable at any level and facilitates test automation.
+
+In this tutorial, we will explore how to implement Hexagonal Architecture in a Spring Boot application.
+
+== Why Hexagonal Architecture?
+
+Traditional layered architectures often lead to domain logic bleeding into the infrastructure (e.g., database models dictating business logic). By adopting Hexagonal Architecture, we achieve:
+
+* *Isolation of Domain Logic*: The core business logic is completely unaware of databases, web endpoints, or external services.
+* *Testability*: Testing the domain requires no heavy setup because it depends on interfaces (Ports) rather than concrete infrastructure.
+* *Flexibility*: Switching a database from PostgreSQL to MongoDB, or exposing a new GraphQL endpoint alongside REST, involves adding new Adapters without modifying the core.
+
+== Implementation
+
+=== Domain (Core)
+
+The Domain contains the business entities and definitions of required outgoing interactions (Outgoing Ports).
+
+[source,java]
+----
+package zin.rashidi.boot.architecture.hexagonal.user.domain;
+
+public class User {
+
+    private final Long id;
+    private final String name;
+
+    // Constructors, Getters
+}
+----
+
+The core defines the `UserRepository` interface. Notice this is not a Spring Data interface; it's a pure Java interface defining what the domain needs to function.
+
+[source,java]
+----
+package zin.rashidi.boot.architecture.hexagonal.user.domain;
+
+import java.util.List;
+
+public interface UserRepository {
+
+    User save(User user);
+
+    List<User> findAll();
+
+}
+----
+
+=== Application (Use Cases / Incoming Ports)
+
+The Application layer implements the business use cases. It defines the Incoming Ports (interfaces) that outside actors (like REST controllers) will call.
+
+[source,java]
+----
+package zin.rashidi.boot.architecture.hexagonal.user.application;
+
+import zin.rashidi.boot.architecture.hexagonal.user.domain.User;
+import java.util.List;
+
+public interface UserUseCase {
+
+    User create(User user);
+
+    List<User> retrieveAll();
+
+}
+----
+
+The `UserService` implements this Use Case and orchestrates the flow using the domain objects and outgoing ports.
+
+[source,java]
+----
+package zin.rashidi.boot.architecture.hexagonal.user.application;
+
+import org.springframework.stereotype.Service;
+import zin.rashidi.boot.architecture.hexagonal.user.domain.User;
+import zin.rashidi.boot.architecture.hexagonal.user.domain.UserRepository;
+import java.util.List;
+
+@Service
+class UserService implements UserUseCase {
+
+    private final UserRepository repository;
+
+    public UserService(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public User create(User user) {
+        return repository.save(user);
+    }
+
+    @Override
+    public List<User> retrieveAll() {
+        return repository.findAll();
+    }
+
+}
+----
+
+=== Adapters (Infrastructure)
+
+Adapters translate data between the core domain and the outside world.
+
+*Primary Adapters (Incoming)* drive the application. For example, a REST controller.
+
+[source,java]
+----
+package zin.rashidi.boot.architecture.hexagonal.user.adapter.in.web;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import zin.rashidi.boot.architecture.hexagonal.user.application.UserUseCase;
+import zin.rashidi.boot.architecture.hexagonal.user.domain.User;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/users")
+class UserResource {
+
+    private final UserUseCase useCase;
+
+    public UserResource(UserUseCase useCase) {
+        this.useCase = useCase;
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public User create(@RequestBody UserRequest request) {
+        User user = new User(null, request.name());
+        return useCase.create(user);
+    }
+
+    @GetMapping
+    public List<User> retrieveAll() {
+        return useCase.retrieveAll();
+    }
+
+    record UserRequest(String name) {}
+}
+----
+
+*Secondary Adapters (Outgoing)* are driven by the application. For instance, the database persistence logic.
+We create a JPA entity `UserEntity`, a Spring Data repository `JpaUserRepository`, and an adapter class that implements the domain's `UserRepository` port.
+
+[source,java]
+----
+package zin.rashidi.boot.architecture.hexagonal.user.adapter.out.persistence;
+
+import org.springframework.stereotype.Component;
+import zin.rashidi.boot.architecture.hexagonal.user.domain.User;
+import zin.rashidi.boot.architecture.hexagonal.user.domain.UserRepository;
+import java.util.List;
+
+@Component
+class UserPersistenceAdapter implements UserRepository {
+
+    private final JpaUserRepository repository;
+
+    public UserPersistenceAdapter(JpaUserRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public User save(User user) {
+        UserEntity entity = new UserEntity(user.id(), user.name());
+        UserEntity savedEntity = repository.save(entity);
+        return new User(savedEntity.getId(), savedEntity.getName());
+    }
+
+    @Override
+    public List<User> findAll() {
+        return repository.findAll().stream()
+                .map(entity -> new User(entity.getId(), entity.getName()))
+                .toList();
+    }
+}
+----
+
+== Integration Testing
+
+We verify the end-to-end functionality using https://testcontainers.com/[Testcontainers] and `RestTestClient`. The test verifies that our Primary Adapter (Web) successfully calls the Use Case, which interacts with the Secondary Adapter (Persistence).
+
+[source,java]
+----
+package zin.rashidi.boot.architecture.hexagonal.user.adapter.in.web;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.client.RestTestClient;
+import zin.rashidi.boot.architecture.hexagonal.TestcontainersConfiguration;
+
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
+@AutoConfigureRestTestClient
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+class UserResourceTests {
+
+    @Autowired
+    private RestTestClient restClient;
+
+    @Test
+    @DisplayName("Should create and retrieve a user via HTTP")
+    void createAndRetrieveUser() {
+        // Create user
+        restClient.post().uri("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{\"name\":\"Rashidi\"}")
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.id").exists()
+                .jsonPath("$.name").isEqualTo("Rashidi");
+
+        // Retrieve users
+        restClient.get().uri("/users")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.length()").isEqualTo(1)
+                .jsonPath("$[0].name").isEqualTo("Rashidi");
+    }
+
+}
+----
+
+== Summary
+
+By implementing Hexagonal Architecture, we effectively isolated our core domain from the web layer and database. The flow is cleanly managed through Incoming and Outgoing Ports, ensuring high maintainability and testability.

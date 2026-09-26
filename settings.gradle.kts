@@ -2,6 +2,7 @@ rootProject.name = "spring-boot-tutorials"
 
 include("ai-pgvector")
 include("ai-redis")
+include("architecture-hexagonal")
 include("batch-rest-repository")
 include("batch-skip-step")
 include("cloud-jdbc-env-repo")
