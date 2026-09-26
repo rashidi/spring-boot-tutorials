@@ -58,7 +58,7 @@ class DocumentSearchTests {
         assertThat(results)
                 .hasSize(1)
                 .first()
-                .extracting("content").isEqualTo("Spring Boot simplifies microservice development with convention over configuration.");
+                .extracting("text").isEqualTo("Spring Boot simplifies microservice development with convention over configuration.");
     }
 
     @TestConfiguration
@@ -100,7 +100,7 @@ class DocumentSearchTests {
 
                 @Override
                 public float[] embed(Document document) {
-                    return createVector(document.getContent());
+                    return createVector(document.getText());
                 }
 
             };
