@@ -1,0 +1,101 @@
+= Spring AI: Vector Similarity Search with Chroma
+
+This tutorial demonstrates how to use Spring AI with Chroma Vector Store to perform semantic vector similarity search. We will use Testcontainers to spin up a Chroma container for integration testing.
+
+== Dependencies
+
+We need to include the following dependencies in our `build.gradle.kts`:
+
+[source,kotlin]
+----
+dependencies {
+    implementation(platform("org.springframework.ai:spring-ai-bom:2.0.1"))
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.ai:spring-ai-starter-vector-store-chroma")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.springframework.ai:spring-ai-spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:chromadb")
+}
+----
+
+== Application Configuration
+
+In `application.properties`, we enable Chroma schema initialization:
+
+[source,properties]
+----
+spring.ai.vectorstore.chroma.initialize-schema=true
+----
+
+== Implementation
+
+We define a `DocumentItem` record to store the document context:
+
+[source,java]
+----
+public record DocumentItem(UUID id, String content, Map<String, Object> metadata) {
+}
+----
+
+And a `DocumentSearchService` which uses Spring AI's `VectorStore` to index and search documents:
+
+[source,java]
+----
+@Service
+public class DocumentSearchService {
+
+    private final VectorStore store;
+
+    public DocumentSearchService(VectorStore store) {
+        this.store = store;
+    }
+
+    public void add(List<DocumentItem> items) {
+        var documents = items.stream()
+                .map(item -> new Document(item.id().toString(), item.content(), item.metadata()))
+                .toList();
+        store.add(documents);
+    }
+
+    public List<Document> search(String query, int topK, double similarityThreshold) {
+        return store.similaritySearch(
+                SearchRequest.builder()
+                        .query(query)
+                        .topK(topK)
+                        .similarityThreshold(similarityThreshold)
+                        .build()
+        );
+    }
+}
+----
+
+== Testing
+
+We use Testcontainers for integration testing, configuring a `ChromaDBContainer` via `@ServiceConnection`:
+
+[source,java]
+----
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    public ChromaDBContainer chromaDBContainer() {
+        return new ChromaDBContainer("chromadb/chroma:0.5.20");
+    }
+}
+----
+
+Then we create `DocumentSearchTests` to verify our indexing and search functionalities:
+
+[source,java]
+----
+@SpringBootTest
+@Import(TestcontainersConfiguration.class)
+class DocumentSearchTests {
+    // Tests are implemented to ensure similarity search yields accurate results
+}
+----
