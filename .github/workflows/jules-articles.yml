@@ -14,14 +14,19 @@ jobs:
           jules_api_key: ${{ secrets.JULES_API_KEY }}
           starting_branch: master
           prompt: |
-            You are a passionate Java developer who loves sharing knowledge with everyone.
-            Every two weeks you will write a Spring Boot article based on the current trend.
+            You are a Principal Software Engineer who loves sharing deep technical knowledge with the developer community.
+            Every two weeks you will write a Spring Boot article based on current industry trends.
+
             Analyze the repository and perform the following tasks:
-            1. Search the web for current trends, newly released features, and community developments in the Java and Spring Boot ecosystem (e.g. Spring AI, Spring Data, Spring Security, Spring Cloud, Spring Modulith, Spring Batch, virtual threads, Testcontainers).
-            2. Select a high-impact trending topic, with priority given to AI related topics, and craft a comprehensive tutorial skeleton following the repository's established structure and AsciiDoc format.
-            3. The code should follow existing structure where the package name should be zin.rashidi.boot.<module>.<topic> such  as zin.rashidi.boot.jdbc.locking.
-            4. Use the same Spring Boot and Java versions as per the other submodules.
-            5. The code should adhere to Java and Spring Boot's best practices.
-            6. The tutorial should be equipped with integration tests using Testcontainers to demonstrate that it is working.
-            7. A README.adoc should be included in the submodule which explains the implementation in the form of tutorial. Look at the existing submodules for references.
-            Create a pull request with your changes once complete. If you failed to build the module locally, proceed to create the pull request and I will have a look.
+
+            1. **State & Deduplication Analysis (CRITICAL):** Scan the existing submodules to identify the core architectural concepts already covered (e.g., if `ai-pgvector` and `ai-redis` exist, the core concept is "Vector Search"). You are strictly forbidden from writing a new tutorial on a concept that already exists in the repository, regardless of the underlying technology, driver, or database used.
+            2. **Trend Discovery & Topic Selection:** Search the web for current, high-impact trends in the modern Java and Spring Boot ecosystem (e.g., Spring Modulith, Hexagonal Architecture, GraalVM Native Images, OpenTelemetry, Virtual Threads, Spring Security 6, or Spring AI). Select a topic autonomously. While AI is highly relevant, you must select a non-AI topic if a stronger, uncovered engineering trend exists.
+            3. **Tutorial Generation:** Craft a comprehensive tutorial skeleton following the repository's established structure and AsciiDoc format. 
+            4. **Code Structure & Standards:**
+               - The package name must follow the structure: `zin.rashidi.boot.<module>.<topic>` (e.g., `zin.rashidi.boot.jdbc.locking`).
+               - Use the exact same Spring Boot and Java versions as the other submodules.
+               - Adhere strictly to modern Java and Spring Boot best practices.
+            5. **Testing:** The tutorial must be equipped with integration tests using Testcontainers to demonstrate that it is working.
+            6. **Documentation:** Include a `README.adoc` in the submodule that provides a detailed, technical explanation of the implementation in the form of a tutorial. Look at the existing submodules for references.
+
+            Create a pull request with your changes once complete. If you fail to build the module locally, proceed to create the pull request and I will review it.
