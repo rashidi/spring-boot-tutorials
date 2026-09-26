@@ -41,3 +41,6 @@
 ** xref:web-problem-details.adoc[Spring Web: Problem Details for HTTP APIs]
 ** xref:web-rest-client.adoc[Spring Web: REST Clients for calling Synchronous API]
 ** xref:web-virtual-threads.adoc[Spring Web: Virtual Threads]
+
+* ArchitectureHexagonal
+** xref:architecture-hexagonal.adoc[Architecture: Hexagonal Architecture]
