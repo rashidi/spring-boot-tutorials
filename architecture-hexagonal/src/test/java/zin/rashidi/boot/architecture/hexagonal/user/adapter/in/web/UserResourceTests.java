@@ -14,7 +14,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @AutoConfigureRestTestClient
 @Import(TestcontainersConfiguration.class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.show-sql=true"
+})
 class UserResourceTests {
 
     @Autowired
@@ -26,7 +29,11 @@ class UserResourceTests {
         // Create user
         restClient.post().uri("/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body("{\"name\":\"Rashidi\"}")
+                .body("""
+                        {
+                            "name": "Rashidi"
+                        }
+                        """)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
