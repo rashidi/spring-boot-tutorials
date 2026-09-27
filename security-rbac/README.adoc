@@ -1,6 +1,6 @@
 = Spring Security 6: Role-Based Access Control (RBAC) with JPA
 Rashidi Zin <rashidi@zin.my>
-1.0, October 10, 2026: Initial version
+1.0, September 27, 2026: Initial version
 :toc:
 :icons: font
 :source-highlighter: highlight.js
