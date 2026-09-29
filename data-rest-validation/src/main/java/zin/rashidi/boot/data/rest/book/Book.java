@@ -18,7 +18,7 @@ class Book {
     private String title;
 
     @JoinColumn
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Author author;
 
     public Author getAuthor() {
