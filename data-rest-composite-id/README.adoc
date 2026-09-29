@@ -36,7 +36,7 @@ class Book {
     @EmbeddedId
     private Isbn isbn = new Isbn();
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false)
     private Author author;
 
     private String title;
