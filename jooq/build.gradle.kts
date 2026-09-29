@@ -3,6 +3,7 @@ import org.jooq.meta.kotlin.*
 
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
     id("nu.studer.jooq") version "10.2.1"
