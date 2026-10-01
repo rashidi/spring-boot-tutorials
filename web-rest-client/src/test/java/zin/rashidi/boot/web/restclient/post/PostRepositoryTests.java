@@ -66,11 +66,13 @@ class PostRepositoryTests {
         assertThatThrownBy(() -> repository.findById(10101011L)).isInstanceOf(PostNotFoundException.class);
     }
 
+    private static final List<Post> POSTS = List.of(
+            new Post(1L, 84L, "Spring Web: REST Clients Example with RESTClient", "An example of using RESTClient"),
+            new Post(2L, 84L, "Spring Web: REST Clients Example with HTTPExchange", "An example of using HttpExchange interface")
+    );
+
     private List<Post> posts() {
-        return List.of(
-                new Post(1L, 84L, "Spring Web: REST Clients Example with RESTClient", "An example of using RESTClient"),
-                new Post(2L, 84L, "Spring Web: REST Clients Example with HTTPExchange", "An example of using HttpExchange interface")
-        );
+        return POSTS;
     }
 
 }
