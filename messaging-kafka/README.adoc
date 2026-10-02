@@ -1,6 +1,6 @@
 = Spring for Apache Kafka
 Rashidi Zin <rashidi@zin.my>
-1.0, October 11, 2024: Initial version
+1.0, October 2, 2026: Initial version
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/main/messaging-kafka

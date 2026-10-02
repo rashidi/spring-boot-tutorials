@@ -29,7 +29,7 @@ class UserControllerTests {
 
     @Container
     @ServiceConnection
-    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.1"));
+    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest").asCompatibleSubstituteFor("confluentinc/cp-kafka"));
 
     @Autowired
     private RestTestClient client;
