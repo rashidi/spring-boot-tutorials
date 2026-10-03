@@ -4,3 +4,6 @@
 ## 2024-10-27 - Object Allocation Optimization in Repositories
 **Learning:** Hardcoded sample data returned directly inside repository or service methods (like `List.of(...)`) causes unnecessary object allocations and Garbage Collection pressure on every invocation.
 **Action:** Always extract hardcoded sample data into `private static final` immutable collections (like `List.of(...)`) to cache it at the class level and reuse the single instance across calls.
+## 2024-10-27 - Reflection Performance Optimization
+**Learning:** Using Java Reflection inside a frequently called method (like `findAll()` in a repository) causes unnecessary overhead on every execution.
+**Action:** Always compute reflective checks or expensive configuration logic during object instantiation (e.g. in the constructor) and cache the result in a `final` field for reuse.
