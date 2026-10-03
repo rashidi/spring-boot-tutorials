@@ -20,7 +20,7 @@ class JpaCustomBaseRepository<T, ID> extends SimpleJpaRepository<T, ID> {
 
     public JpaCustomBaseRepository(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
         super(entityInformation, entityManager);
-        this.hasStatusField = Stream.of(ReflectionUtils.getDeclaredMethods(getDomainClass())).anyMatch(field -> field.getName().equals("status"));
+        this.hasStatusField = ReflectionUtils.findField(getDomainClass(), "status") != null;
     }
 
     @Override
