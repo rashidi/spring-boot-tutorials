@@ -44,3 +44,6 @@
 
 * ArchitectureHexagonal
 ** xref:architecture-hexagonal.adoc[Architecture: Hexagonal Architecture]
+
+* MessagingKafka
+** xref:messaging-kafka.adoc[Spring for Apache Kafka]
