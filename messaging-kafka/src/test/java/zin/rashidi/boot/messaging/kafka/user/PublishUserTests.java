@@ -6,30 +6,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.client.RestTestClient;
-import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
+import zin.rashidi.boot.messaging.kafka.TestcontainersConfiguration;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * @author Rashidi Zin
  */
-@SpringBootTest
-@Testcontainers
+@Import(TestcontainersConfiguration.class)
 @AutoConfigureRestTestClient
-class UserControllerTests {
-
-    @Container
-    @ServiceConnection
-    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest").asCompatibleSubstituteFor("confluentinc/cp-kafka"));
+@SpringBootTest(webEnvironment =  RANDOM_PORT)
+class PublishUserTests {
 
     @Autowired
     private RestTestClient client;

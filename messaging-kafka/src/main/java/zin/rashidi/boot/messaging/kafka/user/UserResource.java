@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Rashidi Zin
  */
 @RestController
-class UserController {
+class UserResource {
 
     private final KafkaTemplate<String, User> kafkaTemplate;
 
-    UserController(KafkaTemplate<String, User> kafkaTemplate) {
+    UserResource(KafkaTemplate<String, User> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -24,4 +24,5 @@ class UserController {
     void publish(@RequestBody User user) {
         kafkaTemplate.send("user-events", String.valueOf(user.id()), user);
     }
+
 }

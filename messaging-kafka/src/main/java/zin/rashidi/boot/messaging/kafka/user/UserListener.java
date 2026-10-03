@@ -21,6 +21,7 @@ class UserListener {
     }
 
     public List<User> getReceivedUsers() {
-        return List.copyOf(receivedUsers);
+        return new ArrayList<>(receivedUsers);
     }
+
 }

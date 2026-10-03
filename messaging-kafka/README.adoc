@@ -4,6 +4,8 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/main/messaging-kafka
+:source-main: src/main/java/zin/rashidi/boot/messaging/kafka
+:source-test: src/test/java/zin/rashidi/boot/messaging/kafka
 
 This tutorial demonstrates how to use Spring for Apache Kafka to publish and listen for messages in a Spring Boot application, and how to write integration tests using Testcontainers.
 
@@ -15,7 +17,7 @@ We will build a simple application that takes a user payload via a REST API, pub
 
 The project has three main components:
 - `User`: A record representing our domain model.
-- `UserController`: A REST controller that accepts POST requests and publishes the user to Kafka.
+- `UserResource`: A REST controller that accepts POST requests and publishes the user to Kafka.
 - `UserListener`: A Kafka listener that listens to messages on the `user-events` topic.
 
 === The Record
@@ -30,7 +32,7 @@ public record User(Long id, String name, String username, String email) {
 
 === The Controller
 
-Our `UserController` will accept a POST request with the user JSON and then publish it using `KafkaTemplate`.
+Our `UserResource` will accept a POST request with the user JSON and then publish it using `KafkaTemplate`.
 
 [source,java]
 ----
@@ -75,18 +77,30 @@ class UserListener {
 
 == Testing
 
-We will write an integration test using Testcontainers to bring up an actual Kafka container. The `@ServiceConnection` annotation automatically configures the broker properties for us, so we don't need to specify the connection string manually in our properties file.
+We will write an integration test using Testcontainers to bring up an actual Kafka container. The setup for Kafka can be found in link:{source-test}/TestcontainersConfiguration.class[`TestcontainersConfiguration`].
 
 [source,java]
 ----
-@SpringBootTest
-@Testcontainers
-@AutoConfigureRestTestClient
-class UserControllerTests {
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
 
-    @Container
+    @Bean
     @ServiceConnection
-    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.1"));
+    KafkaContainer kafkaContainer() {
+        return new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"));
+    }
+
+}
+----
+
+The `@ServiceConnection` annotation automatically configures the broker properties for us, so we don't need to specify the connection string manually in our properties file.
+
+[source,java]
+----
+@Import(TestcontainersConfiguration.class)
+@AutoConfigureRestTestClient
+@SpringBootTest(webEnvironment =  RANDOM_PORT)
+class PublishUserTests {
 
     @Autowired
     private RestTestClient client;
