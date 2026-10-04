@@ -47,3 +47,6 @@
 
 * MessagingKafka
 ** xref:messaging-kafka.adoc[Spring for Apache Kafka]
+
+* MessagingRabbitmqDlq
+** xref:messaging-rabbitmq-dlq.adoc[Spring AMQP: Dead Letter Queue with RabbitMQ]
