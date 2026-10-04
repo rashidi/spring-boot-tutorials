@@ -1,0 +1,312 @@
+= Spring AMQP: Dead Letter Queue with RabbitMQ
+Rashidi Zin <rashidi@zin.my>
+1.0, October 4, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/messaging-rabbitmq-dlq
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/messaging/rabbitmq
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/messaging/rabbitmq
+:url-dlx: https://www.rabbitmq.com/docs/dlx
+
+Not every message can be processed successfully. A malformed payload or a violated business rule will fail no matter
+how many times it is consumed. In this tutorial, we will explore how to route such messages into a Dead Letter Queue
+(DLQ) using https://spring.io/projects/spring-amqp[Spring AMQP] and RabbitMQ, and verify the behaviour with
+integration tests powered by https://testcontainers.com[Testcontainers].
+
+== Background
+
+When a consumer fails to process a message, RabbitMQ will, by default, requeue it. If the failure is permanent, the
+same message is delivered again and again, blocking other messages and wasting resources. This is commonly known as a
+_poison message_.
+
+RabbitMQ solves this with {url-dlx}[Dead Letter Exchanges] (DLX). A queue can be configured with an
+`x-dead-letter-exchange` argument. When a message in that queue is _dead-lettered_, RabbitMQ republishes it to the
+configured exchange instead of discarding it. A message is dead-lettered when:
+
+* It is rejected by the consumer with `requeue=false`.
+* It expires due to its TTL.
+* It is dropped because the queue exceeded its length limit.
+* It exceeds the delivery limit of a quorum queue.
+
+The queue bound to the dead letter exchange is our Dead Letter Queue. Messages that end up there can be inspected,
+fixed, and replayed at a later time without blocking healthy traffic.
+
+== The Use Case
+
+We will build an application that consumes orders from the `orders` queue. An order with a quantity of less than one
+is invalid and can never be processed. Instead of looping forever, such an order will be retried a few times and then
+routed to the `orders.dlq` queue.
+
+[source]
+----
+Publisher ──► orders (exchange) ──► orders (queue) ──► OrderListener
+                                         │
+                                         │ rejected after 3 failed attempts
+                                         ▼
+                                    orders.dlx (exchange) ──► orders.dlq (queue)
+----
+
+== Implementation
+
+=== The Record
+
+We start by defining an link:{source-main}/order/Order.java[`Order`] record that will be published and consumed as
+JSON:
+
+[source,java]
+----
+public record Order(Long id, String product, int quantity) {
+}
+----
+
+=== Queue Topology
+
+The topology is declared in link:{source-main}/order/OrderQueueConfiguration.java[`OrderQueueConfiguration`]. Spring
+AMQP's `RabbitAdmin`, which is auto-configured by Spring Boot, declares every `Exchange`, `Queue`, and `Binding` bean
+against the broker on startup.
+
+[source,java]
+----
+@Configuration(proxyBeanMethods = false)
+class OrderQueueConfiguration {
+
+    static final String ORDER_EXCHANGE = "orders";
+    static final String ORDER_QUEUE = "orders";
+    static final String ORDER_ROUTING_KEY = "orders";
+
+    static final String DEAD_LETTER_EXCHANGE = "orders.dlx";
+    static final String DEAD_LETTER_QUEUE = "orders.dlq";
+    static final String DEAD_LETTER_ROUTING_KEY = "orders.dlq";
+
+    @Bean
+    DirectExchange orderExchange() {
+        return new DirectExchange(ORDER_EXCHANGE);
+    }
+
+    @Bean
+    Queue orderQueue() {
+        return QueueBuilder.durable(ORDER_QUEUE)
+                .deadLetterExchange(DEAD_LETTER_EXCHANGE)
+                .deadLetterRoutingKey(DEAD_LETTER_ROUTING_KEY)
+                .build();
+    }
+
+    @Bean
+    Binding orderBinding() {
+        return BindingBuilder.bind(orderQueue()).to(orderExchange()).with(ORDER_ROUTING_KEY);
+    }
+
+    @Bean
+    DirectExchange deadLetterExchange() {
+        return new DirectExchange(DEAD_LETTER_EXCHANGE);
+    }
+
+    @Bean
+    Queue deadLetterQueue() {
+        return QueueBuilder.durable(DEAD_LETTER_QUEUE).build();
+    }
+
+    @Bean
+    Binding deadLetterBinding() {
+        return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange()).with(DEAD_LETTER_ROUTING_KEY);
+    }
+
+}
+----
+
+The key part is `orderQueue()`. `deadLetterExchange` and `deadLetterRoutingKey` set the `x-dead-letter-exchange` and
+`x-dead-letter-routing-key` arguments on the `orders` queue. Without an explicit routing key, RabbitMQ would reuse the
+message's original routing key when republishing it to the dead letter exchange.
+
+The dead letter exchange and queue are ordinary RabbitMQ resources. There is nothing special about them other than
+being referenced by the arguments of `orders`.
+
+IMPORTANT: Queue arguments cannot be changed once a queue has been declared. Redeclaring an existing queue with
+different arguments fails with `PRECONDITION_FAILED`. For queues that already exist in production, consider
+configuring the dead letter exchange through a {url-dlx}[policy] instead.
+
+=== Message Conversion
+
+Orders are exchanged as JSON. We declare a `MessageConverter` bean, which Spring Boot will apply to both
+`RabbitTemplate` and `@RabbitListener` containers:
+
+[source,java]
+----
+@Bean
+MessageConverter messageConverter(JsonMapper mapper) {
+    // Only types from this package may be deserialized based on the __TypeId__ header
+    return new JacksonJsonMessageConverter(mapper, Order.class.getPackageName());
+}
+----
+
+`JacksonJsonMessageConverter` adds a `__TypeId__` header to outgoing messages. When the target type cannot be inferred,
+for example when reading from a queue with `RabbitTemplate`, the converter relies on this header to decide which class
+to instantiate. Restricting the trusted packages ensures that a crafted message cannot trick the application into
+deserializing arbitrary types.
+
+=== The Listener
+
+link:{source-main}/order/OrderListener.java[`OrderListener`] consumes from the `orders` queue. An order with an invalid
+quantity results in an exception being thrown. We also keep track of processed orders and the number of attempts made
+for each order so that we can verify the behaviour later.
+
+[source,java]
+----
+@Component
+class OrderListener {
+
+    private final List<Order> processedOrders = Collections.synchronizedList(new ArrayList<>());
+    private final Map<Long, Integer> attempts = new ConcurrentHashMap<>();
+
+    @RabbitListener(queues = ORDER_QUEUE)
+    void process(Order order) {
+        attempts.merge(order.id(), 1, Integer::sum);
+
+        if (order.quantity() < 1) {
+            throw new IllegalArgumentException("Order %d has an invalid quantity of %d".formatted(order.id(), order.quantity()));
+        }
+
+        processedOrders.add(order);
+    }
+
+    List<Order> getProcessedOrders() {
+        return List.copyOf(processedOrders);
+    }
+
+    int getAttempts(Long orderId) {
+        return attempts.getOrDefault(orderId, 0);
+    }
+
+}
+----
+
+Notice that the listener is not aware of the dead letter queue at all. Routing failed messages is the responsibility
+of the broker.
+
+=== Retry and Rejection
+
+Transient failures, such as a temporarily unavailable downstream service, may succeed on a subsequent attempt. That is
+why we retry before giving up. This is configured in
+link:{url-quickref}/src/main/resources/application.properties[`application.properties`]:
+
+[source,properties]
+----
+spring.rabbitmq.listener.simple.default-requeue-rejected=false
+spring.rabbitmq.listener.simple.retry.enabled=true
+spring.rabbitmq.listener.simple.retry.max-retries=2
+spring.rabbitmq.listener.simple.retry.initial-interval=500ms
+spring.rabbitmq.listener.simple.retry.multiplier=2
+----
+
+With these properties:
+
+* A failed message is retried within the consumer up to two more times, waiting 500 milliseconds and then 1 second
+between attempts. This gives a total of three attempts.
+* Once retries are exhausted, Spring Boot's default `MessageRecoverer`, `RejectAndDontRequeueRecoverer`, rejects the
+message with `requeue=false`. RabbitMQ then dead-letters it to `orders.dlx`, which routes it to `orders.dlq`.
+* `default-requeue-rejected=false` acts as a safety net. Should retries be disabled, a failed message is still rejected
+without requeue and dead-lettered, instead of being redelivered to the `orders` queue endlessly.
+
+TIP: Retries happen within the consumer and do not involve the broker. Therefore, the `x-death` header that RabbitMQ
+adds to a dead-lettered message will report a single rejection, regardless of the number of retries.
+
+== Verification
+
+We will verify the implementation with an actual RabbitMQ instance provided by Testcontainers.
+
+=== RabbitMQ Container
+
+link:{source-test}/TestcontainersConfiguration.java[`TestcontainersConfiguration`] defines the container:
+
+[source,java]
+----
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    RabbitMQContainer rabbitMQContainer() {
+        return new RabbitMQContainer(DockerImageName.parse("rabbitmq:management-alpine"));
+    }
+
+}
+----
+
+`@ServiceConnection` instructs Spring Boot to connect to the container, so no connection properties need to be
+defined.
+
+=== Integration Tests
+
+link:{source-test}/order/OrderDeadLetterTests.java[`OrderDeadLetterTests`] covers both the happy path and the dead
+letter path:
+
+[source,java]
+----
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest
+class OrderDeadLetterTests {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private OrderListener listener;
+
+    @Test
+    @DisplayName("When a valid order is published Then it should be processed and not be routed to the dead letter queue")
+    void valid() {
+        var order = new Order(1L, "Spring Boot in Action", 1);
+
+        rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, order);
+
+        await().atMost(Duration.ofSeconds(5)).untilAsserted(() ->
+                assertThat(listener.getProcessedOrders()).contains(order)
+        );
+
+        assertThat(listener.getAttempts(order.id())).isOne();
+        assertThat(rabbitTemplate.receive(DEAD_LETTER_QUEUE, Duration.ofSeconds(1).toMillis())).isNull();
+    }
+
+    @Test
+    @DisplayName("When an invalid order fails processing after all retries Then it should be routed to the dead letter queue")
+    void invalid() {
+        var order = new Order(2L, "Spring Boot in Action", 0);
+
+        rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, order);
+
+        var deadLetter = rabbitTemplate.receive(DEAD_LETTER_QUEUE, Duration.ofSeconds(10).toMillis());
+
+        assertThat(deadLetter).isNotNull();
+        assertThat(rabbitTemplate.getMessageConverter().fromMessage(deadLetter)).isEqualTo(order);
+
+        assertThat(deadLetter.getMessageProperties().getXDeathHeader())
+                .singleElement(MAP)
+                .containsEntry("queue", ORDER_QUEUE)
+                .containsEntry("reason", "rejected")
+                .containsEntry("exchange", ORDER_EXCHANGE);
+
+        assertThat(listener.getAttempts(order.id())).isEqualTo(3);
+        assertThat(listener.getProcessedOrders()).doesNotContain(order);
+    }
+
+}
+----
+
+The first test verifies that a valid order is processed on the first attempt and nothing is routed to the dead letter
+queue.
+
+The second test publishes an invalid order and waits for it to arrive in `orders.dlq`. We then verify that:
+
+* The dead-lettered message still carries the original order.
+* The `x-death` header, added by RabbitMQ, states that the message was `rejected` from the `orders` queue, which it
+received through the `orders` exchange.
+* The listener attempted to process the order three times before giving up.
+* The order was never processed.
+
+== Conclusion
+
+A Dead Letter Queue keeps poison messages from blocking healthy traffic without losing them. With Spring AMQP, enabling
+it requires no changes to the listener: we declare the dead letter exchange on the queue, enable retries, and let
+`RejectAndDontRequeueRecoverer` hand the message back to RabbitMQ once retries are exhausted. Testcontainers allows us
+to verify the complete flow against a real broker.
