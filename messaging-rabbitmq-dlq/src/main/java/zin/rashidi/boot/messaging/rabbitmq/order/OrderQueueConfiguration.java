@@ -1,5 +1,6 @@
 package zin.rashidi.boot.messaging.rabbitmq.order;
 
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -7,9 +8,12 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.amqp.autoconfigure.RabbitListenerRetrySettingsCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import tools.jackson.databind.json.JsonMapper;
+
+import java.util.List;
 
 /**
  * @author Rashidi Zin
@@ -62,6 +66,12 @@ class OrderQueueConfiguration {
     MessageConverter messageConverter(JsonMapper mapper) {
         // Only types from this package may be deserialized based on the __TypeId__ header
         return new JacksonJsonMessageConverter(mapper, Order.class.getPackageName());
+    }
+
+    @Bean
+    RabbitListenerRetrySettingsCustomizer retrySettingsCustomizer() {
+        // Permanent failures are rejected immediately instead of being retried
+        return settings -> settings.setExceptionExcludes(List.of(AmqpRejectAndDontRequeueException.class));
     }
 
 }

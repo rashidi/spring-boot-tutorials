@@ -47,12 +47,28 @@ class OrderDeadLetterTests {
     }
 
     @Test
-    @DisplayName("When an invalid order fails processing after all retries Then it should be routed to the dead letter queue")
-    void invalid() {
+    @DisplayName("When an order has an invalid quantity Then it should be routed to the dead letter queue without being retried")
+    void permanentFailure() {
         var order = new Order(2L, "Spring Boot in Action", 0);
 
         rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, order);
 
+        assertDeadLettered(order);
+        assertThat(listener.getAttempts(order.id())).isOne();
+    }
+
+    @Test
+    @DisplayName("When an ordered product remains unavailable after all retries Then it should be routed to the dead letter queue")
+    void transientFailure() {
+        var order = new Order(3L, "Spring Data in Action", 1);
+
+        rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, order);
+
+        assertDeadLettered(order);
+        assertThat(listener.getAttempts(order.id())).isEqualTo(3);
+    }
+
+    private void assertDeadLettered(Order order) {
         var deadLetter = rabbitTemplate.receive(DEAD_LETTER_QUEUE, Duration.ofSeconds(10).toMillis());
 
         assertThat(deadLetter).isNotNull();
@@ -64,7 +80,6 @@ class OrderDeadLetterTests {
                 .containsEntry("reason", "rejected")
                 .containsEntry("exchange", ORDER_EXCHANGE);
 
-        assertThat(listener.getAttempts(order.id())).isEqualTo(3);
         assertThat(listener.getProcessedOrders()).doesNotContain(order);
     }
 

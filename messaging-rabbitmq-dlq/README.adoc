@@ -34,15 +34,21 @@ fixed, and replayed at a later time without blocking healthy traffic.
 
 == The Use Case
 
-We will build an application that consumes orders from the `orders` queue. An order with a quantity of less than one
-is invalid and can never be processed. Instead of looping forever, such an order will be retried a few times and then
-routed to the `orders.dlq` queue.
+We will build an application that consumes orders from the `orders` queue. Processing an order can fail in two
+different ways:
+
+* *Permanent failure*: an order with a quantity of less than one is invalid. It will never succeed, no matter how many
+times it is processed.
+* *Transient failure*: the ordered product is temporarily unavailable. It may succeed if we try again a moment later.
+
+Instead of looping forever, a failed order will be routed to the `orders.dlq` queue. We will explore two approaches to
+achieve this, compare them, and finally combine them so that each type of failure is handled appropriately.
 
 [source]
 ----
 Publisher ──► orders (exchange) ──► orders (queue) ──► OrderListener
                                          │
-                                         │ rejected after 3 failed attempts
+                                         │ rejected
                                          ▼
                                     orders.dlx (exchange) ──► orders.dlq (queue)
 ----
@@ -147,14 +153,15 @@ deserializing arbitrary types.
 
 === The Listener
 
-link:{source-main}/order/OrderListener.java[`OrderListener`] consumes from the `orders` queue. An order with an invalid
-quantity results in an exception being thrown. We also keep track of processed orders and the number of attempts made
-for each order so that we can verify the behaviour later.
+link:{source-main}/order/OrderListener.java[`OrderListener`] consumes from the `orders` queue. We also keep track of
+processed orders and the number of attempts made for each order so that we can verify the behaviour later.
 
 [source,java]
 ----
 @Component
 class OrderListener {
+
+    private static final Set<String> AVAILABLE_PRODUCTS = Set.of("Spring Boot in Action", "Spring in Action");
 
     private final List<Order> processedOrders = Collections.synchronizedList(new ArrayList<>());
     private final Map<Long, Integer> attempts = new ConcurrentHashMap<>();
@@ -164,7 +171,11 @@ class OrderListener {
         attempts.merge(order.id(), 1, Integer::sum);
 
         if (order.quantity() < 1) {
-            throw new IllegalArgumentException("Order %d has an invalid quantity of %d".formatted(order.id(), order.quantity()));
+            throw new AmqpRejectAndDontRequeueException("Order %d has an invalid quantity of %d".formatted(order.id(), order.quantity()));
+        }
+
+        if (!AVAILABLE_PRODUCTS.contains(order.product())) {
+            throw new IllegalStateException("Product %s is temporarily unavailable".formatted(order.product()));
         }
 
         processedOrders.add(order);
@@ -181,13 +192,19 @@ class OrderListener {
 }
 ----
 
-Notice that the listener is not aware of the dead letter queue at all. Routing failed messages is the responsibility
-of the broker.
+Notice that the listener throws two different exceptions. Each of them represents one of the approaches that we will
+explore next.
 
-=== Retry and Rejection
+== Routing Failed Messages to the Dead Letter Queue
 
-Transient failures, such as a temporarily unavailable downstream service, may succeed on a subsequent attempt. That is
-why we retry before giving up. This is configured in
+By default, a message whose listener throws an exception is rejected with `requeue=true`. RabbitMQ puts it back on the
+`orders` queue and delivers it again, forever. In order for the message to be dead-lettered, it must be rejected with
+`requeue=false`. Spring AMQP offers two ways to achieve that.
+
+=== Approach 1: Retry, Then Reject
+
+The first approach is configuration driven. We let Spring retry the message a number of times, and once retries are
+exhausted, reject it without requeue. This is configured in
 link:{url-quickref}/src/main/resources/application.properties[`application.properties`]:
 
 [source,properties]
@@ -208,8 +225,78 @@ message with `requeue=false`. RabbitMQ then dead-letters it to `orders.dlx`, whi
 * `default-requeue-rejected=false` acts as a safety net. Should retries be disabled, a failed message is still rejected
 without requeue and dead-lettered, instead of being redelivered to the `orders` queue endlessly.
 
+The listener remains unaware of RabbitMQ. It simply throws `IllegalStateException` when a product is unavailable.
+
 TIP: Retries happen within the consumer and do not involve the broker. Therefore, the `x-death` header that RabbitMQ
 adds to a dead-lettered message will report a single rejection, regardless of the number of retries.
+
+=== Approach 2: Throw `AmqpRejectAndDontRequeueException`
+
+The second approach is code driven. When the listener throws `AmqpRejectAndDontRequeueException`, Spring AMQP rejects
+the message with `requeue=false`, regardless of the `default-requeue-rejected` setting. This is what our listener does
+for an order with an invalid quantity:
+
+[source,java]
+----
+if (order.quantity() < 1) {
+    throw new AmqpRejectAndDontRequeueException("Order %d has an invalid quantity of %d".formatted(order.id(), order.quantity()));
+}
+----
+
+On its own, this approach requires no configuration at all. The message is dead-lettered after the first attempt.
+
+=== Comparison
+
+Both approaches end with the message in `orders.dlq` and require a similar amount of effort: a handful of properties
+for the first, a single `throw` statement for the second. However, they do not behave the same way:
+
+|===
+| |Retry, Then Reject |`AmqpRejectAndDontRequeueException`
+
+|Driven by
+|Configuration
+|Code
+
+|Attempts before dead-lettering
+|Configurable, three in our example
+|One
+
+|Suitable for
+|Transient failures, such as an unavailable downstream service
+|Permanent failures, such as invalid payloads or violated business rules
+
+|Handles unexpected exceptions
+|Yes, any exception is retried and then rejected
+|No, only the exceptions that we explicitly convert
+
+|Coupling
+|Listener is unaware of Spring AMQP
+|Listener depends on Spring AMQP's exception
+|===
+
+In other words, neither approach is a replacement for the other. Retrying an invalid order is a waste of time and
+resources, while dead-lettering an order on its first transient failure gives up too early.
+
+=== Combining Both Approaches
+
+The natural solution is to use both: retry transient failures and dead-letter permanent failures immediately. There is
+a catch, however. When retry is enabled, *every* exception is retried, including `AmqpRejectAndDontRequeueException`.
+Without further configuration, an invalid order would still be attempted three times.
+
+We can exclude `AmqpRejectAndDontRequeueException` from being retried with a `RabbitListenerRetrySettingsCustomizer`,
+which is declared in link:{source-main}/order/OrderQueueConfiguration.java[`OrderQueueConfiguration`]:
+
+[source,java]
+----
+@Bean
+RabbitListenerRetrySettingsCustomizer retrySettingsCustomizer() {
+    // Permanent failures are rejected immediately instead of being retried
+    return settings -> settings.setExceptionExcludes(List.of(AmqpRejectAndDontRequeueException.class));
+}
+----
+
+Now, an order with an invalid quantity is dead-lettered on its first attempt, while an order for an unavailable product
+is attempted three times before it is dead-lettered.
 
 == Verification
 
@@ -238,8 +325,8 @@ defined.
 
 === Integration Tests
 
-link:{source-test}/order/OrderDeadLetterTests.java[`OrderDeadLetterTests`] covers both the happy path and the dead
-letter path:
+link:{source-test}/order/OrderDeadLetterTests.java[`OrderDeadLetterTests`] covers the happy path as well as both types
+of failure:
 
 [source,java]
 ----
@@ -269,12 +356,28 @@ class OrderDeadLetterTests {
     }
 
     @Test
-    @DisplayName("When an invalid order fails processing after all retries Then it should be routed to the dead letter queue")
-    void invalid() {
+    @DisplayName("When an order has an invalid quantity Then it should be routed to the dead letter queue without being retried")
+    void permanentFailure() {
         var order = new Order(2L, "Spring Boot in Action", 0);
 
         rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, order);
 
+        assertDeadLettered(order);
+        assertThat(listener.getAttempts(order.id())).isOne();
+    }
+
+    @Test
+    @DisplayName("When an ordered product remains unavailable after all retries Then it should be routed to the dead letter queue")
+    void transientFailure() {
+        var order = new Order(3L, "Spring Data in Action", 1);
+
+        rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, order);
+
+        assertDeadLettered(order);
+        assertThat(listener.getAttempts(order.id())).isEqualTo(3);
+    }
+
+    private void assertDeadLettered(Order order) {
         var deadLetter = rabbitTemplate.receive(DEAD_LETTER_QUEUE, Duration.ofSeconds(10).toMillis());
 
         assertThat(deadLetter).isNotNull();
@@ -286,7 +389,6 @@ class OrderDeadLetterTests {
                 .containsEntry("reason", "rejected")
                 .containsEntry("exchange", ORDER_EXCHANGE);
 
-        assertThat(listener.getAttempts(order.id())).isEqualTo(3);
         assertThat(listener.getProcessedOrders()).doesNotContain(order);
     }
 
@@ -296,17 +398,21 @@ class OrderDeadLetterTests {
 The first test verifies that a valid order is processed on the first attempt and nothing is routed to the dead letter
 queue.
 
-The second test publishes an invalid order and waits for it to arrive in `orders.dlq`. We then verify that:
+The remaining tests verify that each failed order arrives in `orders.dlq` with:
 
-* The dead-lettered message still carries the original order.
-* The `x-death` header, added by RabbitMQ, states that the message was `rejected` from the `orders` queue, which it
+* The original order as its payload.
+* An `x-death` header, added by RabbitMQ, stating that the message was `rejected` from the `orders` queue, which it
 received through the `orders` exchange.
-* The listener attempted to process the order three times before giving up.
-* The order was never processed.
+
+The number of attempts tells the two approaches apart. An order with an invalid quantity is attempted once, as
+`AmqpRejectAndDontRequeueException` bypasses retries. An order for an unavailable product is attempted three times
+before `RejectAndDontRequeueRecoverer` gives up on it.
 
 == Conclusion
 
-A Dead Letter Queue keeps poison messages from blocking healthy traffic without losing them. With Spring AMQP, enabling
-it requires no changes to the listener: we declare the dead letter exchange on the queue, enable retries, and let
-`RejectAndDontRequeueRecoverer` hand the message back to RabbitMQ once retries are exhausted. Testcontainers allows us
-to verify the complete flow against a real broker.
+A Dead Letter Queue keeps poison messages from blocking healthy traffic without losing them. With Spring AMQP, we
+declare the dead letter exchange on the queue and then decide how a failed message gets there. Retrying and then
+rejecting with `RejectAndDontRequeueRecoverer` suits transient failures and acts as a catch-all for unexpected ones.
+Throwing `AmqpRejectAndDontRequeueException` suits failures that we know will never succeed. Combining both, with the
+latter excluded from retries, gives each failure the treatment it deserves. Testcontainers allows us to verify the
+complete flow against a real broker.
