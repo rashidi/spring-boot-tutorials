@@ -1,0 +1,175 @@
+= Spring AMQP: RabbitMQ Dead Letter Queue (DLQ)
+Rashidi Zin <rashidi@zin.my>
+1.0, October 4, 2026: Initial version
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/main/messaging-rabbitmq-dlq
+:source-main: src/main/java/zin/rashidi/boot/messaging/rabbitmq/dlq
+:source-test: src/test/java/zin/rashidi/boot/messaging/rabbitmq/dlq
+
+This tutorial demonstrates how to use Spring Boot with RabbitMQ to implement a Dead Letter Queue (DLQ) and how to write integration tests using Testcontainers.
+
+== The Use Case
+
+We will build an application that accepts a user payload via a REST API, publishes it to a RabbitMQ queue, and then processes it using a listener. To demonstrate the DLQ behavior, the listener will intentionally throw an exception when processing a specific username, causing the message to be routed to a dead letter queue. We will have another listener handle the DLQ messages.
+
+== Project Structure
+
+The project has the following main components:
+- `RabbitMQConfiguration`: Configures exchanges, queues (including the DLQ), and bindings.
+- `User`: A record representing our domain model.
+- `UserResource`: A REST controller that publishes messages.
+- `UserListener`: The primary RabbitMQ listener that simulates a processing failure.
+- `UserDlqListener`: A listener that reads from the dead letter queue.
+
+=== Configuration
+
+First, we define our RabbitMQ setup in link:{source-main}/RabbitMQConfiguration.java[`RabbitMQConfiguration`]. This sets up a direct exchange, a main queue configured with DLQ arguments (`x-dead-letter-exchange` and `x-dead-letter-routing-key`), and the DLQ itself.
+
+[source,java]
+----
+@Configuration
+class RabbitMQConfiguration {
+
+    // ... constants defined ...
+
+    @Bean
+    MessageConverter messageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    DirectExchange userExchange() {
+        return new DirectExchange(USER_EXCHANGE);
+    }
+
+    @Bean
+    Queue userQueue() {
+        return QueueBuilder.durable(USER_QUEUE)
+                .withArgument("x-dead-letter-exchange", USER_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", USER_DLQ_ROUTING_KEY)
+                .build();
+    }
+
+    @Bean
+    Queue userDlq() {
+        return QueueBuilder.durable(USER_DLQ).build();
+    }
+
+    @Bean
+    Binding userBinding(Queue userQueue, DirectExchange userExchange) {
+        return BindingBuilder.bind(userQueue).to(userExchange).with(USER_ROUTING_KEY);
+    }
+
+    @Bean
+    Binding userDlqBinding(Queue userDlq, DirectExchange userExchange) {
+        return BindingBuilder.bind(userDlq).to(userExchange).with(USER_DLQ_ROUTING_KEY);
+    }
+}
+----
+
+=== The Listeners
+
+Our main `UserListener` listens on the primary queue. We simulate a processing error for a specific username (`rashidi.zin`). If this exception occurs repeatedly (based on retry configuration in `application.properties`), RabbitMQ routes the message to the DLQ.
+
+[source,java]
+----
+@Component
+public class UserListener {
+
+    private final List<User> receivedUsers = Collections.synchronizedList(new ArrayList<>());
+
+    @RabbitListener(queues = "user-queue")
+    public void listen(User user) {
+        if ("rashidi.zin".equals(user.username())) {
+            throw new RuntimeException("Simulating an error to push to DLQ");
+        }
+        receivedUsers.add(user);
+    }
+
+    public List<User> getReceivedUsers() {
+        return List.copyOf(receivedUsers);
+    }
+}
+----
+
+The `UserDlqListener` reads messages that fail processing from the `user-dlq`.
+
+[source,java]
+----
+@Component
+public class UserDlqListener {
+
+    private final List<User> receivedDlqUsers = Collections.synchronizedList(new ArrayList<>());
+
+    @RabbitListener(queues = "user-dlq")
+    public void listen(User user) {
+        receivedDlqUsers.add(user);
+    }
+
+    public List<User> getReceivedDlqUsers() {
+        return List.copyOf(receivedDlqUsers);
+    }
+}
+----
+
+== Testing
+
+We will write integration tests using Testcontainers to bring up an actual RabbitMQ instance. The setup can be found in link:{source-test}/TestcontainersConfiguration.class[`TestcontainersConfiguration`].
+
+[source,java]
+----
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    RabbitMQContainer rabbitContainer() {
+        return new RabbitMQContainer(DockerImageName.parse("rabbitmq:3.12-management"));
+    }
+
+}
+----
+
+The `@ServiceConnection` annotation automatically configures the connection properties for the RabbitMQ container.
+
+In our tests, we will verify both the successful processing flow and the DLQ flow:
+
+[source,java]
+----
+@Import(TestcontainersConfiguration.class)
+@AutoConfigureRestTestClient
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+class PublishUserTests {
+
+    @Autowired
+    private RestTestClient client;
+
+    @Autowired
+    private UserListener userListener;
+
+    @Autowired
+    private UserDlqListener userDlqListener;
+
+    // ...
+
+    @Test
+    @DisplayName("When user fails processing, it should be received by the DLQ listener")
+    void publishToDlq() {
+        var user = new User(2L, "Rashidi Zin", "rashidi.zin", "rashidi@zin.my");
+
+        client.post().uri("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(user)
+                .exchange()
+                .expectStatus().isAccepted();
+
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            assertThat(userDlqListener.getReceivedDlqUsers())
+                    .hasSize(1)
+                    .extracting("name")
+                    .containsExactly("Rashidi Zin")
+        );
+    }
+}
+----

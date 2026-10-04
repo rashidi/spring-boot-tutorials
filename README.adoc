@@ -60,6 +60,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:graphql[Spring GraphQL] |Getting started with Spring GraphQL
 |link:jooq[jOOQ] |Typesafe SQL with jOOQ and Spring Boot
 |link:messaging-kafka[Spring for Apache Kafka] |Implement message publishing and consumption using Spring for Apache Kafka and Testcontainers
+|link:messaging-rabbitmq-dlq[Spring AMQP: RabbitMQ Dead Letter Queue (DLQ)] |Implement Dead Letter Queue (DLQ) with Spring Boot and RabbitMQ
 |link:modulith[Spring Modulith] |Building modular applications with Spring Modulith
 |link:modulith-events[Spring Modulith: Event Publication Registry] |Implement resilient event publication with Spring Modulith and PostgreSQL Outbox
 |link:test-execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
