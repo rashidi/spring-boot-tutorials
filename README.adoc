@@ -39,6 +39,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:architecture-hexagonal[Architecture: Hexagonal Architecture] |Implement Hexagonal Architecture (Ports and Adapters) in Spring Boot
 |link:batch-rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
 |link:batch-skip-step[Spring Batch: Skip Specific Data] |Skip processing specific data based on business logic in Spring Batch
+|link:batch-bulk-update[Spring Batch: Bulk Update] |Implement bulk update in Spring Batch using BatchPreparedStatementSetter with JDBC and Postgres
 |link:cloud-jdbc-env-repo[Spring Cloud Environment Repository] |Store environment properties in MySQL database with Spring Cloud Environment Repository
 |link:data-domain-events[Spring Data Domain Events] |Publish Domain Events with Spring Data
 |link:data-envers-audit[Spring Data Envers Audit] |Enable with Entity Revisions using Spring Data Envers

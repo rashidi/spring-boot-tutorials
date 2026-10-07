@@ -1,0 +1,62 @@
+= Spring Batch: Bulk Update
+Rashidi Zin <rashidi@zin.my>
+1.0, August 28, 2024: Initial version
+:icons: font
+:source-highlighter: highlight.js
+
+Demonstrates how to bulk update in Spring Batch using `BatchPreparedStatementSetter` and `JdbcBatchItemWriter` with `PostgreSQL`.
+
+== Overview
+
+When dealing with a large amount of data, it is recommended to use `JdbcBatchItemWriter` to perform batch operations. `JdbcBatchItemWriter` provides a way to execute a batch of statements using `BatchPreparedStatementSetter`. This tutorial will demonstrate how to implement this using `PostgreSQL` and test it using `Testcontainers`.
+
+== Implementation
+
+In our `JobConfiguration`, we will define an `ItemWriter` that uses `JdbcBatchItemWriterBuilder` to construct `JdbcBatchItemWriter`. We will use `itemPreparedStatementSetter` to map the `User` object to the `PreparedStatement`.
+
+[source,java]
+----
+private JdbcBatchItemWriter<User> writer(DataSource dataSource) {
+    return new JdbcBatchItemWriterBuilder<User>()
+            .dataSource(dataSource)
+            .itemPreparedStatementSetter((item, ps) -> {
+                ps.setString(1, item.name());
+                ps.setString(2, item.username());
+                ps.setLong(3, item.id());
+            })
+            .sql("UPDATE users SET name = ?, username = ? WHERE id = ?")
+            .build();
+}
+----
+
+== Tests
+
+To verify that the implementation is working, we will write a test using `Testcontainers`. We will insert dummy data into the database before the job execution and verify that the data has been updated after the job completes.
+
+[source,java]
+----
+@Test
+@DisplayName("Given users exist in database, When job is executed, Then users are updated")
+void updateUsers() {
+
+    IntStream.rangeClosed(1, 10).forEach(i ->
+            jdbc.update("INSERT INTO users (id, name, username) VALUES (?, ?, ?)", i, "Old Name " + i, "old_username_" + i)
+    );
+
+    await().atMost(10, SECONDS).untilAsserted(() -> {
+        var execution = operator.startJob();
+        assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
+    });
+
+    var users = jdbc.query("SELECT * FROM users", (rs, _) ->
+            new User(rs.getLong("id"), rs.getString("name"), rs.getString("username"))
+    );
+
+    assertThat(users)
+            .hasSize(10)
+            .extracting("username")
+            .contains("Bret", "Antonette", "Samantha", "Karianne", "Kamren", "Leopoldo_Corkery", "Elwyn.Skiles", "Maxime_Nienow", "Delphine", "Moriah.Stanton");
+}
+----
+
+With this approach, we can verify that `Spring Batch` can perform a bulk update successfully.
