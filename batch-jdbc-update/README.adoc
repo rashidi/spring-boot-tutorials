@@ -1,0 +1,135 @@
+= Spring Batch: Batch Update with BatchPreparedStatementSetter
+
+This tutorial demonstrates how to implement a batch update operation in a Spring Batch application using JDBC and `BatchPreparedStatementSetter`. It also includes automated integration testing using Testcontainers.
+
+== Overview
+
+When dealing with large volumes of data, executing individual updates can become a bottleneck. Spring Batch combined with JDBC's `BatchPreparedStatementSetter` allows you to group multiple update statements and execute them efficiently in a single batch operation.
+
+== Implementation
+
+We start by defining domain records for reading updates and representing the user:
+
+[source,java]
+----
+public record UserUpdate(Long id, String status) {
+}
+----
+
+Next, we implement a custom `ItemWriter` that uses `JdbcTemplate.batchUpdate` with a `BatchPreparedStatementSetter`:
+
+[source,java]
+----
+@Component
+class UserBatchUpdateWriter implements ItemWriter<UserUpdate> {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    UserBatchUpdateWriter(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public void write(Chunk<? extends UserUpdate> chunk) {
+        List<? extends UserUpdate> items = chunk.getItems();
+
+        jdbcTemplate.batchUpdate("UPDATE users SET status = ? WHERE id = ?", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                UserUpdate item = items.get(i);
+                ps.setString(1, item.status());
+                ps.setLong(2, item.id());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return items.size();
+            }
+        });
+    }
+
+}
+----
+
+We then wire everything together in a Spring Batch Job configuration. The job reads from a JSON source and writes updates to the database:
+
+[source,java]
+----
+@Configuration
+class UserJobConfiguration {
+
+    private static final JsonMapper OBJECT_MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+            .build();
+
+    private JsonItemReader<UserUpdate> reader() {
+        JacksonJsonObjectReader<UserUpdate> reader = new JacksonJsonObjectReader<>(UserUpdate.class);
+
+        reader.setMapper(OBJECT_MAPPER);
+
+        return new JsonItemReaderBuilder<UserUpdate>()
+                .jsonObjectReader(reader)
+                .name("userUpdateReader")
+                .resource(new ClassPathResource("user-updates.json"))
+                .build();
+    }
+
+    private Step step(JobRepository jobRepository, PlatformTransactionManager transactionManager, UserBatchUpdateWriter writer) {
+        return new StepBuilder("userUpdateStep", jobRepository)
+                .<UserUpdate, UserUpdate>chunk(10)
+                .transactionManager(transactionManager)
+                .reader(reader())
+                .writer(writer)
+                .build();
+    }
+
+    @Bean
+    public Job job(JobRepository repository, PlatformTransactionManager transactionManager, UserBatchUpdateWriter writer) {
+        return new JobBuilder("userUpdateJob", repository)
+                .start(step(repository, transactionManager, writer))
+                .build();
+    }
+}
+----
+
+== Automated Testing
+
+Testing the batch job relies on Testcontainers for spinning up a MySQL database dynamically. We initialize the schema with a SQL script and assert that the updates are successfully applied after executing the job.
+
+[source,java]
+----
+@SpringBatchTest
+@SpringBootTest
+@Testcontainers
+class UserBatchUpdateJobTests {
+
+    @Container
+    @ServiceConnection
+    private static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.4.2");
+
+    @Autowired
+    private JobLauncherTestUtils jobLauncherTestUtils;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Test
+    void executeJob(@Autowired Job job) throws Exception {
+        jobLauncherTestUtils.setJob(job);
+
+        JobExecution execution = jobLauncherTestUtils.launchJob(
+                new JobParametersBuilder()
+                        .addLong("time", System.currentTimeMillis())
+                        .toJobParameters()
+        );
+
+        assertThat(execution.getExitStatus()).isEqualTo(COMPLETED);
+
+        assertThat(jdbcTemplate.queryForObject("SELECT status FROM users WHERE id = 1", String.class))
+                .isEqualTo("ACTIVE");
+
+        // ... verify other updates ...
+    }
+
+}
+----
