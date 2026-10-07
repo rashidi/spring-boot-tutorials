@@ -37,7 +37,7 @@ class UpdateUserStatusJobConfiguration {
     @Bean
     public Step step(ItemReader<User> reader, ItemProcessor<User, UserUpdate> processor, ItemWriter<UserUpdate> writer, JobRepository jobs, PlatformTransactionManager transactionManager) {
         return new StepBuilder("updateUserStatusStep", jobs)
-                .<User, UserUpdate>chunk(10)
+                .<User, UserUpdate>chunk(10, transactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)

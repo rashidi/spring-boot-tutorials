@@ -1,0 +1,133 @@
+= Spring Batch: Bulk Update with JDBC
+:source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, May 15, 2024
+:toc:
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch-jdbc-bulk-update
+
+Perform a bulk update operation efficiently against a relational database with https://spring.io/projects/spring-batch[Spring Batch] and https://docs.spring.io/spring-framework/reference/data-access/jdbc.html[Spring JDBC].
+
+== Background
+Spring Batch allows us to perform large volumes of data processing and updates. When dealing with database records, updating them one by one can be inefficient due to multiple round-trips to the database.
+
+In this article, we will explore how to implement a batch operation that reads records using `JdbcPagingItemReader`, processes them, and performs a bulk update using `JdbcTemplate` and its `batchUpdate` method. We will retrieve a list of users, update their statuses to the next one, and save the modifications in a single operation.
+
+== Job Configuration
+Next is to implement the job that will be responsible for reading users, modifying their status, and saving the updates back to the database. `Job` consists of `Step` and `Step` consists of `ItemReader`, `ItemProcessor`, and `ItemWriter`. We will implement all of them in link:{url-quickref}/src/main/java/zin/rashidi/boot/batch/jdbcbulkupdate/user/UpdateUserStatusJobConfiguration.java[UpdateUserStatusJobConfiguration].
+
+[source,java]
+----
+@Configuration
+class UpdateUserStatusJobConfiguration {
+
+    @Bean
+    public Job job(JobRepository jobs, Step step) {
+        return new JobBuilder("updateUserStatusJob", jobs).start(step).build();
+    }
+
+    @Bean
+    public Step step(ItemReader<User> reader, ItemProcessor<User, UserUpdate> processor, ItemWriter<UserUpdate> writer, JobRepository jobs, PlatformTransactionManager transactionManager) {
+        return new StepBuilder("updateUserStatusStep", jobs)
+                .<User, UserUpdate>chunk(10, transactionManager)
+                .reader(reader)
+                .processor(processor)
+                .writer(writer)
+                .build();
+    }
+
+    @Bean
+    public JdbcPagingItemReader<User> reader(DataSource dataSource) throws Exception {
+        return new JdbcPagingItemReaderBuilder<User>()
+                .name("updateUserStatusReader")
+                .dataSource(dataSource)
+                .selectClause("SELECT *")
+                .fromClause("FROM users")
+                .sortKeys(Map.of("username", Order.ASCENDING))
+                .rowMapper((rs, _) -> new User(rs.getLong("id"), rs.getString("username"), User.Status.valueOf(rs.getString("status"))))
+                .build();
+    }
+
+    @Bean
+    public ItemProcessor<User, UserUpdate> processor() {
+
+        return new ItemProcessor<User, UserUpdate>() {
+            @Override
+            public @Nullable UserUpdate process(User item) throws Exception {
+                var nextStatus = User.Status.values()[item.status().ordinal() + 1];
+                return new UserUpdate(item.id(), nextStatus);
+            }
+        };
+
+    }
+
+    @Bean
+    public ItemWriter<UserUpdate> writer(JdbcTemplate jdbc) {
+        return chunk -> {
+            var users = chunk.getItems();
+
+            jdbc.batchUpdate("UPDATE users SET status = ? WHERE id = ?", new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    var user = users.get(i);
+
+                    ps.setString(1, user.status.name());
+                    ps.setLong(2, user.id);
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return users.size();
+                }
+            });
+        };
+    }
+
+}
+----
+
+From the code above, we can see that `JdbcPagingItemReader` is used to retrieve `User` objects from the database in a paginated manner. Then, `ItemProcessor` modifies the statuses, mapping them to a custom `UserUpdate` object. Finally, we implement an `ItemWriter` that depends on `JdbcTemplate` to execute a single `batchUpdate` query to update all the `UserUpdate` records within a specific chunk, increasing our application's performance.
+
+== Verification
+We will launch `updateUserStatusJob` which will retrieve our users from a database, change their statuses, and update them back.
+Once completed, we will verify that the database contains the expected updated statuses for our users.
+
+[source,java]
+----
+@Import(TestcontainersConfiguration.class)
+@SpringBatchTest
+@SpringBootTest(properties = "spring.batch.jdbc.initialize-schema=always")
+@Sql(
+        scripts = "classpath:schema-postgres.sql",
+        statements = {
+                "INSERT INTO users (username, status) VALUES ('rashidi.zin', 'ACTIVE'), ('zaid.zin', 'INACTIVE'), ('john.doe', 'DORMANT')"
+        },
+        executionPhase = BEFORE_TEST_CLASS)
+class BatchJdbcBulkUpdateApplicationTests {
+
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    @Autowired
+    private JobOperatorTestUtils jobs;
+
+    @Test
+    @DisplayName("When job is executed Then users' status will be updated to the next Status")
+    void contextLoads() throws Exception {
+
+        await().atMost(10L, SECONDS).untilAsserted(() -> {
+            var execution = jobs.startJob();
+
+            assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
+        });
+
+        var updatedStatuses = jdbc.queryForList("SELECT status FROM users", String.class);
+
+        assertThat(updatedStatuses).containsOnly("INACTIVE", "DORMANT", "DELETED");
+    }
+
+}
+----
+
+Full implementation can be found in link:{url-quickref}/src/test/java/zin/rashidi/boot/batch/jdbcbulkupdate/user/BatchJdbcBulkUpdateApplicationTests.java[BatchJdbcBulkUpdateApplicationTests].
