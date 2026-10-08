@@ -9,17 +9,15 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.batch.infrastructure.item.ItemReader;
 import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.infrastructure.item.database.JdbcPagingItemReader;
 import org.springframework.batch.infrastructure.item.database.Order;
+import org.springframework.batch.infrastructure.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.infrastructure.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -69,25 +67,15 @@ class UpdateUserStatusJobConfiguration {
     }
 
     @Bean
-    public ItemWriter<UserUpdate> writer(JdbcTemplate jdbc) {
-        return chunk -> {
-            var users = chunk.getItems();
-
-            jdbc.batchUpdate("UPDATE users SET status = ? WHERE id = ?", new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    var user = users.get(i);
-
+    public JdbcBatchItemWriter<UserUpdate> writer(DataSource dataSource) throws Exception {
+        return new JdbcBatchItemWriterBuilder<UserUpdate>()
+                .dataSource(dataSource)
+                .sql("UPDATE users SET status = ? WHERE id = ?")
+                .itemPreparedStatementSetter((user, ps) -> {
                     ps.setString(1, user.status.name());
                     ps.setLong(2, user.id);
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return users.size();
-                }
-            });
-        };
+                })
+                .build();
     }
 
     static class UserUpdate {
