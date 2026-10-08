@@ -63,25 +63,15 @@ class UpdateUserStatusJobConfiguration {
     }
 
     @Bean
-    public ItemWriter<UserUpdate> writer(JdbcTemplate jdbc) {
-        return chunk -> {
-            var users = chunk.getItems();
-
-            jdbc.batchUpdate("UPDATE users SET status = ? WHERE id = ?", new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    var user = users.get(i);
-
+    public JdbcBatchItemWriter<UserUpdate> writer(DataSource dataSource) throws Exception {
+        return new JdbcBatchItemWriterBuilder<UserUpdate>()
+                .dataSource(dataSource)
+                .sql("UPDATE users SET status = ? WHERE id = ?")
+                .itemPreparedStatementSetter((user, ps) -> {
                     ps.setString(1, user.status.name());
                     ps.setLong(2, user.id);
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return users.size();
-                }
-            });
-        };
+                })
+                .build();
     }
 
 }
