@@ -62,6 +62,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:jooq[jOOQ] |Typesafe SQL with jOOQ and Spring Boot
 |link:messaging-kafka[Spring for Apache Kafka] |Implement message publishing and consumption using Spring for Apache Kafka and Testcontainers
 |link:messaging-rabbitmq-dlq[Spring AMQP: Dead Letter Queue with RabbitMQ] |Route messages that fail processing to a Dead Letter Queue using Spring AMQP and RabbitMQ
+|link:observability-opentelemetry[Spring Observability: OpenTelemetry] |Instrument Spring Boot application with OpenTelemetry to generate traces and export them
 |link:modulith[Spring Modulith] |Building modular applications with Spring Modulith
 |link:modulith-events[Spring Modulith: Event Publication Registry] |Implement resilient event publication with Spring Modulith and PostgreSQL Outbox
 |link:test-execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
