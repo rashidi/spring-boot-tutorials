@@ -1,0 +1,31 @@
+<article class="doc{{#if page.home}} home{{/if}}">
+{{#if page.home}}
+<section class="hero">
+  <p class="hero-eyebrow">Java 25 · Spring Boot 4.1.1</p>
+  <h1 class="page">Spring Boot Tutorials</h1>
+  <p class="hero-lead">Practical, tested, and up-to-date samples for Spring Boot modules, from Spring Data and Spring Batch to Spring AI and Spring Modulith.</p>
+  <div class="hero-actions">
+    <a class="button primary" href="#topics">Browse tutorials</a>
+    <a class="button" href="https://github.com/rashidi/spring-boot-tutorials">View on GitHub</a>
+  </div>
+</section>
+<section id="topics" class="topics">
+{{#each page.navigation}}
+{{#each ./items}}
+{{#if ./items}}
+  <a class="topic-card" href="{{{relativize ./items.[0].url}}}">
+    <span class="topic-title">{{{./content}}}</span>
+    <span class="topic-count">{{./items.length}} {{#if ./items.[1]}}tutorials{{else}}tutorial{{/if}}</span>
+  </a>
+{{/if}}
+{{/each}}
+{{/each}}
+</section>
+{{else}}
+{{#with page.title}}
+<h1 class="page">{{{this}}}</h1>
+{{/with}}
+{{/if}}
+{{{page.contents}}}
+{{> pagination}}
+</article>
