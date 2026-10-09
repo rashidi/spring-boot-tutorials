@@ -29,6 +29,8 @@
 * Spring GraphQL
 ** xref:graphql.adoc[GraphQL With Spring Boot]
 * Spring Messaging
+** xref:messaging-rabbitmq-dlq.adoc[Spring AMQP: Dead Letter Queue with RabbitMQ]
+** xref:messaging-kafka.adoc[Spring for Apache Kafka]
 * Spring Modulith
 ** xref:modulith.adoc[Spring Modulith: Building Modular Monolithic Applications]
 ** xref:modulith-events.adoc[Spring Modulith: Event Publication Registry with PostgreSQL]
@@ -45,10 +47,8 @@
 ** xref:web-virtual-threads.adoc[Spring Web: Virtual Threads]
 
 * MessagingKafka
-** xref:messaging-kafka.adoc[Spring for Apache Kafka]
 
 * ArchitectureHexagonal
 ** xref:architecture-hexagonal.adoc[Architecture: Hexagonal Architecture]
 
 * MessagingRabbitmqDlq
-** xref:messaging-rabbitmq-dlq.adoc[Spring AMQP: Dead Letter Queue with RabbitMQ]
