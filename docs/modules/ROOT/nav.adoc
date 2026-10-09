@@ -1,27 +1,26 @@
 * xref:index.adoc[Home]
 * Architecture
-** xref:architecture-hexagonal.adoc[Architecture: Hexagonal Architecture]
 * Spring AI
 ** xref:ai-pgvector.adoc[Spring AI: Vector Similarity Search with PgVector]
 ** xref:ai-redis.adoc[Spring AI: Vector Similarity Search with Redis]
 * Spring Batch
 ** xref:batch-jdbc-bulk-update.adoc[Spring Batch: Bulk Update with JDBC]
 ** xref:batch-skip-step.adoc[Spring Batch: Skip Specific Data]
-** xref:batch-rest-repository.adoc[Spring Batch: Working With REST Resources]
+** xref:batch-rest-repository.adoc[Spring Batch: Working With REST Resources]
 * Spring Cloud
-** xref:cloud-jdbc-env-repo.adoc[Spring Cloud: JDBCEnvironmentRepository Sample Application]
+** xref:cloud-jdbc-env-repo.adoc[Spring Cloud: JDBCEnvironmentRepository Sample Application]
 * Spring Data
-** xref:data-mongodb-transactional.adoc[@Transactional with Spring Data MongoDB]
-** xref:data-envers-audit.adoc[Spring Data Envers: Audit With Entity Revisions]
+** xref:data-mongodb-transactional.adoc[@Transactional with Spring Data MongoDB]
+** xref:data-envers-audit.adoc[Spring Data Envers: Audit With Entity Revisions]
 ** xref:data-jdbc-schema-generation.adoc[Spring Data JDBC: Generate Liquibase Changeset]
 ** xref:data-jdbc-audit.adoc[Spring Data JDBC: Implement Auditing]
 ** xref:data-jdbc-optimistic-locking.adoc[Spring Data JDBC: Optimistic Locking with @Version]
-** xref:data-jpa-audit.adoc[Spring Data Jpa Audit Example]
+** xref:data-jpa-audit.adoc[Spring Data Jpa Audit Example]
 ** xref:data-jpa-filtered-query.adoc[Spring Data Jpa: Global Filter Query]
 ** xref:data-jpa-hibernate-cache.adoc[Spring Data JPA: Hibernate Second Level Caching with EhCache]
 ** xref:data-jpa-event.adoc[Spring Data JPA: Perform Entity Validation at Repository Level through Event Driven]
-** xref:data-mongodb-audit.adoc[Spring Data MongoDB Audit Example]
-** xref:data-mongodb-tc-data-load.adoc[Spring Data MongoDb with Testcontainers]
+** xref:data-mongodb-audit.adoc[Spring Data MongoDB Audit Example]
+** xref:data-mongodb-tc-data-load.adoc[Spring Data MongoDb with Testcontainers]
 ** xref:data-mongodb-full-text-search.adoc[Spring Data MongoDB: Full Text Search]
 ** xref:data-redis-cache.adoc[Spring Data Redis: Implementing Caching with Spring Data Redis]
 ** xref:data-rest-composite-id.adoc[Spring Data REST with Composite ID]
@@ -47,3 +46,9 @@
 ** xref:web-problem-details.adoc[Spring Web: Problem Details for HTTP APIs]
 ** xref:web-rest-client.adoc[Spring Web: REST Clients for calling Synchronous API]
 ** xref:web-virtual-threads.adoc[Spring Web: Virtual Threads]
+
+* ArchitectureHexagonal
+** xref:architecture-hexagonal.adoc[Architecture: Hexagonal Architecture]
+
+* ActuatorObservabilityOpentelemetry
+** xref:actuator-observability-opentelemetry.adoc[Spring Boot Observability with OpenTelemetry]
