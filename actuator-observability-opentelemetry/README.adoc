@@ -1,0 +1,37 @@
+= Spring Boot Observability with OpenTelemetry
+Rashidi Zin <rashidi@zin.my>
+1.0, October 9, 2024: Initial version
+:icons: font
+:source-highlighter: highlight.js
+
+This tutorial demonstrates how to instrument a Spring Boot application with OpenTelemetry to generate traces and export them.
+
+== Dependencies
+
+To enable OpenTelemetry in our application, we will need to add the following dependencies:
+
+[source,kotlin]
+----
+implementation("org.springframework.boot:spring-boot-starter-web")
+implementation("org.springframework.boot:spring-boot-starter-actuator")
+implementation("io.micrometer:micrometer-tracing-bridge-otel")
+implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+----
+
+With these dependencies, Spring Boot Actuator and Micrometer Tracing will automatically configure OpenTelemetry to generate and export traces.
+
+== Configuration
+
+By default, the OTLP exporter will attempt to send traces to an endpoint. Let's configure it in our properties:
+
+[source,properties]
+----
+management.tracing.sampling.probability=1.0
+management.otlp.tracing.endpoint=http://localhost:4318/v1/traces
+----
+
+`management.tracing.sampling.probability=1.0` ensures that all traces are captured. `management.otlp.tracing.endpoint` sets the OTLP HTTP endpoint.
+
+== Conclusion
+
+With Micrometer Tracing and OpenTelemetry, Spring Boot application observability is made easy with just a few dependencies and properties.
