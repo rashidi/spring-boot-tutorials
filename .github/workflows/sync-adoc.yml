@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - '**/README.adoc'
+      - '**/sync-adoc.yml'
 
 permissions:
   contents: write
@@ -70,6 +71,9 @@ jobs:
                 ;;
               jooq)
                 CATEGORY_TITLE="jOOQ"
+                ;;
+              messaging-*|spring-messaging)
+                CATEGORY_TITLE="Spring Messaging"
                 ;;
               modulith*|spring-modulith)
                 CATEGORY_TITLE="Spring Modulith"
