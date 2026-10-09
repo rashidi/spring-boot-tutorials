@@ -1,4 +1,6 @@
 * xref:index.adoc[Home]
+* Architecture
+** xref:architecture-hexagonal.adoc[Architecture: Hexagonal Architecture]
 * Spring AI
 ** xref:ai-pgvector.adoc[Spring AI: Vector Similarity Search with PgVector]
 ** xref:ai-redis.adoc[Spring AI: Vector Similarity Search with Redis]
@@ -45,5 +47,3 @@
 ** xref:web-problem-details.adoc[Spring Web: Problem Details for HTTP APIs]
 ** xref:web-rest-client.adoc[Spring Web: REST Clients for calling Synchronous API]
 ** xref:web-virtual-threads.adoc[Spring Web: Virtual Threads]
-* Architecture
-** xref:architecture-hexagonal.adoc[Architecture: Hexagonal Architecture]
