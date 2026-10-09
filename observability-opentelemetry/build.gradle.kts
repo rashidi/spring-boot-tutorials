@@ -24,7 +24,7 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-restclient")
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
