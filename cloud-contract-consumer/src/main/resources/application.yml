@@ -1,0 +1,3 @@
+stubrunner:
+  ids: zin.rashidi.boot:cloud-contract-producer:+:stubs:8080
+  stubs-mode: local
