@@ -28,48 +28,76 @@ with https://plugins.gradle.org/plugin/org.springframework.boot/4.1.1[Spring Boo
 
 == Documentation
 
-All tutorials are documented in AsciiDoc format and published as an https://antora.org[Antora] site at
-{url-docs}[rashidi.github.io/spring-boot-tutorials].
+=== Core
+* {url-docs}/architecture-hexagonal/[Hexagonal Architecture]
+* {url-docs}/modulith/[Spring Modulith]
+* {url-docs}/modulith-events/[Spring Modulith with Application Events]
+* {url-docs}/test-slice-tests-rest/[Slice Tests for REST APIs]
+* {url-docs}/test-execution-listeners/[Test Execution Listeners]
 
-|===
-|Tutorial |Description
+=== Spring Data
+* {url-docs}/data-domain-events/[Domain Events]
+* {url-docs}/data-envers-audit/[Envers Audit]
+* {url-docs}/data-jdbc-audit/[Spring Data JDBC Audit]
+* {url-docs}/data-jdbc-optimistic-locking/[Spring Data JDBC Optimistic Locking]
+* {url-docs}/data-jdbc-schema-generation/[Spring Data JDBC Schema Generation]
+* {url-docs}/data-jpa-audit/[Spring Data JPA Audit]
+* {url-docs}/data-jpa-event/[Spring Data JPA Event]
+* {url-docs}/data-jpa-filtered-query/[Spring Data JPA Filtered Query]
+* {url-docs}/data-jpa-hibernate-cache/[Hibernate Second-Level Cache]
+* {url-docs}/data-mongodb-audit/[Spring Data MongoDB Audit]
+* {url-docs}/data-mongodb-full-text-search/[Spring Data MongoDB Full Text Search]
+* {url-docs}/data-mongodb-tc-data-load/[Spring Data MongoDB Testcontainers Data Load]
+* {url-docs}/data-mongodb-transactional/[Spring Data MongoDB Transactional]
+* {url-docs}/data-redis-cache/[Spring Data Redis Cache]
+* {url-docs}/data-repository-definition/[Spring Data Repository Definition]
+* {url-docs}/data-rest-composite-id/[Spring Data REST Composite ID]
+* {url-docs}/data-rest-validation/[Spring Data REST Validation]
+* {url-docs}/graphql/[Spring GraphQL]
+* {url-docs}/jooq/[jOOQ]
 
-|link:ai-pgvector[Spring AI: Vector Similarity Search with PgVector] |Semantic vector similarity search using Spring AI and PostgreSQL pgvector with Testcontainers
-|link:ai-redis[Spring AI: Vector Store with Redis] |Semantic vector similarity search using Spring AI and Redis Vector Store with Testcontainers
-|link:architecture-hexagonal[Architecture: Hexagonal Architecture] |Implement Hexagonal Architecture (Ports and Adapters) in Spring Boot
-|link:batch-jdbc-bulk-update[Spring Batch: Bulk Update with JDBC] |Perform a bulk update operation efficiently against a relational database
-|link:batch-rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
-|link:batch-skip-step[Spring Batch: Skip Specific Data] |Skip processing specific data based on business logic in Spring Batch
-|link:cloud-jdbc-env-repo[Spring Cloud Environment Repository] |Store environment properties in MySQL database with Spring Cloud Environment Repository
-|link:data-domain-events[Spring Data Domain Events] |Publish Domain Events with Spring Data
-|link:data-envers-audit[Spring Data Envers Audit] |Enable with Entity Revisions using Spring Data Envers
-|link:data-jdbc-audit[Spring Data JDBC Audit] |Enable Audit with Spring Data JDBC
-|link:data-jdbc-optimistic-locking[Spring Data JDBC: Optimistic Locking] |Implement Optimistic Locking with Spring Data JDBC using @Version
-|link:data-jdbc-schema-generation[Spring Data JDBC: Generate Liquibase Changeset] |Generate Liquibase changeset with Spring Data JDBC
-|link:data-jpa-audit[Spring Data JPA Audit] |Enable Audit with Spring Data JPA
-|link:data-jpa-event[Spring Data JPA: Event Driven] |Implement `Entity` validation at `Repository` level through `EventListeners`
-|link:data-jpa-filtered-query[Spring Data JPA: Global Filtered Query] |Implement global filtered query with Spring Data JPA by defining `repositoryBaseClass`
-|link:data-jpa-hibernate-cache[Spring Data JPA: Hibernate Second Level Caching with EhCache] |Implement Hibernate second level caching using Spring Data JPA and EhCache to improve application performance
-|link:data-redis-cache[Spring Data Redis: Implementing Caching with Spring Data Redis] |Implement caching with Spring Data Redis to improve application performance and compare with Hibernate second level caching
-|link:data-mongodb-audit[Spring Data MongoDB Audit] |Enable Audit with Spring Data MongoDB
-|link:data-mongodb-full-text-search[Spring Data MongoDB: Full Text Search] |Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with Spring Data MongoDB
-|link:data-mongodb-tc-data-load[Spring Data MongoDB: Data Load with Testcontainers] |Load data dynamically with Testcontainers for Spring Data MongoDB
-|link:data-mongodb-transactional[Spring Data MongoDB: Transactional] |Enable `@Transactional` support for Spring Data MongoDB
-|link:data-repository-definition[Spring Data Repository Definition] |Customize Spring Data Repository with `@RepositoryDefinition`
-|link:data-rest-composite-id[Spring Data REST: Composite Id] |Expose entities with composite ID using Spring Data REST
-|link:data-rest-validation[Spring Data REST: Custom Validation] |Implement custom validation for Spring Data REST endpoints
-|link:graphql[Spring GraphQL] |Getting started with Spring GraphQL
-|link:jooq[jOOQ] |Typesafe SQL with jOOQ and Spring Boot
-|link:messaging-kafka[Spring for Apache Kafka] |Implement message publishing and consumption using Spring for Apache Kafka and Testcontainers
-|link:messaging-rabbitmq-dlq[Spring AMQP: Dead Letter Queue with RabbitMQ] |Route messages that fail processing to a Dead Letter Queue using Spring AMQP and RabbitMQ
-|link:actuator-observability-opentelemetry[Spring Observability: OpenTelemetry] |Instrument Spring Boot application with OpenTelemetry to generate traces and export them
-|link:modulith[Spring Modulith] |Building modular applications with Spring Modulith
-|link:modulith-events[Spring Modulith: Event Publication Registry] |Implement resilient event publication with Spring Modulith and PostgreSQL Outbox
-|link:test-execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
-|link:test-rest-assured[Spring Test: REST Assured Integration] |Integration testing with REST Assured
-|link:test-slice-tests-rest[Spring Test: Slice Tests for REST Application] |Implementing Slice Tests for REST application
-|link:web-problem-details[Spring Web: Problem Details for HTTP APIs] |Return Problem Details for HTTP APIs (RFC 7807) in Spring Boot
-|link:web-rest-client[Spring Web: Synchronous REST Clients] |Implement synchronous REST client using `RestClient`, `WebClient`, and `RestTemplate`
-|link:web-thymeleaf-xss[Spring Web: Cross-Site Scripting (XSS) with Thymeleaf] |Prevent Cross-Site Scripting (XSS) with Thymeleaf
-|link:web-virtual-threads[Spring Web: Virtual Threads] |Enable Virtual Threads in Spring Boot to handle high concurrency with blocking I/O
-|===
+=== Spring Batch
+* {url-docs}/batch-jdbc-bulk-update/[JDBC Bulk Update]
+* {url-docs}/batch-rest-repository/[REST Repository]
+* {url-docs}/batch-skip-step/[Skip Step]
+
+=== Spring Cloud
+* {url-docs}/cloud-contract-producer/[Spring Cloud Contract Producer]
+* {url-docs}/cloud-contract-consumer/[Spring Cloud Contract Consumer]
+* {url-docs}/cloud-jdbc-env-repo/[Spring Cloud Config Server with JDBC Environment Repository]
+
+=== Messaging
+* {url-docs}/messaging-kafka/[Spring Kafka]
+* {url-docs}/messaging-rabbitmq-dlq/[Spring RabbitMQ Dead Letter Queue]
+
+=== Spring AI
+* {url-docs}/ai-pgvector/[Spring AI with PGVector]
+* {url-docs}/ai-redis/[Spring AI with Redis]
+
+=== Web
+* {url-docs}/web-problem-details/[Spring Web Problem Details]
+* {url-docs}/web-rest-client/[Spring Web RestClient]
+* {url-docs}/web-thymeleaf-xss/[Thymeleaf XSS]
+* {url-docs}/web-virtual-threads/[Virtual Threads]
+
+=== Actuator
+* {url-docs}/actuator-observability-opentelemetry/[Observability with OpenTelemetry]
+
+== Build
+
+The project uses Gradle. To build the project, run the following command:
+
+[source,bash]
+----
+./gradlew build
+----
+
+== Contributing
+
+I welcome contributions to this repository. If you have an idea for a tutorial, please open an issue first. I will
+review it and get back to you. I will not accept tutorials using mock frameworks in tests.
+
+== License
+
+All contents are released into the public domain under The Unlicense. For more information, please refer to the
+link:LICENSE[LICENSE] file.

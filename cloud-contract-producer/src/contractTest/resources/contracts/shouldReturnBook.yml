@@ -1,0 +1,11 @@
+request:
+  method: GET
+  url: /books/123e4567-e89b-12d3-a456-426614174000
+response:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body:
+    id: "123e4567-e89b-12d3-a456-426614174000"
+    title: "Spring Boot in Action"
+    author: "Craig Walls"
