@@ -2,14 +2,14 @@ plugins {
     java
     id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.springframework.cloud.contract") version "5.0.3"
+    id("org.springframework.cloud.contract") version "4.2.0"
     `maven-publish`
 }
 
 group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
 
-val springCloudVersion = "2025.1.3"
+val springCloudVersion = "2024.0.0"
 
 java {
     toolchain {
