@@ -38,3 +38,7 @@ dependencies {
 tasks.named<Test>("test") {
     useJUnitPlatform()
 }
+
+tasks.named<Test>("test") {
+    dependsOn(":test-contract-producer:publishToMavenLocal")
+}
