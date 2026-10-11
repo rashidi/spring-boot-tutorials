@@ -51,14 +51,6 @@ publishing {
         create<MavenPublication>("maven") {
             from(components["java"])
             artifact(tasks.named("verifierStubsJar"))
-            versionMapping {
-                usage("java-api") {
-                    fromResolutionOf("runtimeClasspath")
-                }
-                usage("java-runtime") {
-                    fromResolutionResult()
-                }
-            }
         }
     }
 }
