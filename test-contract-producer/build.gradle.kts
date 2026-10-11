@@ -3,7 +3,6 @@ plugins {
     id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
     id("sh.stubborn.contract") version "0.1.3"
-    `maven-publish`
 }
 
 group = "zin.rashidi.boot"
@@ -46,15 +45,11 @@ contracts {
     failOnNoContracts.set(false)
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-            artifact(tasks.named("verifierStubsJar"))
-        }
-    }
+val stubs = configurations.create("stubs") {
+    isCanBeConsumed = true
+    isCanBeResolved = false
 }
 
-tasks.withType<org.gradle.api.publish.tasks.GenerateModuleMetadata>().configureEach {
-    suppressedValidationErrors.add("dependencies-without-versions")
+artifacts {
+    add("stubs", tasks.named("verifierStubsJar"))
 }

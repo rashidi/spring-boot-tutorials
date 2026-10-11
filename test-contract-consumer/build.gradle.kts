@@ -33,12 +33,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("sh.stubborn:stubborn-contract-starter-stub-runner")
+    testImplementation(project(path = ":test-contract-producer", configuration = "stubs"))
 }
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
-}
-
-tasks.named<Test>("test") {
-    dependsOn(":test-contract-producer:publishToMavenLocal")
 }

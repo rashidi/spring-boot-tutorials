@@ -10,8 +10,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @AutoConfigureStubRunner(
-        ids = "zin.rashidi.boot:test-contract-producer:0.0.1-SNAPSHOT:stubs:8080",
-        stubsMode = StubsMode.LOCAL
+        ids = "zin.rashidi.boot:test-contract-producer:+:stubs:8080",
+        stubsMode = StubsMode.CLASSPATH
 )
 class ProductClientTest {
 
