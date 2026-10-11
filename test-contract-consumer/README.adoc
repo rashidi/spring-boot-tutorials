@@ -1,4 +1,6 @@
 = Stubborn Contract Consumer Tutorial
+Rashidi Zin <rashidi@zin.my>
+1.0, October 11, 2026: Initial version
 :icons: font
 :source-highlighter: highlight.js
 
@@ -34,7 +36,7 @@ We can use the Stubborn Contract Stub Runner to test our `ProductClient` against
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @AutoConfigureStubRunner(
         ids = "zin.rashidi.boot:test-contract-producer:+:stubs:8080",
-        stubsMode = StubRunnerProperties.StubsMode.LOCAL
+        stubsMode = StubsMode.CLASSPATH
 )
 class ProductClientTest {
 
@@ -52,4 +54,4 @@ class ProductClientTest {
 }
 ----
 
-By configuring `@AutoConfigureStubRunner` to use the producer's ID (`zin.rashidi.boot:test-contract-producer`) and `StubsMode.LOCAL`, Stubborn automatically searches the local `.m2` maven repository for the producer's stub JAR, unpacks it, and starts a WireMock server on the configured port (`8080`). This verifies that our HTTP interactions match the agreed-upon contract.
+By configuring `@AutoConfigureStubRunner` to use the producer's ID (`zin.rashidi.boot:test-contract-producer`) and `StubsMode.CLASSPATH`, Stubborn automatically searches the local classpath for the producer's stub JAR, unpacks it, and starts a WireMock server on the configured port (`8080`). This verifies that our HTTP interactions match the agreed-upon contract without needing a running external server.
