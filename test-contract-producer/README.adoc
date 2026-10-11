@@ -27,12 +27,12 @@ response:
 
 == Producer Implementation
 
-The producer needs to implement the endpoint that satisfies the contract. We provide a `ProductController`:
+The producer needs to implement the endpoint that satisfies the contract. We provide a `ProductResource`:
 
 [source,java]
 ----
 @RestController
-class ProductController {
+class ProductResource {
 
     @GetMapping("/products/{id}")
     public Product getProduct(@PathVariable Long id) {
@@ -50,7 +50,7 @@ We need a base class for the generated contract tests to initialize the applicat
 
 [source,java]
 ----
-public class BaseContractTest {
+public class ProductContractTests {
 
     @BeforeEach
     public void setup() {
@@ -60,6 +60,6 @@ public class BaseContractTest {
 ----
 
 When you build the project (`./gradlew build`), Stubborn Contract will automatically:
-1. Generate test cases from the YAML files based on `BaseContractTest`.
+1. Generate test cases from the YAML files based on `ProductContractTests`.
 2. Execute the tests to verify the controller meets the contract.
 3. Package the WireMock stubs into a jar (`-stubs.jar`), which the consumer can download and use for testing.

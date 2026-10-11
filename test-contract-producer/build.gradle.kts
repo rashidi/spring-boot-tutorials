@@ -41,7 +41,7 @@ tasks.named<Test>("test") {
 }
 
 contracts {
-    baseClassForTests.set("zin.rashidi.boot.test.contract.producer.BaseContractTest")
+    baseClassForTests.set("zin.rashidi.boot.test.contract.producer.product.ProductContractTests")
     failOnNoContracts.set(false)
 }
 

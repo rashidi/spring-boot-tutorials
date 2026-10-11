@@ -1,11 +1,11 @@
-package zin.rashidi.boot.test.contract.producer;
+package zin.rashidi.boot.test.contract.producer.product;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-class ProductController {
+class ProductResource {
 
     @GetMapping("/products/{id}")
     public Product getProduct(@PathVariable Long id) {
