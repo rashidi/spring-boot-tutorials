@@ -68,6 +68,8 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:test-execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
 |link:test-rest-assured[Spring Test: REST Assured Integration] |Integration testing with REST Assured
 |link:test-slice-tests-rest[Spring Test: Slice Tests for REST Application] |Implementing Slice Tests for REST application
+|link:test-contract-producer[Stubborn Contract: Producer] |Implementing contract testing producer using Stubborn Contract
+|link:test-contract-consumer[Stubborn Contract: Consumer] |Implementing contract testing consumer using Stubborn Contract Stub Runner
 |link:web-problem-details[Spring Web: Problem Details for HTTP APIs] |Return Problem Details for HTTP APIs (RFC 7807) in Spring Boot
 |link:web-rest-client[Spring Web: Synchronous REST Clients] |Implement synchronous REST client using `RestClient`, `WebClient`, and `RestTemplate`
 |link:web-thymeleaf-xss[Spring Web: Cross-Site Scripting (XSS) with Thymeleaf] |Prevent Cross-Site Scripting (XSS) with Thymeleaf

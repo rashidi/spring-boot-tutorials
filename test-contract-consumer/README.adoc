@@ -1,0 +1,55 @@
+= Stubborn Contract Consumer Tutorial
+:icons: font
+:source-highlighter: highlight.js
+
+This module demonstrates the consumer side of Consumer-Driven Contract (CDC) testing using **Stubborn Contract**.
+
+== Consumer Implementation
+
+Our application requires fetching product information from an external API (the producer). We use a `RestTemplate` inside `ProductClient`:
+
+[source,java]
+----
+@Component
+public class ProductClient {
+
+    private final RestTemplate restTemplate;
+
+    public ProductClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public Product getProduct(Long id) {
+        return restTemplate.getForObject("http://localhost:8080/products/{id}", Product.class, id);
+    }
+}
+----
+
+== Stub Runner Test
+
+We can use the Stubborn Contract Stub Runner to test our `ProductClient` against a locally running WireMock instance mapped with the producer's exact stubs, without running the actual producer app.
+
+[source,java]
+----
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@AutoConfigureStubRunner(
+        ids = "zin.rashidi.boot:test-contract-producer:+:stubs:8080",
+        stubsMode = StubRunnerProperties.StubsMode.LOCAL
+)
+class ProductClientTest {
+
+    @Autowired
+    private ProductClient productClient;
+
+    @Test
+    void shouldReturnProduct() {
+        Product product = productClient.getProduct(1L);
+
+        assertThat(product.id()).isEqualTo(1L);
+        assertThat(product.name()).isEqualTo("MacBook Pro");
+        assertThat(product.price()).isEqualTo(1999.99);
+    }
+}
+----
+
+By configuring `@AutoConfigureStubRunner` to use the producer's ID (`zin.rashidi.boot:test-contract-producer`) and `StubsMode.LOCAL`, Stubborn automatically searches the local `.m2` maven repository for the producer's stub JAR, unpacks it, and starts a WireMock server on the configured port (`8080`). This verifies that our HTTP interactions match the agreed-upon contract.

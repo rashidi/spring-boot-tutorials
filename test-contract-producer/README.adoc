@@ -1,0 +1,63 @@
+= Stubborn Contract Producer Tutorial
+:icons: font
+:source-highlighter: highlight.js
+
+This module demonstrates the producer side of Consumer-Driven Contract (CDC) testing using **Stubborn Contract**. Stubborn Contract is the official continuation of Spring Cloud Contract.
+
+== Contract Definition
+
+The contract is defined in `src/contractTest/resources/contracts/shouldReturnProduct.yaml`. It describes an interaction where a `GET /products/1` should return a 200 OK with a specific JSON body.
+
+[source,yaml]
+----
+request:
+  method: GET
+  url: /products/1
+response:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body:
+    id: 1
+    name: "MacBook Pro"
+    price: 1999.99
+----
+
+== Producer Implementation
+
+The producer needs to implement the endpoint that satisfies the contract. We provide a `ProductController`:
+
+[source,java]
+----
+@RestController
+class ProductController {
+
+    @GetMapping("/products/{id}")
+    public Product getProduct(@PathVariable Long id) {
+        if (id == 1L) {
+            return new Product(1L, "MacBook Pro", 1999.99);
+        }
+        throw new IllegalArgumentException("Product not found");
+    }
+}
+----
+
+== Verification
+
+We need a base class for the generated contract tests to initialize the application context.
+
+[source,java]
+----
+public class BaseContractTest {
+
+    @BeforeEach
+    public void setup() {
+        RestAssuredMockMvc.standaloneSetup(new ProductController());
+    }
+}
+----
+
+When you build the project (`./gradlew build`), Stubborn Contract will automatically:
+1. Generate test cases from the YAML files based on `BaseContractTest`.
+2. Execute the tests to verify the controller meets the contract.
+3. Package the WireMock stubs into a jar (`-stubs.jar`), which the consumer can download and use for testing.
