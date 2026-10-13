@@ -41,6 +41,8 @@
 ** xref:test-rest-assured.adoc[Spring Test: Implement BDD with RestAssured]
 ** xref:test-execution-listeners.adoc[Spring Test: Managing Test Data with `TestExecutionListener`]
 ** xref:test-slice-tests-rest.adoc[Spring Test: Slice Testing a REST Application]
+** xref:test-contract-consumer.adoc[Stubborn Contract Consumer Tutorial]
+** xref:test-contract-producer.adoc[Stubborn Contract Producer Tutorial]
 * Spring Web
 ** xref:web-thymeleaf-xss.adoc[Preventing XSS with Spring Security and Thymeleaf]
 ** xref:web-problem-details.adoc[Spring Web: Problem Details for HTTP APIs]

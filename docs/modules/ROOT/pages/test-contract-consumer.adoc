@@ -1,0 +1,51 @@
+= Stubborn Contract Consumer Tutorial
+Rashidi Zin <rashidi@zin.my>
+1.0, October 11, 2026: Initial version
+:icons: font
+:source-highlighter: highlight.js
+
+This module demonstrates the consumer side of Consumer-Driven Contract (CDC) testing using **Stubborn Contract**.
+
+== Consumer Implementation
+
+Our application requires fetching product information from an external API (the producer). We use a `RestClient` inside `ProductRepository`:
+
+[source,java]
+----
+@HttpExchange(url = "/products", accept = MediaType.APPLICATION_JSON_VALUE)
+interface ProductRepository {
+
+    @GetExchange("/{id}")
+    Product findById(@PathVariable Long id);
+
+}
+----
+
+== Stub Runner Test
+
+We can use the Stubborn Contract Stub Runner to test our `ProductRepository` against a locally running WireMock instance mapped with the producer's exact stubs, without running the actual producer app.
+
+[source,java]
+----
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@AutoConfigureStubRunner(
+        ids = "zin.rashidi.boot:test-contract-producer:+:stubs:8080",
+        stubsMode = StubsMode.CLASSPATH
+)
+class ProductRepositoryTests {
+
+    @Autowired
+    private ProductRepository products;
+
+    @Test
+    void shouldReturnProduct() {
+        Product product = products.findById(1L);
+
+        assertThat(product)
+                .extracting("id", "name", "price")
+                .containsOnly(1L, "MacBook Pro", 1999.99);
+    }
+}
+----
+
+By configuring `@AutoConfigureStubRunner` to use the producer's ID (`zin.rashidi.boot:test-contract-producer`) and `StubsMode.CLASSPATH`, Stubborn automatically searches the local classpath for the producer's stub JAR, unpacks it, and starts a WireMock server on the configured port (`8080`). This verifies that our HTTP interactions match the agreed-upon contract without needing a running external server.
