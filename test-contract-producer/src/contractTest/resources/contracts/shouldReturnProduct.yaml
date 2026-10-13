@@ -1,0 +1,11 @@
+request:
+  method: GET
+  url: /products/1
+response:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body:
+    id: 1
+    name: "MacBook Pro"
+    price: 1999.99
