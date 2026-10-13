@@ -8,28 +8,22 @@ This module demonstrates the consumer side of Consumer-Driven Contract (CDC) tes
 
 == Consumer Implementation
 
-Our application requires fetching product information from an external API (the producer). We use a `RestTemplate` inside `ProductClient`:
+Our application requires fetching product information from an external API (the producer). We use a `RestClient` inside `ProductRepository`:
 
 [source,java]
 ----
-@Component
-public class ProductClient {
+@HttpExchange(url = "/products", accept = MediaType.APPLICATION_JSON_VALUE)
+interface ProductRepository {
 
-    private final RestTemplate restTemplate;
+    @GetExchange("/{id}")
+    Product findById(@PathVariable Long id);
 
-    public ProductClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
-
-    public Product getProduct(Long id) {
-        return restTemplate.getForObject("http://localhost:8080/products/{id}", Product.class, id);
-    }
 }
 ----
 
 == Stub Runner Test
 
-We can use the Stubborn Contract Stub Runner to test our `ProductClient` against a locally running WireMock instance mapped with the producer's exact stubs, without running the actual producer app.
+We can use the Stubborn Contract Stub Runner to test our `ProductRepository` against a locally running WireMock instance mapped with the producer's exact stubs, without running the actual producer app.
 
 [source,java]
 ----
@@ -38,18 +32,18 @@ We can use the Stubborn Contract Stub Runner to test our `ProductClient` against
         ids = "zin.rashidi.boot:test-contract-producer:+:stubs:8080",
         stubsMode = StubsMode.CLASSPATH
 )
-class ProductClientTest {
+class ProductRepositoryTests {
 
     @Autowired
-    private ProductClient productClient;
+    private ProductRepository products;
 
     @Test
     void shouldReturnProduct() {
-        Product product = productClient.getProduct(1L);
+        Product product = products.findById(1L);
 
-        assertThat(product.id()).isEqualTo(1L);
-        assertThat(product.name()).isEqualTo("MacBook Pro");
-        assertThat(product.price()).isEqualTo(1999.99);
+        assertThat(product)
+                .extracting("id", "name", "price")
+                .containsOnly(1L, "MacBook Pro", 1999.99);
     }
 }
 ----

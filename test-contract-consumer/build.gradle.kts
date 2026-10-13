@@ -1,11 +1,13 @@
 plugins {
     java
     id("org.springframework.boot") version "4.1.1"
-    id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
+
+val springBootVersion = org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES.substringAfterLast(":")
+val stubbornContractVersion = "0.1.3"
 
 java {
     toolchain {
@@ -15,25 +17,24 @@ java {
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
-        mavenContent {
-            snapshotsOnly()
-        }
-    }
 }
 
-dependencyManagement {
-    imports {
-        mavenBom("sh.stubborn:stubborn-contract-dependencies:0.1.3")
+configurations.all {
+    resolutionStrategy {
+        force("org.springframework.boot:spring-boot-http-client:$springBootVersion")
+        force("org.springframework.boot:spring-boot-restclient:$springBootVersion")
     }
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-webmvc")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
+    testImplementation(enforcedPlatform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
+
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
+    testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")
     testImplementation("sh.stubborn:stubborn-contract-starter-stub-runner")
     testImplementation(project(path = ":test-contract-producer", configuration = "stubs"))
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.named<Test>("test") {
