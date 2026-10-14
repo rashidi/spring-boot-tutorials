@@ -28,145 +28,73 @@ jobs:
           path: antora
           token: '${{ secrets.ANTORA_FILE_SYNC }}'
 
-      - name: Sync Files and Update Nav
+      - name: Sync AsciiDoc files and generate nav.adoc
         run: |
-          set -euo pipefail
-          cd master
-
-          DEST_DIR="../antora/docs/modules/ROOT/pages"
-          NAV_FILE="../antora/docs/modules/ROOT/nav.adoc"
-
-          mkdir -p "$DEST_DIR"
-          touch "$NAV_FILE"
-
-          # Find all README.adoc files in subdirectories (ignores root README.adoc)
-          find . -mindepth 2 -name "README.adoc" | while read -r file; do
-            RELATIVE_PATH="${file#./}"
-            CATEGORY=$(printf '%s\n' "$RELATIVE_PATH" | cut -d/ -f1)
-            MODULE_NAME=$(basename "$(dirname "$file")")
-
-            DEST_DOC="${DEST_DIR}/${MODULE_NAME}.adoc"
-            cp "$file" "$DEST_DOC"
-
-            TITLE=$(grep -m 1 "^= " "$file" | sed 's/^= //' || true)
-            if [ -z "$TITLE" ]; then
-              TITLE="$MODULE_NAME"
+          mkdir -p docs/modules/ROOT/pages
+          
+          # Copy all submodule README.adoc files and normalize CRLF -> LF
+          for file in */README.adoc; do
+            if [ -f "$file" ]; then
+              MODULE_NAME=$(dirname "$file")
+              tr -d '\r' < "$file" > "docs/modules/ROOT/pages/${MODULE_NAME}.adoc"
             fi
-
-            case "$CATEGORY" in
-              actuator-*|spring-actuator)
-                CATEGORY_TITLE="Spring Actuator"
-                ;;              
-              ai-*|spring-ai)
-                CATEGORY_TITLE="Spring AI"
-                ;;
-              architecture-*|spring-modulith)
-                CATEGORY_TITLE="Spring Modulith"
-                ;;          
-              batch-*|spring-batch)
-                CATEGORY_TITLE="Spring Batch"
-                ;;
-              cloud-*|spring-cloud)
-                CATEGORY_TITLE="Spring Cloud"
-                ;;
-              data-*|spring-data)
-                CATEGORY_TITLE="Spring Data"
-                ;;
-              graphql|spring-graphql)
-                CATEGORY_TITLE="Spring GraphQL"
-                ;;
-              jooq)
-                CATEGORY_TITLE="jOOQ"
-                ;;
-              messaging-*|spring-messaging)
-                CATEGORY_TITLE="Spring Messaging"
-                ;;
-              modulith*|spring-modulith)
-                CATEGORY_TITLE="Spring Modulith"
-                ;;
-              test-*|spring-test)
-                CATEGORY_TITLE="Spring Test"
-                ;;
-              web-*|spring-web)
-                CATEGORY_TITLE="Spring Web"
-                ;;
+          done
+          
+          # Copy root README.adoc as index.adoc if needed
+          if [ -f "README.adoc" ]; then
+            tr -d '\r' < "README.adoc" > "docs/modules/ROOT/pages/index.adoc"
+          fi
+          
+          # Generate nav.adoc
+          NAV_FILE="docs/modules/ROOT/nav.adoc"
+          > "$NAV_FILE"
+          
+          declare -A CATEGORIES
+          for page in docs/modules/ROOT/pages/*.adoc; do
+            FILENAME=$(basename "$page" .adoc)
+            if [ "$FILENAME" = "index" ]; then
+              continue
+            fi
+          
+            # Extract title and strip any stray carriage returns
+            TITLE=$(grep -m 1 "^= " "$page" | tr -d '\r' | sed 's/^= //' || true)
+            if [ -z "$TITLE" ]; then
+              TITLE="$FILENAME"
+            fi
+          
+            PREFIX="${FILENAME%%-*}"
+            SECOND="${FILENAME#*-}"
+            SECOND="${SECOND%%-*}"
+          
+            case "$PREFIX" in
+              ai) CATEGORY_NAME="Spring AI" ;;
+              batch) CATEGORY_NAME="Spring Batch" ;;
+              cloud) CATEGORY_NAME="Spring Cloud" ;;
+              data) CATEGORY_NAME="Spring Data" ;;
+              graphql) CATEGORY_NAME="Spring GraphQL" ;;
+              jooq) CATEGORY_NAME="jOOQ" ;;
+              messaging) CATEGORY_NAME="Spring Messaging" ;;
+              modulith) CATEGORY_NAME="Spring Modulith" ;;
+              security) CATEGORY_NAME="Spring Security" ;;
+              test) CATEGORY_NAME="Spring Test" ;;
+              web) CATEGORY_NAME="Spring Web" ;;
+              architecture) CATEGORY_NAME="Architecture" ;;
+              actuator) CATEGORY_NAME="Observability" ;;
               *)
-                CATEGORY_TITLE=$(printf '%s\n' "$CATEGORY" | sed -E 's/(^|-)([a-z])/\U\2/g; s/-/ /g; s/\bAi\b/AI/g')
+                CATEGORY_NAME=$(echo "$PREFIX" | sed -E 's/-/ /g; s/\b([a-z])/\U\1/g')
                 ;;
             esac
-
-            SECTION_LINE="* ${CATEGORY_TITLE}"
-            ENTRY_LINE="** xref:${MODULE_NAME}.adoc[${TITLE}]"
-
-            if ! grep -Fxq "$SECTION_LINE" "$NAV_FILE"; then
-              if [ -s "$NAV_FILE" ]; then
-                printf "\n" >> "$NAV_FILE"
-              fi
-              printf "%s\n" "$SECTION_LINE" >> "$NAV_FILE"
-            fi
-
-            sed -i "\|^\*\*\? xref:${MODULE_NAME}\.adoc\[|d" "$NAV_FILE"
-
-            awk -v section="$SECTION_LINE" -v entry="$ENTRY_LINE" '
-              function sort_key(line, key) {
-                key = line
-                sub(/^[^[]*\[/, "", key)
-                sub(/\][^]]*$/, "", key)
-                return tolower(key)
-              }
-
-              function flush_section(   i, j, tmp) {
-                if (!in_section) {
-                  return
-                }
-
-                if (!inserted) {
-                  children[++n] = entry
-                  inserted = 1
-                }
-
-                for (i = 1; i <= n; i++) {
-                  for (j = i + 1; j <= n; j++) {
-                    if (sort_key(children[i]) > sort_key(children[j])) {
-                      tmp = children[i]
-                      children[i] = children[j]
-                      children[j] = tmp
-                    }
-                  }
-                }
-
-                for (i = 1; i <= n; i++) {
-                  print children[i]
-                }
-
-                delete children
-                n = 0
-                in_section = 0
-              }
-
-              /^\* / {
-                flush_section()
-                print
-                in_section = ($0 == section)
-                next
-              }
-
-              in_section && /^\*\* xref:/ {
-                children[++n] = $0
-                next
-              }
-
-              {
-                if (in_section) {
-                  flush_section()
-                }
-                print
-              }
-
-              END {
-                flush_section()
-              }
-            ' "$NAV_FILE" > "$NAV_FILE.tmp" && mv "$NAV_FILE.tmp" "$NAV_FILE"
+          
+            CATEGORIES["$CATEGORY_NAME"]+="** xref:${FILENAME}.adoc[${TITLE}]"$'\n'
+          done
+          
+          # Sort categories and write to nav.adoc
+          IFS=$'\n' SORTED_CATS=($(sort <<<"${!CATEGORIES[*]}"))
+          unset IFS
+          
+          for CAT in "${SORTED_CATS[@]}"; do
+            echo "* ${CAT}" >> "$NAV_FILE"
+            printf "%s" "${CATEGORIES[$CAT]}" | sort >> "$NAV_FILE"
           done
 
       - name: Commit and Push to Antora
