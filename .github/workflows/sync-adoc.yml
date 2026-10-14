@@ -30,71 +30,94 @@ jobs:
 
       - name: Sync AsciiDoc files and generate nav.adoc
         run: |
-          mkdir -p docs/modules/ROOT/pages
-          
-          # Copy all submodule README.adoc files and normalize CRLF -> LF
-          for file in */README.adoc; do
-            if [ -f "$file" ]; then
-              MODULE_NAME=$(dirname "$file")
-              tr -d '\r' < "$file" > "docs/modules/ROOT/pages/${MODULE_NAME}.adoc"
-            fi
-          done
-          
-          # Copy root README.adoc as index.adoc if needed
-          if [ -f "README.adoc" ]; then
-            tr -d '\r' < "README.adoc" > "docs/modules/ROOT/pages/index.adoc"
-          fi
-          
-          # Generate nav.adoc
-          NAV_FILE="docs/modules/ROOT/nav.adoc"
-          > "$NAV_FILE"
-          
+          set -euo pipefail
+          cd master
+
+          DEST_DIR="../antora/docs/modules/ROOT/pages"
+          NAV_FILE="../antora/docs/modules/ROOT/nav.adoc"
+
+          mkdir -p "$DEST_DIR"
+
           declare -A CATEGORIES
-          for page in docs/modules/ROOT/pages/*.adoc; do
-            FILENAME=$(basename "$page" .adoc)
-            if [ "$FILENAME" = "index" ]; then
-              continue
-            fi
-          
+
+          # Find all submodule README.adoc files (ignores root master/README.adoc)
+          while IFS= read -r file; do
+            MODULE_NAME=$(basename "$(dirname "$file")")
+            DEST_DOC="${DEST_DIR}/${MODULE_NAME}.adoc"
+
+            # Copy file and normalize CRLF -> LF
+            tr -d '\r' < "$file" > "$DEST_DOC"
+
             # Extract title and strip any stray carriage returns
-            TITLE=$(grep -m 1 "^= " "$page" | tr -d '\r' | sed 's/^= //' || true)
+            TITLE=$(grep -m 1 "^= " "$DEST_DOC" | sed 's/^= //' || true)
             if [ -z "$TITLE" ]; then
-              TITLE="$FILENAME"
+              TITLE="$MODULE_NAME"
             fi
-          
-            PREFIX="${FILENAME%%-*}"
-            SECOND="${FILENAME#*-}"
-            SECOND="${SECOND%%-*}"
-          
-            case "$PREFIX" in
-              ai) CATEGORY_NAME="Spring AI" ;;
-              batch) CATEGORY_NAME="Spring Batch" ;;
-              cloud) CATEGORY_NAME="Spring Cloud" ;;
-              data) CATEGORY_NAME="Spring Data" ;;
-              graphql) CATEGORY_NAME="Spring GraphQL" ;;
-              jooq) CATEGORY_NAME="jOOQ" ;;
-              messaging) CATEGORY_NAME="Spring Messaging" ;;
-              modulith) CATEGORY_NAME="Spring Modulith" ;;
-              security) CATEGORY_NAME="Spring Security" ;;
-              test) CATEGORY_NAME="Spring Test" ;;
-              web) CATEGORY_NAME="Spring Web" ;;
-              architecture) CATEGORY_NAME="Architecture" ;;
-              actuator) CATEGORY_NAME="Observability" ;;
+
+            case "$MODULE_NAME" in
+              actuator-*|observability*)
+                CATEGORY_TITLE="Observability"
+                ;;
+              architecture-*|architecture)
+                CATEGORY_TITLE="Architecture"
+                ;;
+              ai-*|spring-ai)
+                CATEGORY_TITLE="Spring AI"
+                ;;
+              batch-*|spring-batch)
+                CATEGORY_TITLE="Spring Batch"
+                ;;
+              cloud-*|spring-cloud)
+                CATEGORY_TITLE="Spring Cloud"
+                ;;
+              data-*|spring-data)
+                CATEGORY_TITLE="Spring Data"
+                ;;
+              graphql|spring-graphql)
+                CATEGORY_TITLE="Spring GraphQL"
+                ;;
+              jooq)
+                CATEGORY_TITLE="jOOQ"
+                ;;
+              messaging-*|spring-messaging)
+                CATEGORY_TITLE="Spring Messaging"
+                ;;
+              modulith*|spring-modulith)
+                CATEGORY_TITLE="Spring Modulith"
+                ;;
+              security-*|spring-security)
+                CATEGORY_TITLE="Spring Security"
+                ;;
+              test-*|spring-test)
+                CATEGORY_TITLE="Spring Test"
+                ;;
+              web-*|spring-web)
+                CATEGORY_TITLE="Spring Web"
+                ;;
               *)
-                CATEGORY_NAME=$(echo "$PREFIX" | sed -E 's/-/ /g; s/\b([a-z])/\U\1/g')
+                CATEGORY_TITLE=$(printf '%s\n' "$MODULE_NAME" | sed -E 's/-/ /g; s/\b([a-z])/\U\1/g; s/\bAi\b/AI/g')
                 ;;
             esac
-          
-            CATEGORIES["$CATEGORY_NAME"]+="** xref:${FILENAME}.adoc[${TITLE}]"$'\n'
-          done
-          
-          # Sort categories and write to nav.adoc
-          IFS=$'\n' SORTED_CATS=($(sort <<<"${!CATEGORIES[*]}"))
+
+            CATEGORIES["$CATEGORY_TITLE"]+="** xref:${MODULE_NAME}.adoc[${TITLE}]"$'\n'
+          done < <(find . -mindepth 2 -maxdepth 2 -name "README.adoc" | sort)
+
+          # Write clean nav.adoc starting with Home
+          printf "* xref:index.adoc[Home]\n" > "$NAV_FILE"
+
+          # Keep Architecture at the top if present, then sort remaining categories alphabetically
+          if [ -n "${CATEGORIES["Architecture"]+x}" ]; then
+            printf "* Architecture\n" >> "$NAV_FILE"
+            printf "%s" "${CATEGORIES["Architecture"]}" | sort -f >> "$NAV_FILE"
+            unset 'CATEGORIES["Architecture"]'
+          fi
+
+          IFS=$'\n' SORTED_CATS=($(printf "%s\n" "${!CATEGORIES[@]}" | sort -f))
           unset IFS
-          
+
           for CAT in "${SORTED_CATS[@]}"; do
-            echo "* ${CAT}" >> "$NAV_FILE"
-            printf "%s" "${CATEGORIES[$CAT]}" | sort >> "$NAV_FILE"
+            printf "* %s\n" "$CAT" >> "$NAV_FILE"
+            printf "%s" "${CATEGORIES[$CAT]}" | sort -f >> "$NAV_FILE"
           done
 
       - name: Commit and Push to Antora
@@ -102,11 +125,11 @@ jobs:
           cd antora
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           # Stage the specific documentation paths
           git add docs/modules/ROOT/pages/*.adoc
           git add docs/modules/ROOT/nav.adoc
-          
+
           # Commit only if there are actual changes
           if git diff --staged --quiet; then
             echo "No README changes to sync."
