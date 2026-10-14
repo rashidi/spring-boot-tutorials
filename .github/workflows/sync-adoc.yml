@@ -54,9 +54,15 @@ jobs:
             fi
 
             case "$CATEGORY" in
+              actuator-*|spring-actuator)
+                CATEGORY_TITLE="Spring Actuator"
+                ;;              
               ai-*|spring-ai)
                 CATEGORY_TITLE="Spring AI"
                 ;;
+              architecture-*|spring-modulith)
+                CATEGORY_TITLE="Spring Modulith"
+                ;;          
               batch-*|spring-batch)
                 CATEGORY_TITLE="Spring Batch"
                 ;;
