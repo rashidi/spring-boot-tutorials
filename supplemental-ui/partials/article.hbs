@@ -4,27 +4,83 @@
   <p class="hero-eyebrow">Java 25 · Spring Boot 4.1.1</p>
   <h1 class="page">Spring Boot Tutorials</h1>
   <p class="hero-lead">Practical, tested, and up-to-date samples for Spring Boot modules, from Spring Data and Spring Batch to Spring AI and Spring Modulith.</p>
-  <div class="hero-actions">
-    <a class="button primary" href="#topics">Browse tutorials</a>
-    <a class="button" href="https://github.com/rashidi/spring-boot-tutorials">View on GitHub</a>
-  </div>
 </section>
-<section id="topics" class="topics">
-{{#each page.navigation}}
-{{#each ./items}}
-{{#if ./items}}
-  <a class="topic-card" href="{{{relativize ./items.[0].url}}}">
-    <span class="topic-title">{{{./content}}}</span>
-    <span class="topic-count">{{./items.length}} {{#if ./items.[1]}}tutorials{{else}}tutorial{{/if}}</span>
-  </a>
-{{/if}}
-{{/each}}
-{{/each}}
+
+<section id="topics" class="module-explorer">
+  <div class="module-pills" role="tablist" aria-label="Filter tutorials by Spring module">
+    <button class="module-pill is-active" type="button" data-filter="all" role="tab" aria-selected="true">
+      <span>All Modules</span>
+    </button>
+    {{#each page.navigation}}
+    {{#each ./items}}
+    {{#if ./items}}
+    <button class="module-pill" type="button" data-filter="{{{./content}}}" role="tab" aria-selected="false">
+      <span>{{{./content}}}</span>
+      <span class="pill-count">({{./items.length}})</span>
+    </button>
+    {{/if}}
+    {{/each}}
+    {{/each}}
+  </div>
+
+  <div id="tutorial-grid" class="tutorial-grid">
+    {{#each page.navigation}}
+    {{#each ./items}}
+    {{#if ./items}}
+      {{#each ./items}}
+      <a class="tutorial-card" href="{{{relativize ./url}}}" data-category="{{{../content}}}">
+        <div class="card-top">
+          <span class="card-eyebrow">{{{../content}}}</span>
+          <h3 class="card-title">{{{./content}}}</h3>
+        </div>
+        <div class="card-bottom">
+          <div class="card-tags">
+            {{#each (module-tags ./url)}}
+            <span class="card-tag">{{this}}</span>
+            {{/each}}
+          </div>
+          <span class="card-cta">Read article <span aria-hidden="true">→</span></span>
+        </div>
+      </a>
+      {{/each}}
+    {{/if}}
+    {{/each}}
+    {{/each}}
+  </div>
+  <p id="tutorial-empty" class="tutorial-empty" hidden>No tutorials match your search filter.</p>
 </section>
 {{else}}
-{{#with page.title}}
-<h1 class="page">{{{this}}}</h1>
-{{/with}}
+<header class="article-header">
+  <div class="article-eyebrow">
+    {{#if page.breadcrumbs}}
+      {{#each page.breadcrumbs}}
+        {{#unless @last}}
+        <span class="eyebrow-category">{{{./content}}}</span>
+        {{/unless}}
+      {{/each}}
+    {{/if}}
+    <span class="eyebrow-stack">Java 25 · Spring Boot 4.1.1</span>
+  </div>
+  {{#with page.title}}
+  <h1 class="page">{{{this}}}</h1>
+  {{/with}}
+  {{#with (module-slug page.url)}}
+  <div class="article-meta">
+    <a class="meta-chip" href="https://github.com/rashidi/spring-boot-tutorials/tree/master/{{this}}" target="_blank" rel="noopener" title="View submodule source code on GitHub">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+      </svg>
+      <span>Submodule: <code>{{this}}</code></span>
+      <span class="chip-arrow" aria-hidden="true">↗</span>
+    </a>
+    <button class="meta-chip meta-command" type="button" data-copy="./gradlew :{{this}}:test" title="Copy Gradle command to run tests for this module">
+      <span class="cmd-prompt" aria-hidden="true">$</span>
+      <code>./gradlew :{{this}}:test</code>
+      <span class="copy-status">Copy</span>
+    </button>
+  </div>
+  {{/with}}
+</header>
 {{/if}}
 {{{page.contents}}}
 {{> pagination}}

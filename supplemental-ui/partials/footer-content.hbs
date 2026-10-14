@@ -2,9 +2,120 @@
   <div class="footer-inner">
     <p class="footer-brand">Spring Boot Tutorials by <a href="https://about.me/rashidi.zin">Rashidi Zin</a></p>
     <p id="badges">
-      <img alt="Java version" src="https://img.shields.io/badge/Java_-25-blue?style=flat-square" />
-      <img alt="Spring Boot version" src="https://img.shields.io/badge/Spring_Boot-4.1.1-blue?style=flat-square&logo=springboot" />
-      <img alt="License - Unlicense" src="https://img.shields.io/github/license/rashidi/spring-boot-tutorials?style=flat-square&color=blue" />
+      <img alt="Java version" src="https://img.shields.io/badge/Java-25-6db33f?style=flat-square&logo=openjdk&logoColor=white" />
+      <img alt="Spring Boot version" src="https://img.shields.io/badge/Spring_Boot-4.1.1-6db33f?style=flat-square&logo=springboot&logoColor=white" />
+      <img alt="License - Unlicense" src="https://img.shields.io/github/license/rashidi/spring-boot-tutorials?style=flat-square&color=334155" />
     </p>
   </div>
 </footer>
+<script>
+(function () {
+  var searchInput = document.getElementById('sbt-search-input');
+  var searchResults = document.getElementById('sbt-search-results');
+  var pills = Array.prototype.slice.call(document.querySelectorAll('.module-pill'));
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.tutorial-card'));
+  var emptyState = document.getElementById('tutorial-empty');
+  var activeCategory = 'all';
+
+  function filterHomeCards() {
+    if (!cards.length) return;
+    var query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    var visible = 0;
+    cards.forEach(function (card) {
+      var cat = card.getAttribute('data-category') || '';
+      var text = card.textContent.toLowerCase();
+      var matchesCat = activeCategory === 'all' || cat === activeCategory;
+      var matchesQuery = !query || text.indexOf(query) !== -1;
+      var show = matchesCat && matchesQuery;
+      card.hidden = !show;
+      if (show) visible++;
+    });
+    if (emptyState) emptyState.hidden = visible > 0;
+  }
+
+  pills.forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      activeCategory = pill.getAttribute('data-filter') || 'all';
+      pills.forEach(function (p) {
+        var isCurrent = p === pill;
+        p.classList.toggle('is-active', isCurrent);
+        p.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
+      });
+      filterHomeCards();
+    });
+  });
+
+  // Collect nav links for dropdown search on article pages
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-item[data-depth="2"] > .nav-link')).map(function (link) {
+    var parentItem = link.closest('.nav-item[data-depth="1"]');
+    var categoryEl = parentItem ? parentItem.querySelector('.nav-text, .nav-link') : null;
+    return {
+      title: link.textContent.trim(),
+      url: link.getAttribute('href'),
+      category: categoryEl ? categoryEl.textContent.trim() : ''
+    };
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      if (cards.length) {
+        filterHomeCards();
+      } else if (searchResults) {
+        var q = searchInput.value.trim().toLowerCase();
+        if (!q) {
+          searchResults.hidden = true;
+          searchResults.innerHTML = '';
+          return;
+        }
+        var matches = navLinks.filter(function (item) {
+          return item.title.toLowerCase().indexOf(q) !== -1 || item.category.toLowerCase().indexOf(q) !== -1;
+        }).slice(0, 8);
+        if (!matches.length) {
+          searchResults.innerHTML = '<div class="sbt-search-empty">No matching tutorials</div>';
+        } else {
+          searchResults.innerHTML = matches.map(function (m) {
+            return '<a class="sbt-search-hit" href="' + m.url + '"><span class="hit-cat">' + m.category + '</span><span class="hit-title">' + m.title + '</span></a>';
+          }).join('');
+        }
+        searchResults.hidden = false;
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      } else if (e.key === 'Escape' && searchResults) {
+        searchResults.hidden = true;
+      }
+    });
+
+    document.addEventListener('click', function (e) {
+      if (searchResults && !e.target.closest('.sbt-search')) {
+        searchResults.hidden = true;
+      }
+    });
+  }
+
+  // Copy button for Gradle submodule test command
+  document.querySelectorAll('.meta-command[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var cmd = btn.getAttribute('data-copy');
+      var status = btn.querySelector('.copy-status');
+      if (navigator.clipboard && cmd) {
+        navigator.clipboard.writeText(cmd).then(function () {
+          if (status) {
+            status.textContent = 'Copied!';
+            btn.classList.add('is-copied');
+            setTimeout(function () {
+              status.textContent = 'Copy';
+              btn.classList.remove('is-copied');
+            }, 1800);
+          }
+        });
+      }
+    });
+  });
+})();
+</script>

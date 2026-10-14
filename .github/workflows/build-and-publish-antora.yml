@@ -6,6 +6,7 @@ on:
       - antora
     paths:
       - 'docs/**'
+      - 'supplemental-ui/**'
       - 'antora-playbook.yml'
       - '.github/workflows/build-and-publish-antora.yml'
       - '**/README.adoc'
