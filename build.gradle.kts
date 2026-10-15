@@ -39,35 +39,33 @@ subprojects {
     }
 }
 
-val objects = project.objects
-
-val coverageExclusions = listOf(
-    // Spring Boot @SpringBootApplication entry points and inner classes
-    "**/*Application.class",
-    "**/*Application$*.class",
-
-    // Spring Boot AOT / GraalVM generated classes (if AOT is run)
-    "**/*__BeanDefinitions*.class",
-    "**/*__Autowiring*.class",
-    "**/*__ApplicationContextInitializer*.class",
-
-    // jOOQ generated catalog, schema, keys, and table records in :jooq
-    "zin/rashidi/boot/jooq/DefaultCatalog.class",
-    "zin/rashidi/boot/jooq/DefaultSchema.class",
-    "zin/rashidi/boot/jooq/Indexes.class",
-    "zin/rashidi/boot/jooq/Keys.class",
-    "zin/rashidi/boot/jooq/Tables.class",
-    "zin/rashidi/boot/jooq/tables/**"
-)
-
 val testCodeCoverageReport = tasks.named<JacocoReport>("testCodeCoverageReport") {
-    val defaultClassDirs = files(classDirectories.from.toList())
+    val objectFactory = project.objects
+    val exclusions = listOf(
+        // Spring Boot @SpringBootApplication entry points and inner classes
+        "**/*Application.class",
+        "**/*Application$*.class",
+
+        // Spring Boot AOT / GraalVM generated classes (if AOT is run)
+        "**/*__BeanDefinitions*.class",
+        "**/*__Autowiring*.class",
+        "**/*__ApplicationContextInitializer*.class",
+
+        // jOOQ generated catalog, schema, keys, and table records in :jooq
+        "zin/rashidi/boot/jooq/DefaultCatalog.class",
+        "zin/rashidi/boot/jooq/DefaultSchema.class",
+        "zin/rashidi/boot/jooq/Indexes.class",
+        "zin/rashidi/boot/jooq/Keys.class",
+        "zin/rashidi/boot/jooq/Tables.class",
+        "zin/rashidi/boot/jooq/tables/**"
+    )
+    val defaultClassDirs = objectFactory.fileCollection().from(classDirectories.from.toList())
 
     classDirectories.setFrom(
         defaultClassDirs.elements.map { locations ->
             locations.map { location ->
-                objects.fileTree().from(location.asFile).matching {
-                    exclude(coverageExclusions)
+                objectFactory.fileTree().from(location.asFile).matching {
+                    exclude(exclusions)
                 }
             }
         }
