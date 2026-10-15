@@ -39,6 +39,25 @@ subprojects {
     }
 }
 
+val testCodeCoverageReport = tasks.named<JacocoReport>("testCodeCoverageReport")
+
+val testCodeCoverageVerification = tasks.register<JacocoCoverageVerification>("testCodeCoverageVerification") {
+    dependsOn(testCodeCoverageReport)
+    executionData.setFrom(testCodeCoverageReport.map { it.executionData })
+    classDirectories.setFrom(testCodeCoverageReport.map { it.classDirectories })
+    sourceDirectories.setFrom(testCodeCoverageReport.map { it.sourceDirectories })
+
+    violationRules {
+        rule {
+            limit {
+                counter = "INSTRUCTION"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
 tasks.check {
-    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
+    dependsOn(testCodeCoverageReport)
+    dependsOn(testCodeCoverageVerification)
 }
