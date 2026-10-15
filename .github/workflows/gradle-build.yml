@@ -79,7 +79,7 @@ jobs:
       - name: Publish JaCoCo Report to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.8.0
-        if: github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request'
         with:
           paths: ${{ github.workspace }}/build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
