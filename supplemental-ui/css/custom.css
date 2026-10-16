@@ -964,3 +964,232 @@ footer.footer {
   line-height: 1.6;
   text-wrap: balance;
 }
+
+/* ==========================================================================
+   System-Preference Dark Mode (Aligned with rashidi.zin.my)
+   ========================================================================== */
+
+:root {
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Core Surface & Canvas Tokens */
+    --sbt-bg: #0b0f19;
+    --sbt-surface: #111827;
+    --sbt-surface-elevated: #1e293b;
+    --sbt-surface-hover: #1e293b;
+    --sbt-border: #1e293b;
+    --sbt-border-strong: #334155;
+
+    /* Typography Hierarchy */
+    --sbt-text: #f8fafc;
+    --sbt-text-secondary: #cbd5e1;
+    --sbt-text-muted: #94a3b8;
+
+    /* Spring Brand Accents (Lifted for dark contrast) */
+    --sbt-accent: #4ade80;
+    --sbt-accent-hover: #22c55e;
+    --sbt-accent-subtle: rgba(74, 222, 128, 0.12);
+
+    /* Code & Preformatted Blocks */
+    --sbt-code-bg: #020617;
+    --sbt-inline-code-bg: #1e293b;
+    --sbt-inline-code-text: #e2e8f0;
+
+    /* Shadows */
+    --sbt-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --sbt-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+  }
+
+  /* 1. Document Canvas & Base Typography */
+  html,
+  body,
+  .body {
+    background-color: var(--sbt-bg) !important;
+    color: var(--sbt-text) !important;
+  }
+
+  /* 2. Top Header & Search Trigger */
+  .header,
+  .navbar,
+  header > nav {
+    background-color: rgba(11, 15, 25, 0.85) !important;
+    border-bottom: 1px solid var(--sbt-border) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .navbar-brand .navbar-item,
+  .navbar-end .navbar-item,
+  .navbar-link {
+    color: var(--sbt-text) !important;
+  }
+
+  /* Search button & ⌘K shortcut badge */
+  #search-input,
+  .search-button,
+  header button {
+    background-color: var(--sbt-surface-elevated) !important;
+    color: var(--sbt-text-secondary) !important;
+    border-color: var(--sbt-border-strong) !important;
+  }
+
+  kbd {
+    background-color: var(--sbt-bg) !important;
+    color: var(--sbt-text-muted) !important;
+    border-color: var(--sbt-border-strong) !important;
+    box-shadow: none !important;
+  }
+
+  /* 3. Left Navigation Sidebar & Component Drawer */
+  .nav-container,
+  .nav,
+  .nav-panel-menu,
+  .nav-panel-explore,
+  .nav-panel-explore .context {
+    background-color: var(--sbt-bg) !important;
+    border-color: var(--sbt-border) !important;
+    color: var(--sbt-text-secondary) !important;
+  }
+
+  .nav-item .nav-link,
+  .nav-item .nav-text {
+    color: var(--sbt-text-secondary) !important;
+  }
+
+  .nav-item.is-active > .nav-link,
+  .nav-link:hover {
+    color: var(--sbt-accent) !important;
+    background-color: var(--sbt-accent-subtle) !important;
+  }
+
+  /* 4. Toolbar, Breadcrumbs & Right Table of Contents */
+  .toolbar {
+    background-color: var(--sbt-bg) !important;
+    border-bottom: 1px solid var(--sbt-border) !important;
+    color: var(--sbt-text-muted) !important;
+  }
+
+  .breadcrumbs a,
+  .breadcrumbs li {
+    color: var(--sbt-text-muted) !important;
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--sbt-accent) !important;
+  }
+
+  .toc.sidebar .toc-menu a {
+    color: var(--sbt-text-muted) !important;
+    border-left-color: var(--sbt-border) !important;
+  }
+
+  .toc.sidebar .toc-menu a.is-active {
+    color: var(--sbt-accent) !important;
+    border-left-color: var(--sbt-accent) !important;
+  }
+
+  /* 5. Main Article Content (.doc) */
+  .doc {
+    color: var(--sbt-text-secondary) !important;
+  }
+
+  .doc h1,
+  .doc h2,
+  .doc h3,
+  .doc h4,
+  .doc h5,
+  .doc h6 {
+    color: var(--sbt-text) !important;
+    border-bottom-color: var(--sbt-border) !important;
+  }
+
+  .doc a {
+    color: var(--sbt-accent) !important;
+  }
+
+  .doc a:hover {
+    color: var(--sbt-accent-hover) !important;
+  }
+
+  /* 6. Code Blocks, Highlight.js & Inline Code */
+  .doc pre.highlight,
+  .doc .listingblock pre,
+  .doc pre.highlight > code {
+    background-color: var(--sbt-code-bg) !important;
+    border: 1px solid var(--sbt-border-strong) !important;
+  }
+
+  .doc :not(pre) > code {
+    background-color: var(--sbt-inline-code-bg) !important;
+    color: var(--sbt-inline-code-text) !important;
+    border: 1px solid var(--sbt-border-strong) !important;
+  }
+
+  /* Source toolbox (language badge & copy button) */
+  .doc .source-toolbox {
+    color: var(--sbt-text-muted) !important;
+  }
+
+  /* 7. Landing Page Hero, Filter Tabs & Tutorial Cards */
+  [role="tablist"] button {
+    background-color: var(--sbt-surface) !important;
+    color: var(--sbt-text-secondary) !important;
+    border-color: var(--sbt-border-strong) !important;
+  }
+
+  [role="tablist"] button:hover {
+    background-color: var(--sbt-surface-elevated) !important;
+    color: var(--sbt-text) !important;
+  }
+
+  [role="tablist"] button[aria-selected="true"] {
+    background-color: var(--sbt-accent-subtle) !important;
+    color: var(--sbt-accent) !important;
+    border-color: var(--sbt-accent) !important;
+  }
+
+  /* Tutorial Card Surfaces */
+  .tutorial-card,
+  .card,
+  article a[href*=".html"] {
+    background-color: var(--sbt-surface) !important;
+    border-color: var(--sbt-border-strong) !important;
+    box-shadow: var(--sbt-shadow-sm) !important;
+  }
+
+  .tutorial-card:hover,
+  .card:hover {
+    background-color: var(--sbt-surface-elevated) !important;
+    border-color: var(--sbt-accent) !important;
+    box-shadow: var(--sbt-shadow-md) !important;
+  }
+
+  /* 8. Tables, Admonitions & Footer */
+  .doc table.tableblock,
+  .doc table.tableblock th,
+  .doc table.tableblock td {
+    background-color: var(--sbt-bg) !important;
+    border-color: var(--sbt-border-strong) !important;
+    color: var(--sbt-text-secondary) !important;
+  }
+
+  .doc table.tableblock thead th {
+    background-color: var(--sbt-surface) !important;
+    color: var(--sbt-text) !important;
+  }
+
+  .doc .admonitionblock > table {
+    background-color: var(--sbt-surface) !important;
+    border-color: var(--sbt-border-strong) !important;
+  }
+
+  footer,
+  .footer {
+    background-color: var(--sbt-bg) !important;
+    border-top: 1px solid var(--sbt-border) !important;
+    color: var(--sbt-text-muted) !important;
+  }
+}
