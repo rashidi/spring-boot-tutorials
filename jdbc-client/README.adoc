@@ -67,7 +67,7 @@ Now we will test our repository against a real PostgreSQL database, ensuring all
 
 [source,java]
 ----
-@JdbcTest
+@DataJdbcTest
 @Testcontainers
 @Import(UserRepository.class)
 class UserRepositoryTests {
@@ -110,6 +110,6 @@ class UserRepositoryTests {
 }
 ----
 
-Using `@JdbcTest`, Spring auto-configures a testing environment dedicated to JDBC-based applications. Combined with `@ServiceConnection` from Spring Boot, connecting to Testcontainers becomes trivial, requiring no explicit jdbc property configurations.
+Using `@DataJdbcTest`, Spring auto-configures a testing environment dedicated to JDBC-based applications. Combined with `@ServiceConnection` from Spring Boot, connecting to Testcontainers becomes trivial, requiring no explicit jdbc property configurations.
 
 The full implementation of this tutorial can be found on link:{url-repo}[GitHub].
