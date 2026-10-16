@@ -1,0 +1,115 @@
+= Spring JDBC: JdbcClient
+Rashidi Zin <rashidi@zin.my>
+1.0, July 20, 2023: Initial version
+:url-repo: https://github.com/rashidi/spring-boot-tutorials/tree/master/jdbc-client
+:source-main: {url-repo}/src/main/java/zin/rashidi/boot/jdbc/client
+:source-test: {url-repo}/src/test/java/zin/rashidi/boot/jdbc/client
+
+Starting from Spring Boot 3.2, `JdbcClient` is available as a modern and fluent API for database operations,
+providing an alternative to the traditional `JdbcTemplate`. It offers a more readable and concise way to interact
+with databases while retaining the robust foundation of JDBC.
+
+In this tutorial, we will explore how to perform CRUD operations using `JdbcClient` and verify its behavior using
+integration tests powered by Testcontainers.
+
+== Using JdbcClient
+
+First, we will define a simple `User` record to represent our domain model.
+
+[source,java]
+----
+public record User(Long id, String name, String username, String email) {
+}
+----
+
+Next, let's create our repository. We will use `JdbcClient` to implement `findAll`, `findById`, and `save` operations.
+
+[source,java]
+----
+@Repository
+public class UserRepository {
+
+    private final JdbcClient jdbcClient;
+
+    public UserRepository(JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
+    }
+
+    public List<User> findAll() {
+        return jdbcClient.sql("SELECT id, name, username, email FROM users")
+                .query(User.class)
+                .list();
+    }
+
+    public Optional<User> findById(Long id) {
+        return jdbcClient.sql("SELECT id, name, username, email FROM users WHERE id = :id")
+                .param("id", id)
+                .query(User.class)
+                .optional();
+    }
+
+    public void save(User user) {
+        jdbcClient.sql("INSERT INTO users (id, name, username, email) VALUES (:id, :name, :username, :email)")
+                .param("id", user.id())
+                .param("name", user.name())
+                .param("username", user.username())
+                .param("email", user.email())
+                .update();
+    }
+}
+----
+
+As seen in the snippet above, the syntax of `JdbcClient` makes query binding and result mapping highly readable. We use the `.param()` method for named parameters, and mapping a row to our `User` record is effortlessly handled by `.query(User.class)`.
+
+== Verifying with Testcontainers
+
+Now we will test our repository against a real PostgreSQL database, ensuring all queries are working correctly.
+
+[source,java]
+----
+@JdbcTest
+@Testcontainers
+@Import(UserRepository.class)
+class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+
+    @Autowired
+    private UserRepository repository;
+
+    private static final List<User> USERS = List.of(
+            new User(1L, "Rashidi Zin", "rashidi.zin", "rashidi@zin.my"),
+            new User(2L, "Zaid Zin", "zaid.zin", "zaid@zin.my")
+    );
+
+    @BeforeEach
+    void setUp() {
+        USERS.forEach(repository::save);
+    }
+
+    @Test
+    void findAll_ShouldReturnAllUsers() {
+        List<User> users = repository.findAll();
+        assertThat(users).hasSize(2)
+                .containsExactlyInAnyOrderElementsOf(USERS);
+    }
+
+    @Test
+    void findById_ShouldReturnUser_WhenIdExists() {
+        Optional<User> user = repository.findById(1L);
+        assertThat(user).isPresent().contains(USERS.get(0));
+    }
+
+    @Test
+    void findById_ShouldReturnEmpty_WhenIdDoesNotExist() {
+        Optional<User> user = repository.findById(999L);
+        assertThat(user).isEmpty();
+    }
+}
+----
+
+Using `@JdbcTest`, Spring auto-configures a testing environment dedicated to JDBC-based applications. Combined with `@ServiceConnection` from Spring Boot, connecting to Testcontainers becomes trivial, requiring no explicit jdbc property configurations.
+
+The full implementation of this tutorial can be found on link:{url-repo}[GitHub].
