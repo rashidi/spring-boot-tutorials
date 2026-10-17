@@ -44,6 +44,7 @@ jobs:
               - 'build.gradle.kts'
             java:
               - '**/*.java'
+              - '**/application.yml'
     
   gradle-build:
     name: Build project with Gradle
