@@ -76,6 +76,9 @@ jobs:
               graphql|spring-graphql)
                 CATEGORY_TITLE="Spring GraphQL"
                 ;;
+              jdbc-*)
+                CATEGORY_TITLE="Spring JDBC"
+                ;;                
               jooq)
                 CATEGORY_TITLE="jOOQ"
                 ;;
