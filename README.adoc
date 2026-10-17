@@ -60,10 +60,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:data-rest-composite-id[Spring Data REST: Composite Id] |Expose entities with composite ID using Spring Data REST
 |link:data-rest-validation[Spring Data REST: Custom Validation] |Implement custom validation for Spring Data REST endpoints
 |link:graphql[Spring GraphQL] |Getting started with Spring GraphQL
-<<<<<<< HEAD
-=======
 |link:jdbc-client[Spring JDBC: JdbcClient] |Perform database operations using the fluent JdbcClient API
->>>>>>> jules-3000796323680024138-389747f4
 |link:jooq[jOOQ] |Typesafe SQL with jOOQ and Spring Boot
 |link:messaging-kafka[Spring for Apache Kafka] |Implement message publishing and consumption using Spring for Apache Kafka and Testcontainers
 |link:messaging-rabbitmq-dlq[Spring AMQP: Dead Letter Queue with RabbitMQ] |Route messages that fail processing to a Dead Letter Queue using Spring AMQP and RabbitMQ
