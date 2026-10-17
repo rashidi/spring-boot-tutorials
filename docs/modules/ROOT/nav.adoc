@@ -1,6 +1,8 @@
 * xref:index.adoc[Home]
 * Architecture
 ** xref:architecture-hexagonal.adoc[Architecture: Hexagonal Architecture]
+* Jdbc Client
+** xref:jdbc-client.adoc[Spring JDBC: JdbcClient]
 * jOOQ
 ** xref:jooq.adoc[jOOQ: Implement jOOQ with Spring Boot and Gradle]
 * Observability
