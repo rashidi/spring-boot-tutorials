@@ -74,6 +74,7 @@ jobs:
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4
       with:
+        dependency-caching: true
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
         
