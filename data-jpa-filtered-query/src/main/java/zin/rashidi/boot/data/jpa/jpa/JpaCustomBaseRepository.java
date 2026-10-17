@@ -3,7 +3,6 @@ package zin.rashidi.boot.data.jpa.jpa;
 import static zin.rashidi.boot.data.jpa.user.User.Status.ACTIVE;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
