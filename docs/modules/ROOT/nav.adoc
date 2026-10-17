@@ -1,8 +1,6 @@
 * xref:index.adoc[Home]
 * Architecture
 ** xref:architecture-hexagonal.adoc[Architecture: Hexagonal Architecture]
-* Jdbc Client
-** xref:jdbc-client.adoc[Spring JDBC: JdbcClient]
 * jOOQ
 ** xref:jooq.adoc[jOOQ: Implement jOOQ with Spring Boot and Gradle]
 * Observability
@@ -36,6 +34,8 @@
 ** xref:data-rest-validation.adoc[Spring Data REST: Validation]
 * Spring GraphQL
 ** xref:graphql.adoc[GraphQL With Spring Boot]
+* Spring JDBC
+** xref:jdbc-client.adoc[Spring JDBC: JdbcClient]
 * Spring Messaging
 ** xref:messaging-kafka.adoc[Spring for Apache Kafka]
 ** xref:messaging-rabbitmq-dlq.adoc[Spring AMQP: Dead Letter Queue with RabbitMQ]
