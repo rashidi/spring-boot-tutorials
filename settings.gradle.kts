@@ -26,7 +26,10 @@ include("data-repository-definition")
 include("data-rest-composite-id")
 include("data-rest-validation")
 include("graphql")
+<<<<<<< HEAD
+=======
 include("jdbc-client")
+>>>>>>> jules-3000796323680024138-389747f4
 include("jooq")
 include("messaging-kafka")
 include("messaging-rabbitmq-dlq")
