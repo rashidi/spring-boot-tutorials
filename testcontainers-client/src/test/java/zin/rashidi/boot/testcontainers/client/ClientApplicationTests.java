@@ -25,7 +25,7 @@ class ClientApplicationTests {
     @SuppressWarnings("resource")
     static GenericContainer<?> serverContainer = new GenericContainer<>(DockerImageName.parse("ghcr.io/rashidi/testcontainers-demo-server:latest"))
             .withExposedPorts(8080)
-            .withStartupTimeout(java.time.Duration.ofMinutes(2));
+            .withStartupTimeout(java.time.Duration.ofMinutes(5));
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
