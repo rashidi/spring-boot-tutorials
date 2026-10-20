@@ -23,7 +23,7 @@ class UserResourceTests {
     private RestTestClient restClient;
 
     @Test
-    @DisplayName("Should process web request and database query on a Virtual Thread")
+    @DisplayName("Given virtual threads are enabled When a request is processed Then it should run on a virtual thread")
     void virtualThreadEnabled() {
         restClient.get().uri("/thread-info").exchange()
                 .expectStatus().isOk()

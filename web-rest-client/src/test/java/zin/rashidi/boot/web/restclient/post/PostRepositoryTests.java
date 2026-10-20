@@ -35,7 +35,7 @@ class PostRepositoryTests {
     private ObjectMapper mapper;
 
     @Test
-    @DisplayName("When requesting for all posts then response should contain all posts available")
+    @DisplayName("Given posts exist When requesting for all posts Then response should contain all posts available")
     void findAll() throws JacksonException {
         var content = mapper.writeValueAsString(posts());
 
@@ -59,7 +59,7 @@ class PostRepositoryTests {
     }
 
     @Test
-    @DisplayName("When requesting with an invalid post id Then an error PostNotFoundException will be thrown")
+    @DisplayName("Given posts exist When requesting with an invalid post id Then an error PostNotFoundException will be thrown")
     void findByInvalidId() {
         mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/posts/10101011")).andRespond(withResourceNotFound());
 

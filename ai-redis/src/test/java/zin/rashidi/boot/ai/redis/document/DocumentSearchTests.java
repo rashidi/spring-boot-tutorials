@@ -53,7 +53,7 @@ class DocumentSearchTests {
     }
 
     @Test
-    @DisplayName("should index documents and retrieve semantically similar content")
+    @DisplayName("Given documents are added When searched by query Then similar documents are returned")
     void searchReturnsSemanticallyRelevantDocuments() {
         var results = documents.search("microservices in Java", 1, 0.0);
 
@@ -64,7 +64,7 @@ class DocumentSearchTests {
     }
 
     @Test
-    @DisplayName("should create the configured Redis vector index")
+    @DisplayName("Given the configuration When checking indices Then the expected index should exist")
     void createsConfiguredIndex() throws IOException, InterruptedException {
         var result = redis.execInContainer("redis-cli", "FT._LIST");
 

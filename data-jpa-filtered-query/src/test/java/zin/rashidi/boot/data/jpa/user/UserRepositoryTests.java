@@ -45,7 +45,7 @@ class UserRepositoryTests {
     }
 
     @Test
-    @DisplayName("Given there are two users with status ACTIVE and INACTIVE, when findAll is invoked, then only ACTIVE users are returned")
+    @DisplayName("Given there are two users with status ACTIVE and INACTIVE When findAll is invoked Then only ACTIVE users are returned")
     void findAll() {
         assertThat(users.findAll())
                 .extracting("status")

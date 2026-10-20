@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
 
 @DataJdbcTest
 @Testcontainers
@@ -38,6 +39,7 @@ class UserRepositoryTests {
     }
 
     @Test
+    @DisplayName("Given users exist in the database When I find all Then it should return all users")
     void findAll_ShouldReturnAllUsers() {
         List<User> users = repository.findAll();
         assertThat(users).hasSize(2)
@@ -45,12 +47,14 @@ class UserRepositoryTests {
     }
 
     @Test
+    @DisplayName("Given a user exists When I find by ID Then it should return the user")
     void findById_ShouldReturnUser_WhenIdExists() {
         Optional<User> user = repository.findById(1L);
         assertThat(user).isPresent().contains(USERS.get(0));
     }
 
     @Test
+    @DisplayName("Given a user does not exist When I find by ID Then it should return empty")
     void findById_ShouldReturnEmpty_WhenIdDoesNotExist() {
         Optional<User> user = repository.findById(999L);
         assertThat(user).isEmpty();

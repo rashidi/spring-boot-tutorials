@@ -9,7 +9,7 @@ class HexagonalArchitectureApplicationTests {
     ApplicationModules modules = ApplicationModules.of(HexagonalArchitectureApplication.class);
 
     @Test
-    @DisplayName("Should verify modular boundaries using Spring Modulith")
+    @DisplayName("Given the module structure When verifying boundaries Then Spring Modulith should find no violations")
     void verifyModularBoundaries() {
         modules.verify();
     }

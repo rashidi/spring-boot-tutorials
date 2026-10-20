@@ -24,7 +24,7 @@ class UserResourceTests {
     private RestTestClient restClient;
 
     @Test
-    @DisplayName("Should create and retrieve a user via HTTP")
+    @DisplayName("Given a new user When created and retrieved Then the user details should be returned successfully")
     void createAndRetrieveUser() {
         // Create user
         restClient.post().uri("/users")

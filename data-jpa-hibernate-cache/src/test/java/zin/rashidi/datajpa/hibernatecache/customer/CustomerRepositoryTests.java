@@ -41,7 +41,7 @@ class CustomerRepositoryTests {
     @Test
     @Order(1)
     @Transactional(propagation = REQUIRES_NEW)
-    @DisplayName("On initial retrieval data will be retrieved from the database and customer cache will be stored")
+    @DisplayName("Given a new customer request When initially retrieved Then it is fetched from the database")
     void initial() {
         customers.findById(1L).orElseThrow();
 
@@ -52,7 +52,7 @@ class CustomerRepositoryTests {
     @Test
     @Order(2)
     @Transactional(propagation = REQUIRES_NEW)
-    @DisplayName("On subsequent retrieval data will be retrieved from the customer cache")
+    @DisplayName("Given a previously retrieved customer When subsequently retrieved Then it is fetched from the cache")
     void subsequent() {
         customers.findById(1L).orElseThrow();
 

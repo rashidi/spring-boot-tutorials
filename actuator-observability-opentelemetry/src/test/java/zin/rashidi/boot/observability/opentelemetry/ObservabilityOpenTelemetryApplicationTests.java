@@ -7,6 +7,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.DisplayName;
 
 @SpringBootTest
 @Testcontainers
@@ -22,6 +23,7 @@ class ObservabilityOpenTelemetryApplicationTests {
     }
 
     @Test
+    @DisplayName("Given the application context When loaded Then it should start without errors")
     void contextLoads() {
     }
 }

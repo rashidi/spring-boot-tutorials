@@ -27,7 +27,7 @@ class CreateBookTests {
     private RestTestClient restClient;
 
     @Test
-    @DisplayName("When I create a Book with an inactive Author, I should get a Bad Request response")
+    @DisplayName("Given an author When I create a Book with an inactive Author Then I should get a Bad Request response")
     void inactiveAuthor() {
         var body = """
                 {

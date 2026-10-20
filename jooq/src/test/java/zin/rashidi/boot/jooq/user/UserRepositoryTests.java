@@ -30,7 +30,7 @@ class UserRepositoryTests {
     private UserRepository repository;
 
     @Test
-    @DisplayName("Given username rashidi is available, when findByUsername, then return User")
+    @DisplayName("Given username rashidi is available When findByUsername is invoked Then return User")
     void findByUsername() {
         var user = repository.findByUsername("rashidi");
 
@@ -40,7 +40,7 @@ class UserRepositoryTests {
     }
 
     @Test
-    @DisplayName("Given there is no user with username zaid.zin, when findByUsername, then return empty Optional")
+    @DisplayName("Given there is no user with username zaid.zin When findByUsername is invoked Then return empty Optional")
     void findByUsernameWithNonExistingUsername() {
         var user = repository.findByUsername("zaid.zin");
 

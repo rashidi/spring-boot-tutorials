@@ -35,7 +35,7 @@ class BatchJdbcBulkUpdateApplicationTests {
     private JobOperatorTestUtils jobs;
 
     @Test
-    @DisplayName("When job is executed Then users' status will be updated to the next Status")
+    @DisplayName("Given the preconditions When job is executed Then users' status will be updated to the next Status")
     void contextLoads() throws Exception {
 
         await().atMost(10L, SECONDS).untilAsserted(() -> {

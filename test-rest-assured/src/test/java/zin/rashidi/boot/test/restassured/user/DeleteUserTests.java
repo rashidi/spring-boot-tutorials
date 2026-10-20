@@ -49,7 +49,7 @@ class DeleteUserTests {
     }
 
     @Test
-    @DisplayName("When I trigger delete with a non-existing ID Then response status should be Not Found")
+    @DisplayName("Given the preconditions When I trigger delete with a non-existing ID Then response status should be Not Found")
     void deleteWithNonExistingId() {
         when()
                 .delete("/users/{id}", "5f9b0a9b9d9b4a0a9d9b4a0a")
