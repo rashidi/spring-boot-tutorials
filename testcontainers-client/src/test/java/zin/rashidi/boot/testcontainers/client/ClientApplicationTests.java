@@ -22,8 +22,10 @@ import org.springframework.web.client.RestClient;
 class ClientApplicationTests {
 
     @Container
+    @SuppressWarnings("resource")
     static GenericContainer<?> serverContainer = new GenericContainer<>(DockerImageName.parse("ghcr.io/rashidi/testcontainers-demo-server:latest"))
-            .withExposedPorts(8080);
+            .withExposedPorts(8080)
+            .withStartupTimeout(java.time.Duration.ofMinutes(2));
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
