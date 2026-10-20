@@ -22,7 +22,7 @@ class StudentManagementTests {
     private StudentManagement students;
 
     @Test
-    @DisplayName("When the student with id 4 is inactivated Then StudentInactivated event will be triggered with student id 4")
+    @DisplayName("Given the preconditions When the student with id 4 is inactivated Then StudentInactivated event will be triggered with student id 4")
     void inactive(Scenario scenario) {
         var student = new Student("Bob Johnson");
         ReflectionTestUtils.setField(student, "id", 4L);

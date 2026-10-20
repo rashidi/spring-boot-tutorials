@@ -24,7 +24,7 @@ class BookResourceTests {
     private GraphQlTester client;
 
     @Test
-    @DisplayName("Given there are 3 books, when findAll is invoked, then return all books")
+    @DisplayName("Given there are 3 books When findAll is invoked Then return all books")
     void findAll() {
         client.documentName("books")
                 .execute()
@@ -48,7 +48,7 @@ class BookResourceTests {
     }
 
     @Test
-    @DisplayName("Given there is a book titled The Hobbit, when findByTitle is invoked, then return the book")
+    @DisplayName("Given there is a book titled The Hobbit When findByTitle is invoked Then return the book")
     void findByTitle() {
         client.documentName("books")
                 .variable("title", "The Hobbit")

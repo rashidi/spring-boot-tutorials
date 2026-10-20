@@ -38,7 +38,7 @@ class UserAuditTests {
     private UserRepository repository;
 
     @Test
-    @DisplayName("When a user is persisted Then created and lastModified fields are set And createdBy and lastModifiedBy fields are set to Mr. Auditor")
+    @DisplayName("Given the preconditions When a user is persisted Then created and lastModified fields are set And createdBy and lastModifiedBy fields are set to Mr. Auditor")
     void create() {
         var user = repository.save(new User("Rashidi Zin", "rashidi"));
 

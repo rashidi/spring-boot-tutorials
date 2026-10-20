@@ -32,7 +32,7 @@ class UserAuditTests {
     private UserRepository repository;
 
     @Test
-    @DisplayName("When a user is saved Then created and modified fields are set And createdBy and modifiedBy fields are set to Mr. Auditor")
+    @DisplayName("Given the preconditions When a user is saved Then created and modified fields are set And createdBy and modifiedBy fields are set to Mr. Auditor")
     void create() {
         var user = new User("Rashidi Zin", "rashidi");
 
@@ -43,7 +43,7 @@ class UserAuditTests {
     }
 
     @Test
-    @DisplayName("When a user is updated Then modified field should be updated")
+    @DisplayName("Given the preconditions When a user is updated Then modified field should be updated")
     @Sql(statements = "INSERT INTO users (id, name, username, created, modified) VALUES ('84', 'Rashidi Zin', 'rashidi', now() - INTERVAL 7 DAY, now() - INTERVAL 7 DAY)")
     void update() {
         var modifiedUser = repository.findById(84L).map(user -> { user.setUsername("rashidi.zin"); return user; }).map(repository::saveAndFlush).orElseThrow();

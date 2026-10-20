@@ -37,7 +37,7 @@ class CharacterRepositoryTests {
     private CharacterRepository repository;
 
     @Test
-    @DisplayName("Generated query: Search for 'captain marvel' should return 'Captain Marvel' and 'Thanos'")
+    @DisplayName("Given a search query captain marvel When a generated query search is executed Then it should return Captain Marvel and Thanos")
     void withGeneratedQuery() {
         // Simulate predefined index
         operations.indexOps(Character.class).createIndex(TextIndexDefinition.builder().onFields("name", "publisher").build());
@@ -52,7 +52,7 @@ class CharacterRepositoryTests {
     }
 
     @Test
-    @DisplayName("Custom implementation: Search for 'captain marvel' should return 'Captain Marvel' and 'Thanos'")
+    @DisplayName("Given a search query captain marvel When a custom search is executed Then it should return Captain Marvel and Thanos")
     void findByText() {
         var characters = repository.findByText("captain marvel", Sort.by("name"));
 

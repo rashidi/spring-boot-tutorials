@@ -27,7 +27,7 @@ class CustomerRepositoryTests {
     private CacheManager caches;
 
     @Test
-    @DisplayName("Given the method name is configured as the cache's key Then subsequent retrieval should return the same value as initial retrieval")
+    @DisplayName("Given the method name is configured as the cache's key When subsequently retrieved Then it should return the same value as initial retrieval")
     void findAll() {
         var persisted = customers.findAll();
         var cached = caches.getCache("customers").get("findAll").get();
@@ -36,7 +36,7 @@ class CustomerRepositoryTests {
     }
 
     @Test
-    @DisplayName("Given the cache is configured Then subsequent retrieval with the same key should return the same value as initial retrieval")
+    @DisplayName("Given the method name is configured as the cache's key When subsequently retrieved Then it should return the same value as initial retrieval")
     void findById() {
         var persisted = customers.findById(1L).get();
         var cached = caches.getCache("customerById").get(1L).get();

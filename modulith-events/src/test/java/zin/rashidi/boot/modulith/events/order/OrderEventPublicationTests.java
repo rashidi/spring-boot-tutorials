@@ -28,7 +28,7 @@ class OrderEventPublicationTests {
     private EventPublicationRepository publicationRepository;
 
     @Test
-    @DisplayName("When an order is placed Then domain event is published and completed in the outbox registry")
+    @DisplayName("Given the preconditions When an order is placed Then domain event is published and completed in the outbox registry")
     void placeOrder() {
         var order = orderService.placeOrder("rashidi@zin.my", BigDecimal.valueOf(99.90));
 

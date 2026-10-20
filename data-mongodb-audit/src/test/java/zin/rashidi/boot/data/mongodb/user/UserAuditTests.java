@@ -31,7 +31,7 @@ class UserAuditTests {
     private UserRepository repository;
 
     @Test
-    @DisplayName("When a user is saved Then created and modified fields are set And createdBy and modifiedBy fields are set to Mr. Auditor")
+    @DisplayName("Given the preconditions When a user is saved Then created and modified fields are set And createdBy and modifiedBy fields are set to Mr. Auditor")
     void create() {
         var createdUser = repository.save(new User().name("Rashidi Zin").username("rashidi"));
 
@@ -40,7 +40,7 @@ class UserAuditTests {
     }
 
     @Test
-    @DisplayName("When a user is updated Then modified field should be updated")
+    @DisplayName("Given the preconditions When a user is updated Then modified field should be updated")
     void update() {
         var createdUser = repository.save(new User().name("Rashidi Zin").username("rashidi"));
 

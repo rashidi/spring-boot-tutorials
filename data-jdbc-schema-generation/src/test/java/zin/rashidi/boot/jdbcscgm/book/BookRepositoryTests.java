@@ -32,7 +32,7 @@ class BookRepositoryTests {
     }
 
     @Test
-    @DisplayName("Given the user.yaml exists, when changelogExists, then return true")
+    @DisplayName("Given the user.yaml exists When changelogExists is invoked Then return true")
     void changelogExists() {
         assertThat(new FileSystemResource("user.yaml").exists()).isTrue();
     }

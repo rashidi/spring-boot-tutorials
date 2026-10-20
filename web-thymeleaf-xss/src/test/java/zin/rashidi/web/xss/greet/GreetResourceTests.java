@@ -21,7 +21,7 @@ class GreetResourceTests {
     private MockMvcTester mvc;
 
     @Test
-    @DisplayName("Given XSS protection is enabled Then response header should contain information about X-XSS-Protection and Content-Security-Policy")
+    @DisplayName("Given XSS protection is enabled When response is received Then header should contain information about X-XSS-Protection and Content-Security-Policy")
     void headers() {
         mvc.get()
                 .uri("/greet?name={name}", "rashidi")

@@ -27,7 +27,7 @@ class CreateBookTests {
     private MockMvcTester mvc;
 
     @Test
-    @DisplayName("When a Book is created with an ISBN Then its Location should consists of the ISBN")
+    @DisplayName("Given an author When a Book is created with an ISBN Then its Location should consists of the ISBN")
     @Sql(statements = "INSERT INTO author (id, first_name, last_name) VALUES (100, 'Rudyard', 'Kipling')")
     void create() {
         mvc

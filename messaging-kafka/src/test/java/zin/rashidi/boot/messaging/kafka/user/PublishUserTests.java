@@ -37,7 +37,7 @@ class PublishUserTests {
     }
 
     @Test
-    @DisplayName("When user is published via REST, it should be received by the Kafka listener")
+    @DisplayName("Given the messaging system When user is published via REST Then it should be received by the Kafka listener")
     void publish() {
         var user = new User(1L, "Rashidi Zin", "rashidi.zin", "rashidi@zin.my");
 

@@ -35,7 +35,7 @@ class UserRepositoryTests {
     private ObjectMapper mapper;
 
     @Test
-    @DisplayName("When findAll Then all users should be returned")
+    @DisplayName("Given the preconditions When findAll Then all users should be returned")
     void findAll() throws JacksonException {
         var response = mapper.writeValueAsString(List.of(
                 new User(84L, "Rashidi Zin", "rashidi.zin", "rashidi@zin.my", URI.create("rashidi.zin.my")),
@@ -50,7 +50,7 @@ class UserRepositoryTests {
     }
 
     @Test
-    @DisplayName("When an id is provided Then user with the id should be returned")
+    @DisplayName("Given the preconditions When an id is provided Then user with the id should be returned")
     void findById() throws JacksonException {
         var response = mapper.writeValueAsString(
                 new User(84L, "Rashidi Zin", "rashidi.zin", "rashidi@zin.my", URI.create("rashidi.zin.my"))
@@ -64,7 +64,7 @@ class UserRepositoryTests {
     }
 
     @Test
-    @DisplayName("When an invalid user id is provided Then UserNotFoundException will be thrown")
+    @DisplayName("Given the preconditions When an invalid user id is provided Then UserNotFoundException will be thrown")
     void findByInvalidId() {
         mockServer.expect(requestTo("https://jsonplaceholder.typicode.com/users/84")).andRespond(withResourceNotFound());
 

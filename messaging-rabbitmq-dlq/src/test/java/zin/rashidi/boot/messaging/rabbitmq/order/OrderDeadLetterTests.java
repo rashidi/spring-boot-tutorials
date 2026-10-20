@@ -32,7 +32,7 @@ class OrderDeadLetterTests {
     private OrderListener listener;
 
     @Test
-    @DisplayName("When a valid order is published Then it should be processed and not be routed to the dead letter queue")
+    @DisplayName("Given the preconditions When a valid order is published Then it should be processed and not be routed to the dead letter queue")
     void valid() {
         var order = new Order(1L, "Spring Boot in Action", 1);
 
@@ -47,7 +47,7 @@ class OrderDeadLetterTests {
     }
 
     @Test
-    @DisplayName("When an order has an invalid quantity Then it should be routed to the dead letter queue without being retried")
+    @DisplayName("Given the preconditions When an order has an invalid quantity Then it should be routed to the dead letter queue without being retried")
     void permanentFailure() {
         var order = new Order(2L, "Spring Boot in Action", 0);
 
@@ -58,7 +58,7 @@ class OrderDeadLetterTests {
     }
 
     @Test
-    @DisplayName("When an ordered product remains unavailable after all retries Then it should be routed to the dead letter queue")
+    @DisplayName("Given the preconditions When an ordered product remains unavailable after all retries Then it should be routed to the dead letter queue")
     void transientFailure() {
         var order = new Order(3L, "Spring Data in Action", 1);
 

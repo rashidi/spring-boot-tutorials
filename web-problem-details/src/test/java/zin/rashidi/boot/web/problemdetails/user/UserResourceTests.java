@@ -20,7 +20,7 @@ class UserResourceTests {
     private RestTestClient restClient;
 
     @Test
-    @DisplayName("Should return Problem Detail when user is not found")
+    @DisplayName("Given a non-existent user ID When queried Then a Problem Detail response is returned")
     void userNotFound() {
         restClient.get().uri("/users/{id}", 999L).exchange()
                 .expectStatus().isNotFound()

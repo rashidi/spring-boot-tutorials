@@ -51,7 +51,7 @@ class DocumentSearchTests {
     }
 
     @Test
-    @DisplayName("should index documents and retrieve semantically similar content")
+    @DisplayName("Given documents are added When searched by query Then similar documents are returned")
     void searchReturnsSemanticallyRelevantDocuments() {
         var results = documents.search("microservices in Java", 1, 0.0);
 

@@ -24,7 +24,7 @@ class CourseManagementTests {
     private CourseManagement courses;
 
     @Test
-    @DisplayName("When a course is ENDED Then CourseEnded event will be triggered with the course Id")
+    @DisplayName("Given the preconditions When a course is ENDED Then CourseEnded event will be triggered with the course Id")
     void courseEnded(Scenario scenario) {
         var course = new Course("Advanced Java Programming").status(ENDED);
         ReflectionTestUtils.setField(course, "id", 2L);

@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.DisplayName;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
@@ -29,6 +30,7 @@ class UserResourceTests {
     }
 
     @Test
+    @DisplayName("Given the observability app When I get users Then it should return Users string successfully")
     void getUsers() {
         client.get().uri("/users")
                 .exchange()

@@ -33,7 +33,7 @@ class BookAuditRevisionTests {
     private BookRepository repository;
 
     @Test
-    @DisplayName("When a book is created, then a revision information is available with revision number 1")
+    @DisplayName("Given a book When a book is created Then a revision information is available with revision number 1")
     void create() {
         var book = new Book();
 
@@ -52,7 +52,7 @@ class BookAuditRevisionTests {
     }
 
     @Test
-    @DisplayName("When a book is modified, then a revision number will increase")
+    @DisplayName("Given a book When a book is modified Then a revision number will increase")
     void modify() {
         var book = new Book();
 
@@ -75,7 +75,7 @@ class BookAuditRevisionTests {
     }
 
     @Test
-    @DisplayName("When a book is removed, then only ID information is available")
+    @DisplayName("Given a book When a book is removed Then only ID information is available")
     void remove() {
         var book = new Book();
 

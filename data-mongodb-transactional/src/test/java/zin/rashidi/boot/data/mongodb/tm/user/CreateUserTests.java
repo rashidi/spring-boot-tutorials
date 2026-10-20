@@ -13,6 +13,7 @@ import org.testcontainers.mongodb.MongoDBContainer;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static zin.rashidi.boot.data.mongodb.tm.user.User.Status.ACTIVE;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * @author Rashidi Zin
@@ -30,6 +31,7 @@ class CreateUserTests {
     private RestTestClient restTemplate;
 
     @Test
+    @DisplayName("Given a user payload When I create a user Then its status should be ACTIVE")
     void create() {
         var body = """
                 {

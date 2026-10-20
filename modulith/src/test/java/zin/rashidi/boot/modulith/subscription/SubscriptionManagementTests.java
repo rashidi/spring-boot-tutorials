@@ -23,7 +23,7 @@ class SubscriptionManagementTests {
     private SubscriptionRepository subscriptions;
 
     @Test
-    @DisplayName("When CourseEnded is triggered with id 5 Then all subscriptions for the course will be CANCELLED")
+    @DisplayName("Given the preconditions When CourseEnded is triggered with id 5 Then all subscriptions for the course will be CANCELLED")
     void courseEnded(Scenario scenario) {
         var event = new CourseEnded(5L);
 
@@ -33,7 +33,7 @@ class SubscriptionManagementTests {
     }
 
     @Test
-    @DisplayName("When StudentInactivated is triggered with id 5 Then all subscriptions for the student will be CANCELLED")
+    @DisplayName("Given the preconditions When StudentInactivated is triggered with id 5 Then all subscriptions for the student will be CANCELLED")
     void studentInactivated(Scenario scenario) {
         var event = new StudentInactivated(5L);
 

@@ -36,7 +36,7 @@ class UserOptimisticLockingTests {
     private UserRepository repository;
 
     @Test
-    @DisplayName("When a user is persisted Then version field is set to 0")
+    @DisplayName("Given the preconditions When a user is persisted Then version field is set to 0")
     void create() {
         var user = repository.save(new User("Rashidi Zin", "rashidi"));
 

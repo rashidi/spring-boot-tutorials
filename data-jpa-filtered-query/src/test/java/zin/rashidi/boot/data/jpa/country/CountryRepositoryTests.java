@@ -43,7 +43,7 @@ class CountryRepositoryTests {
     }
 
     @Test
-    @DisplayName("Given there are two countries, when findAll is invoked, then both countries are returned")
+    @DisplayName("Given there are two countries When findAll is invoked Then both countries are returned")
     void findAll() {
         assertThat(countries.findAll())
                 .hasSize(2)

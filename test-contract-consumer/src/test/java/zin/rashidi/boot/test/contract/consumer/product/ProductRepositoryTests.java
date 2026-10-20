@@ -7,6 +7,7 @@ import sh.stubborn.contract.stubrunner.StubsMode;
 import sh.stubborn.contract.stubrunner.spring.AutoConfigureStubRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @AutoConfigureStubRunner(
@@ -19,6 +20,7 @@ class ProductRepositoryTests {
     private ProductRepository products;
 
     @Test
+    @DisplayName("Given a product exists When I search for a product Then it should return the matching product")
     void shouldReturnProduct() {
         Product product = products.findById(1L);
 

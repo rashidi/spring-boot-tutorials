@@ -29,7 +29,7 @@ class CreateAuthorTests {
     private MockMvcTester mvc;
 
     @Test
-    @DisplayName("When an Author is created Then its ID should be a number")
+    @DisplayName("Given the preconditions When an Author is created Then its ID should be a number")
     void create() {
         mvc
             .post().uri("/authors")

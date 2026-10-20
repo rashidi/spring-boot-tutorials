@@ -15,13 +15,13 @@ class ModuleTests {
     private final ApplicationModules modules = ApplicationModules.of(ModulithApplication.class);
 
     @Test
-    @DisplayName("Verify architecture")
+    @DisplayName("Given the application modules When verified Then architecture should be valid")
     void verify() {
         modules.verify();
     }
 
     @Test
-    @DisplayName("Generate documentation")
+    @DisplayName("Given the application modules When documented Then documentation should be generated")
     void document() {
         new Documenter(modules, defaults().withOutputFolder("docs"))
                 .writeModulesAsPlantUml()
