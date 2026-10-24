@@ -1,0 +1,89 @@
+= Spring Retry with RestClient
+
+This tutorial demonstrates how to use Spring Retry with the modern `RestClient` in a Spring Boot application.
+
+== Prerequisites
+
+* Java 25
+* Spring Boot 4.1.1
+
+== Dependencies
+
+We need the following dependencies:
+* `spring-boot-starter-webmvc` for web capabilities
+* `spring-boot-starter-restclient` to use the RestClient
+* `spring-retry` and `org.aspectj:aspectjweaver` for declarative retry support via AOP
+
+== Implementation Details
+
+First, we define a simple `User` record to represent the response from the JSONPlaceholder API.
+
+[source,java]
+----
+public record User(Long id, String name, String username, String email) {
+}
+----
+
+Next, we create the `UserService` and inject a `RestClient.Builder` configured with the base URL. We use the `@Retryable` annotation to specify that the method should be retried up to 3 times with a 1-second backoff when an `HttpServerErrorException` (5xx errors) occurs.
+
+[source,java]
+----
+@Service
+public class UserService {
+
+    private final RestClient restClient;
+
+    public UserService(RestClient.Builder restClientBuilder) {
+        this.restClient = restClientBuilder.baseUrl("https://jsonplaceholder.typicode.com").build();
+    }
+
+    @Retryable(
+        retryFor = { HttpServerErrorException.class },
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000)
+    )
+    public List<User> getUsers() {
+        return this.restClient.get()
+            .uri("/users")
+            .retrieve()
+            .body(new ParameterizedTypeReference<>() {});
+    }
+}
+----
+
+Finally, we enable the retry mechanism by annotating the main application class with `@EnableRetry`.
+
+[source,java]
+----
+@EnableRetry
+@SpringBootApplication
+public class WebRestRetryApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(WebRestRetryApplication.class, args);
+    }
+}
+----
+
+== Integration Testing
+
+To verify the retry logic, we use `@SpringBootTest` along with `MockRestServiceServer`.
+By binding the mock server to our `RestClient.Builder` and un-wrapping the AOP proxy in the test setup, we can define a sequence of responses to simulate failures before returning a successful response.
+
+[source,java]
+----
+// Ensure we are injecting the mocked RestClient into the target object, not the AOP proxy itself
+Object target = userService;
+if (AopUtils.isAopProxy(userService)) {
+    target = ((Advised) userService).getTargetSource().getTarget();
+}
+ReflectionTestUtils.setField(target, "restClient", restClientBuilder.baseUrl("https://jsonplaceholder.typicode.com").build());
+
+server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
+      .andRespond(withServerError());
+
+server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
+      .andRespond(withServerError());
+
+server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
+      .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
+----
