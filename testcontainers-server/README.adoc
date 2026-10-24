@@ -1,0 +1,19 @@
+= Testcontainers Server Tutorial
+
+This module demonstrates building a Spring Boot application that packages itself into a Docker image, which is then pushed to GitHub Container Registry using Spring Boot's built-in OCI image builder (`bootBuildImage` task).
+
+== Overview
+
+The application exposes a single REST endpoint:
+- `GET /api/greetings`: Returns a simple JSON greeting `{"message": "Hello from Testcontainers Server!"}`.
+
+== Build and Push Image
+
+To build and push the Docker image to `ghcr.io`, the Gradle task is configured in `build.gradle.kts`. Run the following command (ensuring you have appropriate GitHub authentication variables set):
+
+[source,bash]
+----
+export GITHUB_ACTOR=your-username
+export GITHUB_TOKEN=your-token
+./gradlew :testcontainers-server:bootBuildImage
+----

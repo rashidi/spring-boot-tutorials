@@ -1,0 +1,23 @@
+= Testcontainers Client Tutorial
+
+This module demonstrates using Testcontainers in an integration test to run an external custom Docker image, which is fetched from GitHub Container Registry.
+
+== Overview
+
+The client application includes:
+- `GreetingService`: A service that makes a REST call to the server using `RestClient`.
+- `ClientGreetingController`: Exposes `GET /client/greetings`, which internally invokes the service.
+
+== Integration Testing with Testcontainers
+
+The test class `ClientApplicationTests` verifies end-to-end functionality:
+1. It uses `GenericContainer` to spin up the `ghcr.io/rashidi/testcontainers-demo-server` image.
+2. The dynamic port mapping of the container is registered into the application context via `@DynamicPropertySource`.
+3. `RestClient` calls the client endpoint, simulating a real user request, which in turn calls the Testcontainers-hosted server.
+
+To run the tests:
+
+[source,bash]
+----
+./gradlew :testcontainers-client:test
+----
