@@ -1,4 +1,4 @@
-package zin.rashidi.boot.data.jpa.keyset.pagination;
+package zin.rashidi.boot.data.jpa.keyset.pagination.article;
 
 import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Window;

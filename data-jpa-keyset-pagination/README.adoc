@@ -18,13 +18,13 @@ This tutorial demonstrates how to use the Spring Data Scroll API to implement hi
 
 We will use an `Article` entity that has attributes such as `author` and `views`. We will implement pagination to scroll through articles sorted by their views.
 
-In link:{source-main}/Article.java[`Article`]:
+In link:{source-main}/article/Article.java[`Article`]:
 
 [source,java]
 ----
 @Entity
 @Table(name = "articles")
-public class Article {
+class Article {
 
     @Id
     private UUID id;
@@ -32,7 +32,6 @@ public class Article {
     private String author;
     private int views;
 
-    // constructors and getters
 }
 ----
 
@@ -40,7 +39,7 @@ public class Article {
 
 To use keyset pagination, we define a repository method that accepts a `ScrollPosition` parameter and returns a `Window<T>`. A `Window` provides access to the paginated elements and a method to determine the position of elements, enabling scrolling to the next page.
 
-In link:{source-main}/ArticleRepository.java[`ArticleRepository`]:
+In link:{source-main}/article/ArticleRepository.java[`ArticleRepository`]:
 
 [source,java]
 ----
@@ -59,58 +58,47 @@ With keyset pagination, you retrieve the first page by passing an initial `Scrol
 
 We will verify this behavior using an integration test with `@Testcontainers` and PostgreSQL.
 
-In link:{source-test}/ArticleRepositoryTests.java[`ArticleRepositoryTests`]:
+In link:{source-test}/article/ArticleRepositoryTests.java[`ArticleRepositoryTests`]:
 
 [source,java]
 ----
-@DataJpaTest(properties = {
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
 @Testcontainers
+@DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
+@Sql(
+        statements = {
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Spring Boot Keyset Pagination', 'Rashidi Zin', 1000)",
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Mastering Spring Data JPA', 'Rashidi Zin', 800)",
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Java 25 Features', 'Rashidi Zin', 1200)",
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Testcontainers with Spring Boot', 'Rashidi Zin', 900)",
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Introduction to Docker', 'Jane Doe', 500)"
+        },
+        executionPhase = BEFORE_TEST_CLASS
+)
 class ArticleRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"));
-
-    private static final List<Article> ARTICLES = List.of(
-            new Article(UUID.randomUUID(), "Spring Boot Keyset Pagination", "Rashidi Zin", 1000),
-            new Article(UUID.randomUUID(), "Mastering Spring Data JPA", "Rashidi Zin", 800),
-            new Article(UUID.randomUUID(), "Java 25 Features", "Rashidi Zin", 1200),
-            new Article(UUID.randomUUID(), "Testcontainers with Spring Boot", "Rashidi Zin", 900),
-            new Article(UUID.randomUUID(), "Introduction to Docker", "Jane Doe", 500)
-    );
+    private static final PostgreSQLContainer postgres = new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
 
     @Autowired
     private ArticleRepository repository;
 
-    @BeforeEach
-    void setUp() {
-        repository.deleteAll();
-        ARTICLES.forEach(repository::save);
-    }
-
     @Test
     @DisplayName("Given articles exist When fetching by author using keyset pagination Then should return ordered window")
     void fetchUsingKeysetPagination() {
-        Window<Article> firstPage = repository.findTop2ByAuthorOrderByViewsDesc("Rashidi Zin", ScrollPosition.keyset());
+        var firstPage = repository.findTop2ByAuthorOrderByViewsDesc("Rashidi Zin", ScrollPosition.keyset());
 
-        assertThat(firstPage).isNotNull();
-        assertThat(firstPage.isEmpty()).isFalse();
-        assertThat(firstPage.toList()).hasSize(2);
-        assertThat(firstPage.toList().get(0).getTitle()).isEqualTo("Java 25 Features"); // Views: 1200
-        assertThat(firstPage.toList().get(1).getTitle()).isEqualTo("Spring Boot Keyset Pagination"); // Views: 1000
+        assertThat(firstPage.toList()).hasSize(2)
+                .extracting("title").containsOnly("Java 25 Features", "Spring Boot Keyset Pagination");
 
-        ScrollPosition position = firstPage.positionAt(1); // Position of the last element in the window
+        var position = firstPage.positionAt(1);
 
-        Window<Article> secondPage = repository.findTop2ByAuthorOrderByViewsDesc("Rashidi Zin", position);
+        var secondPage = repository.findTop2ByAuthorOrderByViewsDesc("Rashidi Zin", position);
 
-        assertThat(secondPage).isNotNull();
-        assertThat(secondPage.isEmpty()).isFalse();
-        assertThat(secondPage.toList()).hasSize(2);
-        assertThat(secondPage.toList().get(0).getTitle()).isEqualTo("Testcontainers with Spring Boot"); // Views: 900
-        assertThat(secondPage.toList().get(1).getTitle()).isEqualTo("Mastering Spring Data JPA"); // Views: 800
+        assertThat(secondPage.toList()).hasSize(2)
+                .extracting("title").containsOnly("Testcontainers with Spring Boot", "Mastering Spring Data JPA");
     }
+
 }
 ----
 
