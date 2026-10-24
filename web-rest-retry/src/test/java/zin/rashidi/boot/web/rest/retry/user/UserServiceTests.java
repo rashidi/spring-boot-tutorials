@@ -1,4 +1,4 @@
-package zin.rashidi.boot.web.rest.retry;
+package zin.rashidi.boot.web.rest.retry.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;

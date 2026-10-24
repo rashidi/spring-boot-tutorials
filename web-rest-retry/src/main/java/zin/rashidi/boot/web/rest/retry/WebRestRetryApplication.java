@@ -2,9 +2,9 @@ package zin.rashidi.boot.web.rest.retry;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 
-@EnableRetry
+@EnableResilientMethods
 @SpringBootApplication
 public class WebRestRetryApplication {
 
