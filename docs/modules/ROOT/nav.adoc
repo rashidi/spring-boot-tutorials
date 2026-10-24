@@ -24,6 +24,7 @@
 ** xref:data-jpa-event.adoc[Spring Data JPA: Perform Entity Validation at Repository Level through Event Driven]
 ** xref:data-jpa-filtered-query.adoc[Spring Data Jpa: Global Filter Query]
 ** xref:data-jpa-hibernate-cache.adoc[Spring Data JPA: Hibernate Second Level Caching with EhCache]
+** xref:data-jpa-keyset-pagination.adoc[Spring Data JPA: Keyset Pagination (Scroll API)]
 ** xref:data-mongodb-audit.adoc[Spring Data MongoDB Audit Example]
 ** xref:data-mongodb-full-text-search.adoc[Spring Data MongoDB: Full Text Search]
 ** xref:data-mongodb-tc-data-load.adoc[Spring Data MongoDb with Testcontainers]
