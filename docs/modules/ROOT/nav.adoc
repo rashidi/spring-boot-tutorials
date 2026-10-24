@@ -51,5 +51,6 @@
 * Spring Web
 ** xref:web-problem-details.adoc[Spring Web: Problem Details for HTTP APIs]
 ** xref:web-rest-client.adoc[Spring Web: REST Clients for calling Synchronous API]
+** xref:web-rest-retry.adoc[Spring Web: Retry with RestClient]
 ** xref:web-thymeleaf-xss.adoc[Preventing XSS with Spring Security and Thymeleaf]
 ** xref:web-virtual-threads.adoc[Spring Web: Virtual Threads]

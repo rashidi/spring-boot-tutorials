@@ -1,0 +1,93 @@
+= Spring Web: Retry with RestClient
+:source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, October 24, 2026
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web-rest-retry
+
+This tutorial demonstrates how to use Spring Retry with the modern `RestClient` in a Spring Boot application.
+
+== Implementation Details
+
+First, we define a simple `User` record to represent the response from the JSONPlaceholder API.
+
+[source,java]
+----
+record User(Long id, String name, String username, String email) {
+}
+----
+
+Next, we create the `UserService` and inject a `RestClient.Builder` configured with the base URL.
+We use the `@EnableResilientMethods` and `@Retryable` annotations to enable retry mechanism. `findAll` is specified to handle `HttpServerErrorException` (5xx errors).
+
+[source,java]
+----
+@Service
+@EnableResilientMethods
+class UserService {
+
+    private final RestClient restClient;
+
+    public UserService(RestClient.Builder restClientBuilder) {
+        this.restClient = restClientBuilder.baseUrl("https://jsonplaceholder.typicode.com").build();
+    }
+
+    @Retryable(includes = HttpServerErrorException.class)
+    public List<User> findAll() {
+        return this.restClient.get()
+            .uri("/users")
+            .retrieve()
+            .body(new ParameterizedTypeReference<>() {});
+    }
+
+}
+----
+
+== Integration Testing
+
+To verify the retry logic, we use `@RestClientTest` along with `MockRestServiceServer`.
+
+[source,java]
+----
+@RestClientTest(UserService.class)
+class UserServiceTests {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private MockRestServiceServer server;
+
+    @Test
+    @DisplayName("Given the API returns 500 twice When getting users Then it should retry and succeed on the third attempt")
+    void findAllWithFailures() throws Exception {
+        var response = """
+                       [{
+                         "id": 1,
+                         "name": "Leanne Graham",
+                         "username": "Bret",
+                         "email": "Sincere@april.biz"
+                       }]
+                       """;
+
+        server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
+              .andRespond(withServerError());
+
+        server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
+              .andRespond(withServerError());
+
+        server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
+              .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
+
+        List<User> users = this.userService.findAll();
+
+        assertThat(users).hasSize(1)
+                .first()
+                .extracting("name").isEqualTo("Leanne Graham");
+
+        server.verify();
+    }
+
+}
+----
