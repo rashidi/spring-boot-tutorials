@@ -1,0 +1,119 @@
+= Spring Data JPA: Keyset Pagination (Scroll API)
+Rashidi Zin <rashidi@zin.my>
+1.0, October 23, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-keyset-pagination
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/keyset/pagination
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jpa/keyset/pagination
+
+Traditionally, pagination in Spring Data JPA was done using `Pageable` and offset-based pagination. However, for large datasets, this approach can suffer from performance issues due to high offset values, as the database must scan and skip all rows preceding the offset.
+
+Keyset pagination, introduced in Spring Data using the Scroll API (`ScrollPosition`), is a highly efficient alternative. It uses the keys (typically indexed columns) of the last retrieved row to query the next batch, resulting in constant time complexity regardless of the page number.
+
+This tutorial demonstrates how to use the Spring Data Scroll API to implement high-performance keyset pagination with Spring Boot and PostgreSQL.
+
+== Entity Definition
+
+We will use an `Article` entity that has attributes such as `author` and `views`. We will implement pagination to scroll through articles sorted by their views.
+
+In link:{source-main}/Article.java[`Article`]:
+
+[source,java]
+----
+@Entity
+@Table(name = "articles")
+public class Article {
+
+    @Id
+    private UUID id;
+    private String title;
+    private String author;
+    private int views;
+
+    // constructors and getters
+}
+----
+
+== Repository Interface
+
+To use keyset pagination, we define a repository method that accepts a `ScrollPosition` parameter and returns a `Window<T>`. A `Window` provides access to the paginated elements and a method to determine the position of elements, enabling scrolling to the next page.
+
+In link:{source-main}/ArticleRepository.java[`ArticleRepository`]:
+
+[source,java]
+----
+interface ArticleRepository extends Repository<Article, UUID> {
+
+    Window<Article> findTop2ByAuthorOrderByViewsDesc(String author, ScrollPosition position);
+
+}
+----
+
+The query restricts the result size (e.g., using `Top2`) to fetch data in manageable chunks.
+
+== Scrolling Through Pages
+
+With keyset pagination, you retrieve the first page by passing an initial `ScrollPosition.keyset()`. To fetch the subsequent page, you extract the `ScrollPosition` of the last item in the current window and pass it to the next query.
+
+We will verify this behavior using an integration test with `@Testcontainers` and PostgreSQL.
+
+In link:{source-test}/ArticleRepositoryTests.java[`ArticleRepositoryTests`]:
+
+[source,java]
+----
+@DataJpaTest(properties = {
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
+@Testcontainers
+class ArticleRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"));
+
+    private static final List<Article> ARTICLES = List.of(
+            new Article(UUID.randomUUID(), "Spring Boot Keyset Pagination", "Rashidi Zin", 1000),
+            new Article(UUID.randomUUID(), "Mastering Spring Data JPA", "Rashidi Zin", 800),
+            new Article(UUID.randomUUID(), "Java 25 Features", "Rashidi Zin", 1200),
+            new Article(UUID.randomUUID(), "Testcontainers with Spring Boot", "Rashidi Zin", 900),
+            new Article(UUID.randomUUID(), "Introduction to Docker", "Jane Doe", 500)
+    );
+
+    @Autowired
+    private ArticleRepository repository;
+
+    @BeforeEach
+    void setUp() {
+        repository.deleteAll();
+        ARTICLES.forEach(repository::save);
+    }
+
+    @Test
+    @DisplayName("Given articles exist When fetching by author using keyset pagination Then should return ordered window")
+    void fetchUsingKeysetPagination() {
+        Window<Article> firstPage = repository.findTop2ByAuthorOrderByViewsDesc("Rashidi Zin", ScrollPosition.keyset());
+
+        assertThat(firstPage).isNotNull();
+        assertThat(firstPage.isEmpty()).isFalse();
+        assertThat(firstPage.toList()).hasSize(2);
+        assertThat(firstPage.toList().get(0).getTitle()).isEqualTo("Java 25 Features"); // Views: 1200
+        assertThat(firstPage.toList().get(1).getTitle()).isEqualTo("Spring Boot Keyset Pagination"); // Views: 1000
+
+        ScrollPosition position = firstPage.positionAt(1); // Position of the last element in the window
+
+        Window<Article> secondPage = repository.findTop2ByAuthorOrderByViewsDesc("Rashidi Zin", position);
+
+        assertThat(secondPage).isNotNull();
+        assertThat(secondPage.isEmpty()).isFalse();
+        assertThat(secondPage.toList()).hasSize(2);
+        assertThat(secondPage.toList().get(0).getTitle()).isEqualTo("Testcontainers with Spring Boot"); // Views: 900
+        assertThat(secondPage.toList().get(1).getTitle()).isEqualTo("Mastering Spring Data JPA"); // Views: 800
+    }
+}
+----
+
+== Conclusion
+
+By using the Spring Data Scroll API with `ScrollPosition.keyset()`, we can eliminate the performance penalties associated with offset-based pagination. This results in stable, fast, and highly scalable data fetching.
