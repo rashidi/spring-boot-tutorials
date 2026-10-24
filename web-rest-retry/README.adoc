@@ -1,18 +1,12 @@
-= Spring Retry with RestClient
+= Spring Web: Retry with RestClient
+:source-highlighter: highlight.js
+Rashidi Zin <rashidi@zin.my>
+1.0, October 24, 2026
+:nofooter:
+:icons: font
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web-rest-retry
 
 This tutorial demonstrates how to use Spring Retry with the modern `RestClient` in a Spring Boot application.
-
-== Prerequisites
-
-* Java 25
-* Spring Boot 4.1.1
-
-== Dependencies
-
-We need the following dependencies:
-* `spring-boot-starter-webmvc` for web capabilities
-* `spring-boot-starter-restclient` to use the RestClient
-* `spring-retry` and `org.aspectj:aspectjweaver` for declarative retry support via AOP
 
 == Implementation Details
 
@@ -20,16 +14,18 @@ First, we define a simple `User` record to represent the response from the JSONP
 
 [source,java]
 ----
-public record User(Long id, String name, String username, String email) {
+record User(Long id, String name, String username, String email) {
 }
 ----
 
-Next, we create the `UserService` and inject a `RestClient.Builder` configured with the base URL. We use the `@Retryable` annotation to specify that the method should be retried up to 3 times with a 1-second backoff when an `HttpServerErrorException` (5xx errors) occurs.
+Next, we create the `UserService` and inject a `RestClient.Builder` configured with the base URL.
+We use the `@EnableResilientMethods` and `@Retryable` annotations to enable retry mechanism. `findAll` is specified to handle `HttpServerErrorException` (5xx errors).
 
 [source,java]
 ----
 @Service
-public class UserService {
+@EnableResilientMethods
+class UserService {
 
     private final RestClient restClient;
 
@@ -37,53 +33,61 @@ public class UserService {
         this.restClient = restClientBuilder.baseUrl("https://jsonplaceholder.typicode.com").build();
     }
 
-    @Retryable(
-        retryFor = { HttpServerErrorException.class },
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 1000)
-    )
-    public List<User> getUsers() {
+    @Retryable(includes = HttpServerErrorException.class)
+    public List<User> findAll() {
         return this.restClient.get()
             .uri("/users")
             .retrieve()
             .body(new ParameterizedTypeReference<>() {});
     }
-}
-----
 
-Finally, we enable the retry mechanism by annotating the main application class with `@EnableRetry`.
-
-[source,java]
-----
-@EnableRetry
-@SpringBootApplication
-public class WebRestRetryApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(WebRestRetryApplication.class, args);
-    }
 }
 ----
 
 == Integration Testing
 
-To verify the retry logic, we use `@SpringBootTest` along with `MockRestServiceServer`.
-By binding the mock server to our `RestClient.Builder` and un-wrapping the AOP proxy in the test setup, we can define a sequence of responses to simulate failures before returning a successful response.
+To verify the retry logic, we use `@RestClientTest` along with `MockRestServiceServer`.
 
 [source,java]
 ----
-// Ensure we are injecting the mocked RestClient into the target object, not the AOP proxy itself
-Object target = userService;
-if (AopUtils.isAopProxy(userService)) {
-    target = ((Advised) userService).getTargetSource().getTarget();
+@RestClientTest(UserService.class)
+class UserServiceTests {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private MockRestServiceServer server;
+
+    @Test
+    @DisplayName("Given the API returns 500 twice When getting users Then it should retry and succeed on the third attempt")
+    void findAllWithFailures() throws Exception {
+        var response = """
+                       [{
+                         "id": 1,
+                         "name": "Leanne Graham",
+                         "username": "Bret",
+                         "email": "Sincere@april.biz"
+                       }]
+                       """;
+
+        server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
+              .andRespond(withServerError());
+
+        server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
+              .andRespond(withServerError());
+
+        server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
+              .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
+
+        List<User> users = this.userService.findAll();
+
+        assertThat(users).hasSize(1)
+                .first()
+                .extracting("name").isEqualTo("Leanne Graham");
+
+        server.verify();
+    }
+
 }
-ReflectionTestUtils.setField(target, "restClient", restClientBuilder.baseUrl("https://jsonplaceholder.typicode.com").build());
-
-server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
-      .andRespond(withServerError());
-
-server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
-      .andRespond(withServerError());
-
-server.expect(requestTo("https://jsonplaceholder.typicode.com/users"))
-      .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
 ----

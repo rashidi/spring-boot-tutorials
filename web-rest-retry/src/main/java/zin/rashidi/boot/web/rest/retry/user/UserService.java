@@ -1,6 +1,7 @@
 package zin.rashidi.boot.web.rest.retry.user;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
@@ -9,6 +10,7 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 
 @Service
+@EnableResilientMethods
 class UserService {
 
     private final RestClient restClient;
@@ -18,7 +20,7 @@ class UserService {
     }
 
     @Retryable(includes = HttpServerErrorException.class)
-    public List<User> getUsers() {
+    public List<User> findAll() {
         return this.restClient.get()
             .uri("/users")
             .retrieve()
