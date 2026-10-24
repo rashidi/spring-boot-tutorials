@@ -8,13 +8,13 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Window;
+import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.List;
-import java.util.UUID;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_CLASS;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,28 +22,24 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @Testcontainers
+@Sql(
+        statements = {
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Spring Boot Keyset Pagination', 'Rashidi Zin', 1000)",
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Mastering Spring Data JPA', 'Rashidi Zin', 800)",
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Java 25 Features', 'Rashidi Zin', 1200)",
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Testcontainers with Spring Boot', 'Rashidi Zin', 900)",
+                "INSERT INTO articles (id, title, author, views) VALUES (gen_random_uuid(), 'Introduction to Docker', 'Jane Doe', 500)"
+        },
+        executionPhase = BEFORE_TEST_CLASS
+)
 class ArticleRepositoryTests {
 
     @Container
     @ServiceConnection
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"));
-
-    private static final List<Article> ARTICLES = List.of(
-            new Article(UUID.randomUUID(), "Spring Boot Keyset Pagination", "Rashidi Zin", 1000),
-            new Article(UUID.randomUUID(), "Mastering Spring Data JPA", "Rashidi Zin", 800),
-            new Article(UUID.randomUUID(), "Java 25 Features", "Rashidi Zin", 1200),
-            new Article(UUID.randomUUID(), "Testcontainers with Spring Boot", "Rashidi Zin", 900),
-            new Article(UUID.randomUUID(), "Introduction to Docker", "Jane Doe", 500)
-    );
+    private static final PostgreSQLContainer postgres = new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
 
     @Autowired
     private ArticleRepository repository;
-
-    @BeforeEach
-    void setUp() {
-        repository.deleteAll();
-        ARTICLES.forEach(repository::save);
-    }
 
     @Test
     @DisplayName("Given articles exist When fetching by author using keyset pagination Then should return ordered window")
