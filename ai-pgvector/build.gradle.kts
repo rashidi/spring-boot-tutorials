@@ -17,7 +17,7 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "2.0.1"
+val springAiVersion = "2.0.2"
 
 dependencies {
     implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
