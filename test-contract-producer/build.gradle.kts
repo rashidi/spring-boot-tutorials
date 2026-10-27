@@ -26,7 +26,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("sh.stubborn:stubborn-contract-dependencies:0.1.3")
+        mavenBom("sh.stubborn:stubborn-contract-dependencies:0.2.0")
     }
 }
 
