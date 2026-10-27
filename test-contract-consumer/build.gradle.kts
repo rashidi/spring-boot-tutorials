@@ -7,7 +7,7 @@ group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
 
 val springBootVersion = org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES.substringAfterLast(":")
-val stubbornContractVersion = "0.1.3"
+val stubbornContractVersion = "0.2.0"
 
 java {
     toolchain {
