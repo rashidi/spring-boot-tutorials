@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "4.1.1"
+    id("org.springframework.boot") version "4.1.2"
 }
 
 group = "zin.rashidi.boot"
