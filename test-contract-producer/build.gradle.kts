@@ -2,7 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("sh.stubborn.contract") version "0.1.3"
+    id("sh.stubborn.contract") version "0.2.0"
 }
 
 group = "zin.rashidi.boot"
@@ -26,7 +26,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("sh.stubborn:stubborn-contract-dependencies:0.1.3")
+        mavenBom("sh.stubborn:stubborn-contract-dependencies:0.2.0")
     }
 }
 
