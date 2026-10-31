@@ -15,6 +15,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -67,7 +68,7 @@ class DocumentControllerTest {
     @WithMockUser(roles = "USER")
     @DisplayName("Given USER role When POST /documents Then returns 403 Forbidden")
     void createDocumentAsUser() {
-        mvc.post().uri("/documents")
+        mvc.post().uri("/documents").with(csrf())
                 .contentType("application/json")
                 .content("""
                         {
@@ -83,7 +84,7 @@ class DocumentControllerTest {
     @WithMockUser(roles = "ADMIN")
     @DisplayName("Given ADMIN role When POST /documents Then returns 201 Created")
     void createDocumentAsAdmin() {
-        mvc.post().uri("/documents")
+        mvc.post().uri("/documents").with(csrf())
                 .contentType("application/json")
                 .content("""
                         {
