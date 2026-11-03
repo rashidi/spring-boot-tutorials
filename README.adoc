@@ -1,6 +1,7 @@
 = Spring Boot Tutorials
 Rashidi Zin <rashidi@zin.my>
 1.0, July 20, 2023: Initial version
+:toc:
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials
@@ -11,8 +12,12 @@ Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Sp
 with source code in individual submodules and can be found on {url-quickref}[GitHub].
 
 image:https://img.shields.io/badge/Java_-25-blue?style=flat-square[Static Badge]
-image:https://img.shields.io/badge/Spring_Boot-4.1.1-blue?style=flat-square&logo=springboot[Spring Boot version]
+image:https://img.shields.io/badge/Spring_Boot-4.1.2-blue?style=flat-square&logo=springboot[Spring Boot version]
 image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/gradle-build.yml?style=flat-square&logo=githubactions&color=blue[Gradle Build]
+image:https://img.shields.io/github/actions/workflow/status/rashidi/spring-boot-tutorials/build-and-publish-antora.yml?style=flat-square&logo=antora&label=Antora&color=blue[Antora Site Status, link={url-docs}]
+image:https://img.shields.io/sonar/coverage/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Coverage]
+image:https://img.shields.io/sonar/tech_debt/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Tech Debt]
+image:https://img.shields.io/sonar/quality_gate/rashidi_spring-boot-tutorials?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&color=blue[Sonar Quality Gate]
 image:https://img.shields.io/github/license/rashidi/spring-boot-tutorials?style=flat-square&color=blue[License - Unlicense]
 
 == Motivation
@@ -35,6 +40,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |Tutorial |Description
 
 |link:actuator-observability-opentelemetry[Spring Observability: OpenTelemetry] |Instrument Spring Boot application with OpenTelemetry to generate traces and export them
+|link:ai-chat-memory[Spring AI: Persistent Chat Memory with PostgreSQL] |Multi-turn conversational chat memory persistence using Spring AI and PostgreSQL Testcontainers
 |link:ai-pgvector[Spring AI: Vector Similarity Search with PgVector] |Semantic vector similarity search using Spring AI and PostgreSQL pgvector with Testcontainers
 |link:ai-redis[Spring AI: Vector Store with Redis] |Semantic vector similarity search using Spring AI and Redis Vector Store with Testcontainers
 |link:architecture-hexagonal[Architecture: Hexagonal Architecture] |Implement Hexagonal Architecture (Ports and Adapters) in Spring Boot
@@ -61,14 +67,14 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:data-rest-composite-id[Spring Data REST: Composite Id] |Expose entities with composite ID using Spring Data REST
 |link:data-rest-validation[Spring Data REST: Custom Validation] |Implement custom validation for Spring Data REST endpoints
 |link:graphql[Spring GraphQL] |Getting started with Spring GraphQL
-|link:jdbc-client[Spring JDBC: JdbcClient] |Perform database operations using the fluent JdbcClient API
+|link:jdbc-client[Spring Data JDBC: JdbcClient] |Fluent API for database operations with `JdbcClient`
 |link:jooq[jOOQ] |Typesafe SQL with jOOQ and Spring Boot
-|link:messaging-kafka[Spring for Apache Kafka] |Implement message publishing and consumption using Spring for Apache Kafka and Testcontainers
-|link:messaging-rabbitmq-dlq[Spring AMQP: Dead Letter Queue with RabbitMQ] |Route messages that fail processing to a Dead Letter Queue using Spring AMQP and RabbitMQ
+|link:messaging-kafka[Spring for Apache Kafka] |Publish and consume events with Spring for Apache Kafka
+|link:messaging-rabbitmq-dlq[Spring AMQP: Dead Letter Queue with RabbitMQ] |Dead letter queue handling with Spring AMQP RabbitMQ
 |link:modulith[Spring Modulith] |Building modular applications with Spring Modulith
 |link:modulith-events[Spring Modulith: Event Publication Registry] |Implement resilient event publication with Spring Modulith and PostgreSQL Outbox
-|link:test-contract-consumer[Stubborn Contract: Consumer] |Implementing contract testing consumer using Stubborn Contract Stub Runner
-|link:test-contract-producer[Stubborn Contract: Producer] |Implementing contract testing producer using Stubborn Contract
+|link:test-contract-consumer[Spring Cloud Contract: Consumer] |Consumer-driven contract testing with Spring Cloud Contract
+|link:test-contract-producer[Spring Cloud Contract: Producer] |Producer contract testing with Spring Cloud Contract
 |link:test-execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
 |link:test-rest-assured[Spring Test: REST Assured Integration] |Integration testing with REST Assured
 |link:test-slice-tests-rest[Spring Test: Slice Tests for REST Application] |Implementing Slice Tests for REST application

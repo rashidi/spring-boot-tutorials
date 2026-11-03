@@ -1,0 +1,159 @@
+= Spring AI: Persistent Chat Memory with PostgreSQL and Testcontainers
+Rashidi Zin <rashidi@zin.my>
+1.0, November 02, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/ai-chat-memory
+:source-main: src/main/java/zin/rashidi/boot/ai/chatmemory
+:source-test: src/test/java/zin/rashidi/boot/ai/chatmemory
+
+Large Language Models (LLMs) are stateless by design: each inference call executes independently without retaining memory of previous interactions. To deliver coherent conversational experiences, earlier dialogue turns must be appended to the prompt context window.
+
+In this tutorial, we will explore how to implement durable conversational state management in https://spring.io/projects/spring-ai[Spring AI] using `JdbcChatMemory` backed by PostgreSQL, and verify message persistence across turns with https://testcontainers.com/[Testcontainers].
+
+== Why Durable Chat Memory?
+
+While in-memory chat storage works for single-instance prototyping, production cloud deployments require:
+
+* *Resilience*: Preserve conversation context across application restarts and rolling deployments.
+* *Horizontal Scalability*: Allow multiple service instances behind a load balancer to access identical conversation threads.
+* *Session Isolation*: Partition message history reliably by `conversationId`.
+
+== Dependencies
+
+We add `spring-ai-starter-model-chat-memory-repository-jdbc` alongside PostgreSQL and Testcontainers in `build.gradle.kts`:
+
+[source,kotlin]
+----
+val springAiVersion = "2.0.2"
+
+dependencies {
+    implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
+
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.ai:spring-ai-starter-model-chat-memory-repository-jdbc")
+
+    runtimeOnly("org.postgresql:postgresql")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+----
+
+== ChatClient Configuration
+
+In link:{source-main}/ChatClientConfiguration.java[`ChatClientConfiguration`], we register `JdbcChatMemory` and attach `MessageChatMemoryAdvisor`:
+
+[source,java]
+----
+@Configuration(proxyBeanMethods = false)
+class ChatClientConfiguration {
+
+    @Bean
+    ChatMemory chatMemory(JdbcTemplate jdbcTemplate) {
+        return JdbcChatMemory.create(JdbcChatMemoryConfig.builder()
+                .withJdbcTemplate(jdbcTemplate)
+                .build());
+    }
+
+    @Bean
+    ChatClient chatClient(ChatClient.Builder builder, ChatMemory chatMemory) {
+        return builder
+                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .build();
+    }
+
+}
+----
+
+== Conversational Assistant Service
+
+link:{source-main}/CustomerSupportAssistant.java[`CustomerSupportAssistant`] uses `ChatClient` with a caller-provided `conversationId`:
+
+[source,java]
+----
+@Service
+public class CustomerSupportAssistant {
+
+    private final ChatClient chatClient;
+
+    public CustomerSupportAssistant(ChatClient chatClient) {
+        this.chatClient = chatClient;
+    }
+
+    public String chat(String conversationId, String userMessage) {
+        return chatClient.prompt()
+                .user(userMessage)
+                .advisors(advisor -> advisor.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))
+                .call()
+                .content();
+    }
+
+}
+----
+
+== Integration Testing with Testcontainers
+
+We verify conversation persistence across multiple turns against an actual PostgreSQL container.
+
+=== Testcontainers Configuration
+
+link:{source-test}/TestcontainersConfiguration.java[`TestcontainersConfiguration`] provisions an ephemeral PostgreSQL instance using `@ServiceConnection`:
+
+[source,java]
+----
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgresContainer() {
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+    }
+
+}
+----
+
+=== Multi-Turn Verification Test
+
+In link:{source-test}/CustomerSupportAssistantIntegrationTests.java[`CustomerSupportAssistantIntegrationTests`], we simulate a multi-turn conversation and assert history persistence:
+
+[source,java]
+----
+@SpringBootTest
+@Import(TestcontainersConfiguration.class)
+class CustomerSupportAssistantIntegrationTests {
+
+    @Autowired
+    private CustomerSupportAssistant assistant;
+
+    @Autowired
+    private ChatMemory chatMemory;
+
+    @Test
+    @DisplayName("When chatting across multiple turns Then conversation history is persisted and isolated")
+    void maintainsConversationHistory() {
+        var conversationId = UUID.randomUUID().toString();
+
+        assistant.chat(conversationId, "My order number is ORD-9921");
+        assistant.chat(conversationId, "Can you confirm my order status?");
+
+        var history = chatMemory.get(conversationId, 10);
+        assertThat(history).hasSize(4); // 2 user turns + 2 assistant responses
+
+        var isolatedConversationId = UUID.randomUUID().toString();
+        var isolatedHistory = chatMemory.get(isolatedConversationId, 10);
+        assertThat(isolatedHistory).isEmpty();
+    }
+
+}
+----
+
+== Summary
+
+Combining `JdbcChatMemory` with Spring AI's advisor architecture enables applications to persist conversational context reliably in PostgreSQL, validated against real containerized infrastructure with Testcontainers.

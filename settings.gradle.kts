@@ -1,6 +1,7 @@
 rootProject.name = "spring-boot-tutorials"
 
 include("actuator-observability-opentelemetry")
+include("ai-chat-memory")
 include("ai-pgvector")
 include("ai-redis")
 include("architecture-hexagonal")
