@@ -7,7 +7,7 @@ plugins {
 group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
 
-val stubbornContractVersion = "0.2.1"
+val stubbornContractVersion = "0.2.2"
 
 java {
     toolchain {
