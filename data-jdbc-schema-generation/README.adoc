@@ -5,8 +5,8 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jdbc-schema-generation
-:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/jdbcscgm
-:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/jdbcscgm
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jdbc/schemageneration
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jdbc/schemageneration
 
 This tutorial demonstrates how to generate a Liquibase changeset from Spring Data JDBC entities. This is useful when you want to automatically create database schema migration scripts based on your domain model.
 
