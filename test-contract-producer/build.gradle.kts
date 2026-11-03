@@ -2,7 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("sh.stubborn.contract") version "0.2.1"
+    id("sh.stubborn.contract") version "0.2.2"
 }
 
 group = "zin.rashidi.boot"
