@@ -153,7 +153,7 @@ We will start by creating link:{url-quickref}/src/test/resources/users.json[user
 [source,json]
 ----
 [{
-  "_class": "zin.rashidi.data.mongodb.tc.dataload.user.User",
+  "_class": "zin.rashidi.boot.data.mongodb.tc.dataload.user.User",
   "name": "Rashidi Zin",
   "username": "rashidi.zin"
 }]
@@ -188,7 +188,7 @@ class UserRepositoryTests {
 }
 ----
 
-Then we will inform link:${url-quickref}/src/test/java/zin/rashidi/data/mongodb/tc/dataload/user/UserRepositoryTests.java[UserRepositoryTests] to include `RepositoryPopulatorTestConfiguration`.
+Then we will inform link:${url-quickref}/src/test/java/zin/rashidi/boot/data/mongodb/tc/dataload/user/UserRepositoryTests.java[UserRepositoryTests] to include `RepositoryPopulatorTestConfiguration`.
 
 [source,java]
 ----
@@ -282,6 +282,6 @@ class UserRepositoryTests {
 }
 ----
 
-With that, data will be loaded into MongoDB before the test execution. Full implementation of link:{url-quickref}/src/test/java/zin/rashidi/data/mongodb/tc/dataload/user/UserRepositoryTests.java[`UserRepositoryTests`]:
+With that, data will be loaded into MongoDB before the test execution. Full implementation of link:{url-quickref}/src/test/java/zin/rashidi/boot/data/mongodb/tc/dataload/user/UserRepositoryTests.java[`UserRepositoryTests`]:
 
 This also allows us to have a single source of truth in managing data for our tests.

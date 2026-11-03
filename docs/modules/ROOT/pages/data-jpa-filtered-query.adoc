@@ -125,7 +125,7 @@ link:{url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/country/Country.java
 only `ACTIVE` users will be returned. However, when `findAll` is triggered for `Country` then all countries will be returned.
 
 Next we will inform Spring Data Jpa to use `JpaCustomBaseRepository` as the base class for all `Entity` by defining `@EnableJpaRepositories`
-in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/jpa/JpaConfiguration.java[`JpaConfiguration`].
+in link:{url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/filteredquery/JpaConfiguration.java[`JpaConfiguration`].
 
 [source,java]
 ----

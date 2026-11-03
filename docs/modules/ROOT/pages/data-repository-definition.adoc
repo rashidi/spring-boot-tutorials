@@ -20,7 +20,7 @@ This is where the `@RepositoryDefinition` annotation comes in. It allows us to d
 
 == Domain Class
 
-We have a simple domain class, link:{url-quickref}/src/main/java/zin/rashidi/data/repositorydefinition/note/Note.java[Note], which is a Java record with three fields: `id`, `title`, and `content`.
+We have a simple domain class, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/repositorydefinition/note/Note.java[Note], which is a Java record with three fields: `id`, `title`, and `content`.
 
 [source,java]
 ----
@@ -32,7 +32,7 @@ The `@Id` annotation from Spring Data marks the `id` field as the primary key.
 
 == Repository Definition
 
-Instead of extending a base repository interface, we use the `@RepositoryDefinition` annotation to define our repository interface, link:{url-quickref}/src/main/java/zin/rashidi/data/repositorydefinition/note/NoteRepository.java[NoteRepository].
+Instead of extending a base repository interface, we use the `@RepositoryDefinition` annotation to define our repository interface, link:{url-quickref}/src/main/java/zin/rashidi/boot/data/repositorydefinition/note/NoteRepository.java[NoteRepository].
 
 [source,java]
 ----
@@ -61,7 +61,7 @@ Using `@RepositoryDefinition` offers several benefits:
 
 == Testing
 
-We can link:{url-quickref}/src/test/java/zin/rashidi/data/repositorydefinition/note/NoteRepositoryTests.java[test our repository] using Spring Boot's testing support with Testcontainers for PostgreSQL.
+We can link:{url-quickref}/src/test/java/zin/rashidi/boot/data/repositorydefinition/note/NoteRepositoryTests.java[test our repository] using Spring Boot's testing support with Testcontainers for PostgreSQL.
 
 [source,java]
 ----
