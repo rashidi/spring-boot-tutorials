@@ -6,8 +6,8 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-rest-composite-id
-:source-main: {url-quickref}/src/main/java/zin/rashidi/datarest/compositeid
-:source-test: {url-quickref}/src/test/java/zin/rashidi/datarest/compositeid
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/rest/compositeid
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/rest/compositeid
 
 Implementing and exposing entities with composite IDs through Spring Data REST.
 

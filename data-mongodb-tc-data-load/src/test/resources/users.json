@@ -1,5 +1,5 @@
 [{
-  "_class": "zin.rashidi.data.mongodb.tc.dataload.user.User",
+  "_class": "zin.rashidi.boot.data.mongodb.tc.dataload.user.User",
   "name": "Rashidi Zin",
   "username": "rashidi.zin"
 }]
