@@ -1,12 +1,12 @@
 plugins {
     java
     id("org.springframework.boot") version "4.1.2"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
 
-val springBootVersion = org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES.substringAfterLast(":")
 val stubbornContractVersion = "0.2.1"
 
 java {
@@ -19,16 +19,8 @@ repositories {
     mavenCentral()
 }
 
-configurations.all {
-    resolutionStrategy {
-        force("org.springframework.boot:spring-boot-http-client:$springBootVersion")
-        force("org.springframework.boot:spring-boot-restclient:$springBootVersion")
-    }
-}
-
 dependencies {
-    implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
-    testImplementation(enforcedPlatform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
+    testImplementation(platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
 
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")

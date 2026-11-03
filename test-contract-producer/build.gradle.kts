@@ -16,23 +16,13 @@ java {
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
-        mavenContent {
-            snapshotsOnly()
-        }
-    }
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("sh.stubborn:stubborn-contract-dependencies:0.2.1")
-    }
 }
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    testImplementation(platform("sh.stubborn:stubborn-contract-dependencies:0.2.2"))
     testImplementation("sh.stubborn:stubborn-contract-starter-verifier")
 }
 
