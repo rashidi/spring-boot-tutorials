@@ -1,0 +1,164 @@
+= Spring AI: Model Tool Calling with WireMock Testcontainers
+Rashidi Zin <rashidi@zin.my>
+1.0, November 07, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/ai-tool-calling
+:source-main: src/main/java/zin/rashidi/boot/ai/toolcalling
+:source-test: src/test/java/zin/rashidi/boot/ai/toolcalling
+
+Large Language Models (LLMs) have a fixed knowledge cutoff and cannot natively interact with external systems. Model Tool Calling (also known as Function Calling) bridges this gap by enabling LLMs to invoke client-side Java methods dynamically to fetch real-time data or trigger side effects.
+
+In this tutorial, we will explore how to implement tool calling in https://spring.io/projects/spring-ai[Spring AI] using the `@Tool` annotation and `ChatClient`, and verify the external API integration with https://testcontainers.com/[Testcontainers] and WireMock.
+
+== Why Tool Calling?
+
+Instead of manually parsing unstructured text for intents, tool calling allows the model to:
+
+* *Detect Required Actions*: Determine whether a user prompt requires external data.
+* *Extract Structured Arguments*: Map user queries into strongly typed method parameters.
+* *Execute Deterministic Logic*: Execute verified backend business logic (e.g. database lookups, currency conversions, external REST calls).
+* *Synthesize Natural Answers*: Blend tool output seamlessly into conversational responses.
+
+== Dependencies
+
+We add `spring-ai-starter-model-openai` alongside `RestClient` and WireMock Testcontainers in `build.gradle.kts`:
+
+[source,kotlin]
+----
+val springAiVersion = "2.0.2"
+
+dependencies {
+    implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
+
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.ai:spring-ai-starter-model-openai")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+----
+
+== External Service Client
+
+We create a client in link:{source-main}/CurrencyRateClient.java[`CurrencyRateClient`] to fetch live exchange rates using `RestClient`:
+
+[source,java]
+----
+@Component
+public class CurrencyRateClient {
+
+    private final RestClient restClient;
+
+    public CurrencyRateClient(RestClient.Builder builder, @Value("${currency.api.url}") String baseUrl) {
+        this.restClient = builder.baseUrl(baseUrl).build();
+    }
+
+    public BigDecimal getRate(String from, String to) {
+        return restClient.get()
+                .uri("/rates?from={from}&to={to}", from, to)
+                .retrieve()
+                .body(CurrencyRateResponse.class)
+                .rate();
+    }
+}
+----
+
+== Defining Tools with @Tool
+
+In link:{source-main}/CurrencyConversionTools.java[`CurrencyConversionTools`], we annotate the conversion method with `@Tool`:
+
+[source,java]
+----
+@Component
+public class CurrencyConversionTools {
+
+    private final CurrencyRateClient rateClient;
+
+    public CurrencyConversionTools(CurrencyRateClient rateClient) {
+        this.rateClient = rateClient;
+    }
+
+    @Tool(description = "Convert an amount from one fiat currency to another using real-time exchange rates")
+    public BigDecimal convertCurrency(
+            @ToolParam(description = "Source 3-letter currency code, e.g. USD") String from,
+            @ToolParam(description = "Target 3-letter currency code, e.g. MYR") String to,
+            @ToolParam(description = "Amount to convert") BigDecimal amount) {
+        BigDecimal rate = rateClient.getRate(from, to);
+        return amount.multiply(rate);
+    }
+}
+----
+
+== ChatClient Configuration
+
+In link:{source-main}/FinancialAssistant.java[`FinancialAssistant`], we attach the tool to `ChatClient`:
+
+[source,java]
+----
+@Service
+public class FinancialAssistant {
+
+    private final ChatClient chatClient;
+
+    public FinancialAssistant(ChatClient.Builder builder, CurrencyConversionTools tools) {
+        this.chatClient = builder
+                .defaultTools(tools)
+                .build();
+    }
+
+    public String ask(String query) {
+        return chatClient.prompt()
+                .user(query)
+                .call()
+                .content();
+    }
+}
+----
+
+== Testing with WireMock Testcontainers
+
+We verify the tool integration against an ephemeral WireMock Testcontainer without mocking frameworks.
+
+=== WireMock Test Configuration
+
+In link:{source-test}/FinancialAssistantIntegrationTests.java[`FinancialAssistantIntegrationTests`], we provision WireMock and stub exchange rate responses:
+
+[source,java]
+----
+@Testcontainers
+@SpringBootTest
+class FinancialAssistantIntegrationTests {
+
+    @Container
+    static GenericContainer<?> wireMock = new GenericContainer<>(DockerImageName.parse("wiremock/wiremock:3.9.1"))
+            .withExposedPorts(8080)
+            .withClasspathResourceMapping("mappings", "/home/wiremock/mappings", BindMode.READ_ONLY);
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("currency.api.url", () -> "http://" + wireMock.getHost() + ":" + wireMock.getMappedPort(8080));
+    }
+
+    @Autowired
+    private FinancialAssistant assistant;
+
+    @Autowired
+    private CurrencyConversionTools tools;
+
+    @Test
+    @DisplayName("When prompt requires currency conversion Then tool invokes external API via WireMock")
+    void convertsCurrencyViaTool() {
+        var result = tools.convertCurrency("USD", "MYR", BigDecimal.valueOf(100));
+
+        assertThat(result).isEqualByComparingTo(BigDecimal.valueOf(472.00));
+    }
+}
+----
+
+== Summary
+
+By pairing Spring AI's `@Tool` with `ChatClient` and containerized WireMock integration tests, applications can expose real-time backend services to models with end-to-end integration verification.
