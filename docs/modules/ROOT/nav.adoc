@@ -8,6 +8,7 @@
 * Spring AI
 ** xref:ai-pgvector.adoc[Spring AI: Vector Similarity Search with PgVector]
 ** xref:ai-redis.adoc[Spring AI: Vector Similarity Search with Redis]
+** xref:ai-tool-calling.adoc[Spring AI: Model Tool Calling with WireMock Testcontainers]
 * Spring Batch
 ** xref:batch-jdbc-bulk-update.adoc[Spring Batch: Bulk Update with JDBC]
 ** xref:batch-rest-repository.adoc[Spring Batch: Working With REST Resources]
