@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/rates",
+    "queryParameters": {
+      "from": {
+        "equalTo": "USD"
+      },
+      "to": {
+        "equalTo": "MYR"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"from\":\"USD\",\"to\":\"MYR\",\"rate\":4.72}"
+  }
+}

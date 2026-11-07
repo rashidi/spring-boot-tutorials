@@ -3,6 +3,7 @@ rootProject.name = "spring-boot-tutorials"
 include("actuator-observability-opentelemetry")
 include("ai-pgvector")
 include("ai-redis")
+include("ai-tool-calling")
 include("architecture-hexagonal")
 include("batch-jdbc-bulk-update")
 include("batch-rest-repository")

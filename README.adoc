@@ -24,7 +24,7 @@ and always will be, my primary goal.
 
 With the help of https://github.com/dependabot[Dependabot], each tutorial is also kept up-to-date with the latest
 dependencies. Currently, we are using Java https://adoptium.net/en-GB/temurin/releases?version=25[Temurin 25]
-with https://plugins.gradle.org/plugin/org.springframework.boot/4.1.2[Spring Boot 4.1.2].
+with https://plugins.gradle.org/plugin/org.springframework.boot/4.1.1[Spring Boot 4.1.1].
 
 == Documentation
 
@@ -37,6 +37,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:actuator-observability-opentelemetry[Spring Observability: OpenTelemetry] |Instrument Spring Boot application with OpenTelemetry to generate traces and export them
 |link:ai-pgvector[Spring AI: Vector Similarity Search with PgVector] |Semantic vector similarity search using Spring AI and PostgreSQL pgvector with Testcontainers
 |link:ai-redis[Spring AI: Vector Store with Redis] |Semantic vector similarity search using Spring AI and Redis Vector Store with Testcontainers
+|link:ai-tool-calling[Spring AI: Model Tool Calling with WireMock] |Model Tool Calling using Spring AI @Tool annotation and WireMock Testcontainers
 |link:architecture-hexagonal[Architecture: Hexagonal Architecture] |Implement Hexagonal Architecture (Ports and Adapters) in Spring Boot
 |link:batch-jdbc-bulk-update[Spring Batch: Bulk Update with JDBC] |Perform a bulk update operation efficiently against a relational database
 |link:batch-rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
