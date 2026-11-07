@@ -14,7 +14,7 @@ public class CurrencyRateClient {
 
     private final RestClient restClient;
 
-    public CurrencyRateClient(RestClient.Builder builder, @Value("${currency.api.url}") String baseUrl) {
+    public CurrencyRateClient(RestClient.Builder builder, @Value("${currency.api.url:http://localhost:8080}") String baseUrl) {
         this.restClient = builder.baseUrl(baseUrl).build();
     }
 
