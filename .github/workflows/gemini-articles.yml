@@ -1,0 +1,113 @@
+name: Write Spring Boot Tutorial (Gemini CLI)
+
+on:
+  schedule:
+    # Runs at 00:00 UTC (08:00 AM MYT) every Saturday; gated below for bi-weekly execution
+    - cron: '0 0 * * 6'
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Optional specific Spring Boot topic (leave blank for automatic trend selection)'
+        required: false
+        type: string
+      force_run:
+        description: 'Bypass bi-weekly week number check'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: '${{ github.workflow }}'
+  cancel-in-progress: false
+
+jobs:
+  generate-tutorial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check Bi-Weekly Cadence
+        id: cadence
+        run: |
+          WEEK_NUM=$(date +%V)
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_run }}" == "true" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "Manual dispatch triggered — bypassing bi-weekly check."
+          elif (( 10#$WEEK_NUM % 2 == 0 )); then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "Even ISO week ($WEEK_NUM) — proceeding with scheduled tutorial generation."
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "Odd ISO week ($WEEK_NUM) — skipping this week to maintain bi-weekly cadence."
+          fi
+
+      - name: Checkout Repository
+        if: steps.cadence.outputs.should_run == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up JDK 25
+        if: steps.cadence.outputs.should_run == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+          cache: 'gradle'
+
+      - name: Configure Git Identity
+        if: steps.cadence.outputs.should_run == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Generate Spring Boot Tutorial with Gemini CLI
+        if: steps.cadence.outputs.should_run == 'true'
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: 'true'
+          GEMINI_API_KEY: '${{ secrets.GEMINI_API_KEY }}'
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          REQUESTED_TOPIC: '${{ inputs.topic }}'
+        with:
+          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
+          gemini_cli_version: 'latest'
+          gemini_model: 'gemini-2.5-pro'
+          gemini_debug: true
+          settings: |-
+            {
+              "model": {
+                "maxSessionTurns": 60
+              }
+            }
+          prompt: |-
+            You are tasked with creating a new, production-quality Spring Boot tutorial module in this repository.
+
+            Follow these exact steps sequentially:
+            1. **Inspect Existing Tutorials (Deduplication):**
+               - Read `settings.gradle.kts` and the root `README.adoc` to review all existing modules and topics covered so far.
+               - Inspect 1-2 existing modules to match the exact Gradle Kotlin DSL conventions (`build.gradle.kts`), package layout (`zin.rashidi.boot.<category>.<topic>`), and AsciiDoc (`README.adoc`) formatting.
+
+            2. **Select Topic:**
+               - Check the `REQUESTED_TOPIC` environment variable. If it is non-empty, implement a tutorial for that topic.
+               - Otherwise, select a high-impact, modern Spring Boot ecosystem topic that is NOT yet covered in this repository. Balance topics across core Spring Boot, Spring Data, Spring Security, Spring Modulith, Spring Batch, Spring Cloud, observability, testing, and Spring AI. Avoid repeating vector store tutorials or duplicating existing concepts.
+
+            3. **Implement with Modulith Architecture & Gherkin Tests:**
+               - Create a new git branch named `feat/<module-or-topic-slug>`.
+               - **Architecture (Modular Monolith / Modulith):** Structure the Java 25 source code under `zin.rashidi.boot.<category>.<topic>` by functional domain modules rather than technical layers (`controller`, `service`, `repository`). Enforce `package-private` visibility on all internal entities, repositories, controllers, and internal services, exposing only public API interfaces, DTOs, or domain events across module boundaries.
+               - **Testing (Gherkin `@DisplayName`):** Write integration tests using JUnit 5 and Testcontainers. Every test class, `@Nested` class, and `@Test` method MUST be annotated with JUnit's `@DisplayName` following strict Gherkin syntax (`Given ..., When ..., Then ...`).
+               - Register the new module in `settings.gradle.kts`.
+               - Execute `./gradlew :<new-module-path>:check` using `run_shell_command` to verify that compilation, integration tests, and JaCoCo coverage checks pass. Fix any build or test failures before proceeding.
+
+            4. **Write Documentation:**
+               - Create the module's `README.adoc` detailing the background, modular monolith structure, implementation steps, configuration, and test execution.
+               - Update the root `README.adoc` to list and link the new tutorial in the appropriate category.
+
+            5. **Commit & Open Pull Request:**
+               - Stage all changes, commit them with a clear conventional commit message, push the branch to `origin`, and run `gh pr create` with a comprehensive summary of the new tutorial.
