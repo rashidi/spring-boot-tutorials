@@ -41,5 +41,6 @@ out/
 ### Antora ###
 build/site/
 
-### Jules ###
-*.log
+# gemini-cli settings and credentials
+.gemini/
+gha-creds-*.json
