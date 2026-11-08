@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
 /**
@@ -59,6 +60,14 @@ class OrderExternalizationIntegrationTests {
 
             assertThat(publicationRepository.findIncompletePublications()).isEmpty();
         });
+    }
+
+    @Test
+    @DisplayName("Given a non-existent order ID, When completeOrder is invoked, Then an IllegalArgumentException is thrown")
+    void completeNonExistentOrderThrowsException() {
+        assertThatThrownBy(() -> orderService.completeOrder(999L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Order not found: 999");
     }
 
 }

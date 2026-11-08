@@ -169,6 +169,14 @@ class OrderExternalizationIntegrationTests {
         });
     }
 
+    @Test
+    @DisplayName("Given a non-existent order ID, When completeOrder is invoked, Then an IllegalArgumentException is thrown")
+    void completeNonExistentOrderThrowsException() {
+        assertThatThrownBy(() -> orderService.completeOrder(999L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Order not found: 999");
+    }
+
 }
 ----
 
