@@ -78,7 +78,7 @@ jobs:
         with:
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           gemini_cli_version: 'latest'
-          gemini_model: 'gemini-2.5-pro'
+          gemini_model: 'models/gemini-4-argon'
           gemini_debug: true
           settings: |-
             {
