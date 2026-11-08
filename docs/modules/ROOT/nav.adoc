@@ -42,6 +42,7 @@
 ** xref:messaging-kafka.adoc[Spring for Apache Kafka]
 ** xref:messaging-rabbitmq-dlq.adoc[Spring AMQP: Dead Letter Queue with RabbitMQ]
 * Spring Modulith
+** xref:modulith-event-externalization.adoc[Spring Modulith: Externalizing Domain Events to Apache Kafka]
 ** xref:modulith-events.adoc[Spring Modulith: Event Publication Registry with PostgreSQL]
 ** xref:modulith.adoc[Spring Modulith: Building Modular Monolithic Applications]
 * Spring Test

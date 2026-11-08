@@ -1,0 +1,190 @@
+= Spring Modulith: Externalizing Domain Events to Apache Kafka
+Rashidi Zin <rashidi@zin.my>
+1.0, November 08, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/modulith-event-externalization
+:source-main: src/main/java/zin/rashidi/boot/modulith/externalization
+:source-test: src/test/java/zin/rashidi/boot/modulith/externalization
+
+In a modular monolith architecture, domain modules communicate in-process via strongly typed domain events. However, external distributed microservices or analytics platforms often require access to these lifecycle changes.
+
+In this tutorial, we explore how to project internal domain events onto Apache Kafka topics using https://spring.io/projects/spring-modulith[Spring Modulith] event externalization (`@Externalized`), adhering to package-private encapsulation and verifying message delivery with https://testcontainers.com/[Testcontainers].
+
+== Architecture & Modular Encapsulation
+
+Following modular monolith principles, the application organizes code by business domain rather than technical layers:
+
+* `zin.rashidi.boot.modulith.externalization.order`: Manages order lifecycles and emits domain events. Internal entities (`Order`) and repositories (`OrderRepository`) remain `package-private`, while `OrderService`, `OrderDto`, and `OrderCompletedEvent` form the public API boundary.
+* `zin.rashidi.boot.modulith.externalization.shipping`: Consumes externalized events from the `orders.completed` Kafka topic via a `package-private` `ShippingKafkaListener` and exposes `ShippingTracker`.
+
+== Dependencies
+
+We add `spring-modulith-starter-core`, `spring-modulith-starter-jdbc`, `spring-modulith-events-api`, `spring-modulith-events-kafka`, and `spring-boot-starter-kafka` in `build.gradle.kts`:
+
+[source,kotlin]
+----
+dependencies {
+    implementation(platform("org.springframework.modulith:spring-modulith-bom:2.1.2"))
+
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-kafka")
+    implementation("org.springframework.modulith:spring-modulith-starter-core")
+    implementation("org.springframework.modulith:spring-modulith-starter-jdbc")
+    implementation("org.springframework.modulith:spring-modulith-events-api")
+    implementation("org.springframework.modulith:spring-modulith-events-kafka")
+    runtimeOnly("org.postgresql:postgresql")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-data-jdbc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-kafka-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.springframework.modulith:spring-modulith-starter-test")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-kafka")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+    testImplementation("org.awaitility:awaitility")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+----
+
+== Externalized Event Contract
+
+We define the public domain event in link:{source-main}/order/OrderCompletedEvent.java[`OrderCompletedEvent`] using `@Externalized` with a SpEL routing expression (`topic::#{#this.orderId()}`):
+
+[source,java]
+----
+@Externalized("orders.completed::#{#this.orderId()}")
+public record OrderCompletedEvent(
+        Long orderId,
+        String customerEmail,
+        BigDecimal totalAmount,
+        Instant timestamp
+) {
+}
+----
+
+== Domain Order Service
+
+In link:{source-main}/order/OrderService.java[`OrderService`], the public facade manages state transitions and publishes the event within a `@Transactional` boundary:
+
+[source,java]
+----
+@Service
+public class OrderService {
+
+    private final OrderRepository repository;
+    private final ApplicationEventPublisher events;
+
+    OrderService(OrderRepository repository, ApplicationEventPublisher events) {
+        this.repository = repository;
+        this.events = events;
+    }
+
+    @Transactional
+    public OrderDto completeOrder(Long orderId) {
+        var order = repository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+
+        order.setStatus(Order.OrderStatus.COMPLETED);
+        var saved = repository.save(order);
+
+        events.publishEvent(new OrderCompletedEvent(
+                saved.getId(),
+                saved.getCustomerEmail(),
+                saved.getTotalAmount(),
+                Instant.now()
+        ));
+
+        return new OrderDto(saved.getId(), saved.getCustomerEmail(), saved.getTotalAmount(), saved.getStatus().name());
+    }
+
+}
+----
+
+== Integration Testing with Testcontainers
+
+We verify both module architecture rules and Kafka externalization using Testcontainers in link:{source-test}/TestcontainersConfiguration.java[`TestcontainersConfiguration`]:
+
+[source,java]
+----
+@TestConfiguration(proxyBeanMethods = false)
+public class TestcontainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgresContainer() {
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"))
+                .withInitScripts("schema.sql");
+    }
+
+    @Bean
+    @ServiceConnection
+    KafkaContainer kafkaContainer() {
+        return new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"));
+    }
+
+}
+----
+
+In link:{source-test}/order/OrderExternalizationIntegrationTests.java[`OrderExternalizationIntegrationTests`], we verify that completing an order persists the event publication and externalizes the payload to the `orders.completed` Kafka topic:
+
+[source,java]
+----
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest
+@DisplayName("Given an order lifecycle, When an order is completed, Then the domain event is externalized to Kafka")
+class OrderExternalizationIntegrationTests {
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private ShippingTracker shippingTracker;
+
+    @Autowired
+    private EventPublicationRepository publicationRepository;
+
+    @Test
+    @DisplayName("Given a created order, When completeOrder is invoked, Then OrderCompletedEvent is published to the orders.completed Kafka topic")
+    void orderCompletedEventIsExternalizedToKafka() {
+        var created = orderService.createOrder("rashidi@zin.my", BigDecimal.valueOf(149.50));
+
+        var completed = orderService.completeOrder(created.id());
+
+        assertThat(completed.status()).isEqualTo("COMPLETED");
+
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            assertThat(shippingTracker.getCompletedOrders())
+                    .hasSize(1)
+                    .first()
+                    .satisfies(event -> {
+                        assertThat(event.orderId()).isEqualTo(created.id());
+                        assertThat(event.customerEmail()).isEqualTo("rashidi@zin.my");
+                        assertThat(event.totalAmount()).isEqualByComparingTo(BigDecimal.valueOf(149.50));
+                    });
+
+            assertThat(publicationRepository.findIncompletePublications()).isEmpty();
+        });
+    }
+
+    @Test
+    @DisplayName("Given a non-existent order ID, When completeOrder is invoked, Then an IllegalArgumentException is thrown")
+    void completeNonExistentOrderThrowsException() {
+        assertThatThrownBy(() -> orderService.completeOrder(999L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Order not found: 999");
+    }
+
+}
+----
+
+== Running the Tests
+
+To execute the build and integration tests:
+
+[source,bash]
+----
+./gradlew :modulith-event-externalization:check
+----
