@@ -47,7 +47,7 @@ jobs:
 
       - name: Checkout Repository
         if: steps.cadence.outputs.should_run == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: true
