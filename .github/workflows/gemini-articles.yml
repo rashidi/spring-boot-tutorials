@@ -91,7 +91,7 @@ jobs:
 
             Follow these exact steps sequentially:
             1. **Inspect Existing Tutorials (Deduplication):**
-               - Read `settings.gradle.kts` and the root `README.adoc` to review all existing modules and topics covered so far.
+               - Read `settings.gradle.kts`, the root `README.adoc`, and `*/*/README.adoc` to review all existing modules and topics covered so far.
                - Inspect 1-2 existing modules to match the exact Gradle Kotlin DSL conventions (`build.gradle.kts`), package layout (`zin.rashidi.boot.<category>.<topic>`), and AsciiDoc (`README.adoc`) formatting.
 
             2. **Select Topic:**
@@ -100,13 +100,15 @@ jobs:
 
             3. **Implement with Modulith Architecture & Gherkin Tests:**
                - Create a new git branch named `feat/<module-or-topic-slug>`.
+               - Create the tutorial under `<category>/<topic>/` (for example `data/jpa-audit/` or `web/rest-client/`), with a `build.gradle.kts` applying `id("zin.rashidi.tutorial-conventions")`. Shared Java 25, Spring Boot, dependency management, repositories, JUnit Platform, and JaCoCo settings come from `build-logic/`; keep only tutorial-specific configuration in the module build.
                - **Architecture (Modular Monolith / Modulith):** Structure the Java 25 source code under `zin.rashidi.boot.<category>.<topic>` by functional domain modules rather than technical layers (`controller`, `service`, `repository`). Enforce `package-private` visibility on all internal entities, repositories, controllers, and internal services, exposing only public API interfaces, DTOs, or domain events across module boundaries.
                - **Testing (Gherkin `@DisplayName`):** Write integration tests using JUnit 5 and Testcontainers. Every test class, `@Nested` class, and `@Test` method MUST be annotated with JUnit's `@DisplayName` following strict Gherkin syntax (`Given ..., When ..., Then ...`).
-               - Register the new module in `settings.gradle.kts`.
-               - Execute `./gradlew :<new-module-path>:check` using `run_shell_command` to verify that compilation, integration tests, and JaCoCo coverage checks pass. Fix any build or test failures before proceeding.
+               - The root `settings.gradle.kts` automatically discovers `*/*/build.gradle.kts`; do not add module-local settings or Gradle wrappers.
+               - Execute `./gradlew :<category>:<topic>:check` and then `./gradlew check` using `run_shell_command` to verify compilation, integration tests, and aggregate 80% instruction coverage. Fix any build or test failures before proceeding.
 
             4. **Write Documentation:**
                - Create the module's `README.adoc` detailing the background, modular monolith structure, implementation steps, configuration, and test execution.
+               - Set its `:url-quickref:` to `https://github.com/rashidi/spring-boot-tutorials/tree/master/<category>/<topic>` and document root-wrapper task paths such as `./gradlew :<category>:<topic>:test`.
                - Update the root `README.adoc` to list and link the new tutorial in the appropriate category.
 
             5. **Commit & Open Pull Request:**

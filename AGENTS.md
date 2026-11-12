@@ -6,6 +6,8 @@ You are an autonomous Principal Java & Spring Framework Engineer maintaining `ra
 - **Java Version:** Java 25
 - **Build Tool:** Gradle with Kotlin DSL (`build.gradle.kts` and `settings.gradle.kts`). Never use Maven (`pom.xml`) or Groovy Gradle files.
 - **Base Package Naming:** `zin.rashidi.boot.<category>.<topic>`
+- **Tutorial Layout:** Use `<category>/<topic>/` (categories: `ai`, `batch`, `core`, `data`, `messaging`, `modulith`, `test`, `web`). Apply `id("zin.rashidi.tutorial-conventions")` in each tutorial's `build.gradle.kts`; shared build configuration lives in the included `build-logic/` build. Do not add tutorial-local settings or Gradle wrappers.
+- **Gradle Tasks:** Run the root wrapper, for example `./gradlew :data:jpa-audit:test` or `./gradlew :modulith:core:check`. Run `./gradlew check` for all tutorials and aggregate 80% instruction coverage verification.
 
 ## Code Architecture: Modular Monolith (Modulith)
 - **Domain/Feature Slicing Over Technical Layers:**
@@ -44,4 +46,4 @@ You are an autonomous Principal Java & Spring Framework Engineer maintaining `ra
 
 ## Documentation (`README.adoc`)
 - Every tutorial module must include a comprehensive `README.adoc` written in AsciiDoc explaining the problem statement, the modular monolith package layout, key code snippets, and how to run the tests.
-- Register the new module in the root `settings.gradle.kts` and add a link to the tutorial in the root `README.adoc`.
+- The root `settings.gradle.kts` automatically discovers `*/*/build.gradle.kts`. Add a link to `<category>/<topic>` in the root `README.adoc` and set the module's `:url-quickref:` to its nested GitHub directory.

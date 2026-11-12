@@ -1,0 +1,16 @@
+plugins {
+    id("zin.rashidi.tutorial-conventions")
+}
+
+version = "0.0.1-SNAPSHOT"
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-mongodb")
+    testImplementation("io.rest-assured:rest-assured:6.3.0")
+    testImplementation("org.apache.httpcomponents.client5:httpclient5")
+}

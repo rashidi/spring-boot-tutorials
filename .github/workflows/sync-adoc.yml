@@ -40,13 +40,47 @@ jobs:
 
           declare -A CATEGORIES
 
-          # Find all submodule README.adoc files (ignores root master/README.adoc)
+          # Find two-level tutorial READMEs and retain unique Antora page names
           while IFS= read -r file; do
-            MODULE_NAME=$(basename "$(dirname "$file")")
+            MODULE_PATH=${file#./}
+            MODULE_PATH=${MODULE_PATH%/README.adoc}
+            CATEGORY_DIR="${MODULE_PATH%%/*}"
+            case "$MODULE_PATH" in
+              core/*) MODULE_NAME=${MODULE_PATH#core/} ;;
+              modulith/core) MODULE_NAME=modulith ;;
+              *) MODULE_NAME=${MODULE_PATH//\//-} ;;
+            esac
             DEST_DOC="${DEST_DIR}/${MODULE_NAME}.adoc"
 
-            # Copy file and normalize CRLF -> LF
-            tr -d '\r' < "$file" > "$DEST_DOC"
+            # Normalize line endings and relative tutorial links for flattened Antora pages
+            python3 - "$file" "$DEST_DOC" "$CATEGORY_DIR" <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          source, destination, category = sys.argv[1:]
+
+          def tutorial_xref(match):
+              target_category = match["category"] or category
+              topic = match["topic"]
+              if not Path(target_category, topic, "README.adoc").is_file():
+                  return match[0]
+              if target_category == "core":
+                  page = topic
+              elif (target_category, topic) == ("modulith", "core"):
+                  page = "modulith"
+              else:
+                  page = f"{target_category}-{topic}"
+              return f"xref:{page}.adoc["
+
+          content = Path(source).read_text(encoding="utf-8").replace("\r", "")
+          content = re.sub(
+              r"link:\.\./(?:\.\./(?P<category>[\w-]+)/)?(?P<topic>[\w-]+)/?\[",
+              tutorial_xref,
+              content,
+          )
+          Path(destination).write_text(content, encoding="utf-8")
+          PY
 
             # Extract title and strip any stray carriage returns
             TITLE=$(grep -m 1 "^= " "$DEST_DOC" | sed 's/^= //' || true)
@@ -103,7 +137,7 @@ jobs:
             esac
 
             CATEGORIES["$CATEGORY_TITLE"]+="** xref:${MODULE_NAME}.adoc[${TITLE}]"$'\n'
-          done < <(find . -mindepth 2 -maxdepth 2 -name "README.adoc" | sort)
+          done < <(find . -mindepth 3 -maxdepth 3 -type f -name "README.adoc" ! -path "./build-logic/*" ! -path "./.gradle/*" ! -path "./build/*" | sort)
 
           # Write clean nav.adoc starting with Home
           printf "* xref:index.adoc[Home]\n" > "$NAV_FILE"

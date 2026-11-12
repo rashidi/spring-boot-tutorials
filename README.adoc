@@ -26,6 +26,72 @@ With the help of https://github.com/dependabot[Dependabot], each tutorial is als
 dependencies. Currently, we are using Java https://adoptium.net/en-GB/temurin/releases?version=25[Temurin 25]
 with https://plugins.gradle.org/plugin/org.springframework.boot/4.1.2[Spring Boot 4.1.2].
 
+== Repository Layout and Build
+
+Tutorials live under `<category>/<topic>/`, grouped into `ai`, `batch`, `core`, `data`, `messaging`,
+`modulith`, `test`, and `web`. For example, `data/jpa-audit` is Gradle project `:data:jpa-audit`,
+and `modulith/core` is `:modulith:core`.
+
+The included `build-logic` build provides `zin.rashidi.tutorial-conventions`, which configures Java 25,
+Spring Boot, dependency management, Maven Central, JUnit Platform, and JaCoCo. Tutorial builds apply
+this plugin and declare only their own dependencies and custom configuration.
+The root settings automatically discovers `*/*/build.gradle.kts`; new tutorials need no local settings or wrapper.
+
+With Java 25 and Docker available, run the root Gradle wrapper:
+
+[source,bash]
+----
+./gradlew :data:jpa-audit:test
+./gradlew :test:contract-consumer:check
+./gradlew check
+----
+
+The root `check` runs all tutorial tests, generates `testCodeCoverageReport`, and enforces
+80% minimum aggregate instruction coverage via `testCodeCoverageVerification`.
+The aggregate HTML report is at `build/reports/jacoco/testCodeCoverageReport/html/index.html`.
+
+=== Local Development with Sparse Checkout
+
+Use Git sparse checkout to keep only the tutorials or categories you are working on in your local
+working tree. From the repository root in an existing clone, enable cone mode and select a tutorial
+alongside the Gradle wrapper support files and shared build logic:
+
+[source,bash]
+----
+git sparse-checkout init --cone
+git sparse-checkout set gradle build-logic data/jpa-audit
+----
+
+Cone mode also retains root files such as `gradlew`, `settings.gradle.kts`, and `build.gradle.kts`.
+Keep `gradle` and `build-logic` selected so the root wrapper and convention plugin remain available.
+
+Add another tutorial or an entire category without replacing the current selection:
+
+[source,bash]
+----
+git sparse-checkout add ai/pgvector
+git sparse-checkout add web
+----
+
+Because `settings.gradle.kts` dynamically discovers `*/*/build.gradle.kts`, Gradle and the IDE
+automatically configure only the checked-out tutorial modules. Reload the Gradle project in your IDE
+after changing the selection. Run targeted tasks from the root as usual, for example
+`./gradlew :data:jpa-audit:test`; root coverage aggregation also uses only the available tutorials.
+
+The contract consumer depends on the producer's stubs, so include both when working on it:
+
+[source,bash]
+----
+git sparse-checkout add test/contract-consumer test/contract-producer
+----
+
+Restore the full working tree when you need all tutorials:
+
+[source,bash]
+----
+git sparse-checkout disable
+----
+
 == Documentation
 
 All tutorials are documented in AsciiDoc format and published as an https://antora.org[Antora] site at
@@ -34,49 +100,49 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |===
 |Tutorial |Description
 
-|link:actuator-observability-opentelemetry[Spring Observability: OpenTelemetry] |Instrument Spring Boot application with OpenTelemetry to generate traces and export them
-|link:ai-pgvector[Spring AI: Vector Similarity Search with PgVector] |Semantic vector similarity search using Spring AI and PostgreSQL pgvector with Testcontainers
-|link:ai-redis[Spring AI: Vector Store with Redis] |Semantic vector similarity search using Spring AI and Redis Vector Store with Testcontainers
-|link:ai-tool-calling[Spring AI: Model Tool Calling with WireMock] |Model Tool Calling using Spring AI @Tool annotation and WireMock Testcontainers
-|link:architecture-hexagonal[Architecture: Hexagonal Architecture] |Implement Hexagonal Architecture (Ports and Adapters) in Spring Boot
-|link:batch-jdbc-bulk-update[Spring Batch: Bulk Update with JDBC] |Perform a bulk update operation efficiently against a relational database
-|link:batch-rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
-|link:batch-skip-step[Spring Batch: Skip Specific Data] |Skip processing specific data based on business logic in Spring Batch
-|link:cloud-jdbc-env-repo[Spring Cloud Environment Repository] |Store environment properties in MySQL database with Spring Cloud Environment Repository
-|link:data-domain-events[Spring Data Domain Events] |Publish Domain Events with Spring Data
-|link:data-envers-audit[Spring Data Envers Audit] |Enable with Entity Revisions using Spring Data Envers
-|link:data-jdbc-audit[Spring Data JDBC Audit] |Enable Audit with Spring Data JDBC
-|link:data-jdbc-optimistic-locking[Spring Data JDBC: Optimistic Locking] |Implement Optimistic Locking with Spring Data JDBC using @Version
-|link:data-jdbc-schema-generation[Spring Data JDBC: Generate Liquibase Changeset] |Generate Liquibase changeset with Spring Data JDBC
-|link:data-jpa-audit[Spring Data JPA Audit] |Enable Audit with Spring Data JPA
-|link:data-jpa-event[Spring Data JPA: Event Driven] |Implement `Entity` validation at `Repository` level through `EventListeners`
-|link:data-jpa-filtered-query[Spring Data JPA: Global Filtered Query] |Implement global filtered query with Spring Data JPA by defining `repositoryBaseClass`
-|link:data-jpa-hibernate-cache[Spring Data JPA: Hibernate Second Level Caching with EhCache] |Implement Hibernate second level caching using Spring Data JPA and EhCache to improve application performance
-|link:data-jpa-keyset-pagination[Spring Data JPA: Keyset Pagination (Scroll API)] |Implement high-performance keyset pagination with Spring Data JPA using Scroll API
-|link:data-mongodb-audit[Spring Data MongoDB Audit] |Enable Audit with Spring Data MongoDB
-|link:data-mongodb-full-text-search[Spring Data MongoDB: Full Text Search] |Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with Spring Data MongoDB
-|link:data-mongodb-tc-data-load[Spring Data MongoDB: Data Load with Testcontainers] |Load data dynamically with Testcontainers for Spring Data MongoDB
-|link:data-mongodb-transactional[Spring Data MongoDB: Transactional] |Enable `@Transactional` support for Spring Data MongoDB
-|link:data-redis-cache[Spring Data Redis: Implementing Caching with Spring Data Redis] |Implement caching with Spring Data Redis to improve application performance and compare with Hibernate second level caching
-|link:data-repository-definition[Spring Data Repository Definition] |Customize Spring Data Repository with `@RepositoryDefinition`
-|link:data-rest-composite-id[Spring Data REST: Composite Id] |Expose entities with composite ID using Spring Data REST
-|link:data-rest-validation[Spring Data REST: Custom Validation] |Implement custom validation for Spring Data REST endpoints
-|link:graphql[Spring GraphQL] |Getting started with Spring GraphQL
-|link:jdbc-client[Spring JDBC: JdbcClient] |Perform database operations using the fluent JdbcClient API
-|link:jooq[jOOQ] |Typesafe SQL with jOOQ and Spring Boot
-|link:messaging-kafka[Spring for Apache Kafka] |Implement message publishing and consumption using Spring for Apache Kafka and Testcontainers
-|link:messaging-rabbitmq-dlq[Spring AMQP: Dead Letter Queue with RabbitMQ] |Route messages that fail processing to a Dead Letter Queue using Spring AMQP and RabbitMQ
-|link:modulith[Spring Modulith] |Building modular applications with Spring Modulith
-|link:modulith-event-externalization[Spring Modulith: Event Externalization with Kafka] |Externalize domain events to Apache Kafka topics using Spring Modulith @Externalized and Testcontainers
-|link:modulith-events[Spring Modulith: Event Publication Registry] |Implement resilient event publication with Spring Modulith and PostgreSQL Outbox
-|link:test-contract-consumer[Stubborn Contract: Consumer] |Implementing contract testing consumer using Stubborn Contract Stub Runner
-|link:test-contract-producer[Stubborn Contract: Producer] |Implementing contract testing producer using Stubborn Contract
-|link:test-execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
-|link:test-rest-assured[Spring Test: REST Assured Integration] |Integration testing with REST Assured
-|link:test-slice-tests-rest[Spring Test: Slice Tests for REST Application] |Implementing Slice Tests for REST application
-|link:web-problem-details[Spring Web: Problem Details for HTTP APIs] |Return Problem Details for HTTP APIs (RFC 7807) in Spring Boot
-|link:web-rest-client[Spring Web: Synchronous REST Clients] |Implement synchronous REST client using `RestClient`, `WebClient`, and `RestTemplate`
-|link:web-rest-retry[Spring Web: Retry with RestClient] |Implement retry mechanism with `RestClient`
-|link:web-thymeleaf-xss[Spring Web: Cross-Site Scripting (XSS) with Thymeleaf] |Prevent Cross-Site Scripting (XSS) with Thymeleaf
-|link:web-virtual-threads[Spring Web: Virtual Threads] |Enable Virtual Threads in Spring Boot to handle high concurrency with blocking I/O
+|link:core/actuator-observability-opentelemetry[Spring Observability: OpenTelemetry] |Instrument Spring Boot application with OpenTelemetry to generate traces and export them
+|link:ai/pgvector[Spring AI: Vector Similarity Search with PgVector] |Semantic vector similarity search using Spring AI and PostgreSQL pgvector with Testcontainers
+|link:ai/redis[Spring AI: Vector Store with Redis] |Semantic vector similarity search using Spring AI and Redis Vector Store with Testcontainers
+|link:ai/tool-calling[Spring AI: Model Tool Calling with WireMock] |Model Tool Calling using Spring AI @Tool annotation and WireMock Testcontainers
+|link:core/architecture-hexagonal[Architecture: Hexagonal Architecture] |Implement Hexagonal Architecture (Ports and Adapters) in Spring Boot
+|link:batch/jdbc-bulk-update[Spring Batch: Bulk Update with JDBC] |Perform a bulk update operation efficiently against a relational database
+|link:batch/rest-repository[Spring Batch: Batch Job With REST API source] |Spring Batch job that reads information from REST API
+|link:batch/skip-step[Spring Batch: Skip Specific Data] |Skip processing specific data based on business logic in Spring Batch
+|link:core/cloud-jdbc-env-repo[Spring Cloud Environment Repository] |Store environment properties in MySQL database with Spring Cloud Environment Repository
+|link:data/domain-events[Spring Data Domain Events] |Publish Domain Events with Spring Data
+|link:data/envers-audit[Spring Data Envers Audit] |Enable with Entity Revisions using Spring Data Envers
+|link:data/jdbc-audit[Spring Data JDBC Audit] |Enable Audit with Spring Data JDBC
+|link:data/jdbc-optimistic-locking[Spring Data JDBC: Optimistic Locking] |Implement Optimistic Locking with Spring Data JDBC using @Version
+|link:data/jdbc-schema-generation[Spring Data JDBC: Generate Liquibase Changeset] |Generate Liquibase changeset with Spring Data JDBC
+|link:data/jpa-audit[Spring Data JPA Audit] |Enable Audit with Spring Data JPA
+|link:data/jpa-event[Spring Data JPA: Event Driven] |Implement `Entity` validation at `Repository` level through `EventListeners`
+|link:data/jpa-filtered-query[Spring Data JPA: Global Filtered Query] |Implement global filtered query with Spring Data JPA by defining `repositoryBaseClass`
+|link:data/jpa-hibernate-cache[Spring Data JPA: Hibernate Second Level Caching with EhCache] |Implement Hibernate second level caching using Spring Data JPA and EhCache to improve application performance
+|link:data/jpa-keyset-pagination[Spring Data JPA: Keyset Pagination (Scroll API)] |Implement high-performance keyset pagination with Spring Data JPA using Scroll API
+|link:data/mongodb-audit[Spring Data MongoDB Audit] |Enable Audit with Spring Data MongoDB
+|link:data/mongodb-full-text-search[Spring Data MongoDB: Full Text Search] |Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with Spring Data MongoDB
+|link:data/mongodb-tc-data-load[Spring Data MongoDB: Data Load with Testcontainers] |Load data dynamically with Testcontainers for Spring Data MongoDB
+|link:data/mongodb-transactional[Spring Data MongoDB: Transactional] |Enable `@Transactional` support for Spring Data MongoDB
+|link:data/redis-cache[Spring Data Redis: Implementing Caching with Spring Data Redis] |Implement caching with Spring Data Redis to improve application performance and compare with Hibernate second level caching
+|link:data/repository-definition[Spring Data Repository Definition] |Customize Spring Data Repository with `@RepositoryDefinition`
+|link:data/rest-composite-id[Spring Data REST: Composite Id] |Expose entities with composite ID using Spring Data REST
+|link:data/rest-validation[Spring Data REST: Custom Validation] |Implement custom validation for Spring Data REST endpoints
+|link:core/graphql[Spring GraphQL] |Getting started with Spring GraphQL
+|link:core/jdbc-client[Spring JDBC: JdbcClient] |Perform database operations using the fluent JdbcClient API
+|link:core/jooq[jOOQ] |Typesafe SQL with jOOQ and Spring Boot
+|link:messaging/kafka[Spring for Apache Kafka] |Implement message publishing and consumption using Spring for Apache Kafka and Testcontainers
+|link:messaging/rabbitmq-dlq[Spring AMQP: Dead Letter Queue with RabbitMQ] |Route messages that fail processing to a Dead Letter Queue using Spring AMQP and RabbitMQ
+|link:modulith/core[Spring Modulith] |Building modular applications with Spring Modulith
+|link:modulith/event-externalization[Spring Modulith: Event Externalization with Kafka] |Externalize domain events to Apache Kafka topics using Spring Modulith @Externalized and Testcontainers
+|link:modulith/events[Spring Modulith: Event Publication Registry] |Implement resilient event publication with Spring Modulith and PostgreSQL Outbox
+|link:test/contract-consumer[Stubborn Contract: Consumer] |Implementing contract testing consumer using Stubborn Contract Stub Runner
+|link:test/contract-producer[Stubborn Contract: Producer] |Implementing contract testing producer using Stubborn Contract
+|link:test/execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
+|link:test/rest-assured[Spring Test: REST Assured Integration] |Integration testing with REST Assured
+|link:test/slice-tests-rest[Spring Test: Slice Tests for REST Application] |Implementing Slice Tests for REST application
+|link:web/problem-details[Spring Web: Problem Details for HTTP APIs] |Return Problem Details for HTTP APIs (RFC 7807) in Spring Boot
+|link:web/rest-client[Spring Web: Synchronous REST Clients] |Implement synchronous REST client using `RestClient`, `WebClient`, and `RestTemplate`
+|link:web/rest-retry[Spring Web: Retry with RestClient] |Implement retry mechanism with `RestClient`
+|link:web/thymeleaf-xss[Spring Web: Cross-Site Scripting (XSS) with Thymeleaf] |Prevent Cross-Site Scripting (XSS) with Thymeleaf
+|link:web/virtual-threads[Spring Web: Virtual Threads] |Enable Virtual Threads in Spring Boot to handle high concurrency with blocking I/O
 |===
