@@ -40,9 +40,15 @@ jobs:
 
           declare -A CATEGORIES
 
-          # Find all submodule README.adoc files (ignores root master/README.adoc)
+          # Find two-level tutorial READMEs and retain unique Antora page names
           while IFS= read -r file; do
-            MODULE_NAME=$(basename "$(dirname "$file")")
+            MODULE_PATH=${file#./}
+            MODULE_PATH=${MODULE_PATH%/README.adoc}
+            case "$MODULE_PATH" in
+              core/*) MODULE_NAME=${MODULE_PATH#core/} ;;
+              modulith/core) MODULE_NAME=modulith ;;
+              *) MODULE_NAME=${MODULE_PATH//\//-} ;;
+            esac
             DEST_DOC="${DEST_DIR}/${MODULE_NAME}.adoc"
 
             # Copy file and normalize CRLF -> LF
@@ -103,7 +109,7 @@ jobs:
             esac
 
             CATEGORIES["$CATEGORY_TITLE"]+="** xref:${MODULE_NAME}.adoc[${TITLE}]"$'\n'
-          done < <(find . -mindepth 2 -maxdepth 2 -name "README.adoc" | sort)
+          done < <(find . -mindepth 3 -maxdepth 3 -type f -name "README.adoc" ! -path "./build-logic/*" ! -path "./.gradle/*" ! -path "./build/*" | sort)
 
           # Write clean nav.adoc starting with Home
           printf "* xref:index.adoc[Home]\n" > "$NAV_FILE"

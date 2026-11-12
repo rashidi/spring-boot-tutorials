@@ -1,0 +1,22 @@
+plugins {
+    id("zin.rashidi.tutorial-conventions")
+}
+
+version = "0.0.1-SNAPSHOT"
+
+val springAiVersion = "2.0.2"
+
+dependencies {
+    implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
+
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.ai:spring-ai-starter-vector-store-redis")
+    implementation("redis.clients:jedis")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.springframework.ai:spring-ai-spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("com.redis:testcontainers-redis")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}

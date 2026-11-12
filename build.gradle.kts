@@ -23,19 +23,8 @@ repositories {
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
 
-    subprojects.forEach { p ->
-        implementation(project(":${p.name}"))
-    }
-}
-
-subprojects {
-    apply(plugin = "jacoco")
-
-    // Only configure the test task if it exists
-    tasks.matching { it.name == "test" }.configureEach {
-        if (this is Test) {
-            finalizedBy("jacocoTestReport")
-        }
+    subprojects.filter { it.buildFile.isFile }.forEach { p ->
+        implementation(project(p.path))
     }
 }
 
@@ -51,7 +40,7 @@ tasks.named<JacocoReport>("testCodeCoverageReport") {
         "**/*__Autowiring*.class",
         "**/*__ApplicationContextInitializer*.class",
 
-        // jOOQ generated catalog, schema, keys, and table records in :jooq
+        // jOOQ generated catalog, schema, keys, and table records in :core:jooq
         "zin/rashidi/boot/jooq/DefaultCatalog.class",
         "zin/rashidi/boot/jooq/DefaultSchema.class",
         "zin/rashidi/boot/jooq/Indexes.class",

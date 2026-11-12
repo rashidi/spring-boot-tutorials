@@ -6,6 +6,7 @@ on:
     paths:
       - 'gradle/wrapper/**'
       - '**/*.gradle.kts'
+      - 'build-logic/**'
       - '**/*.java'
       - '**/gradle-build.yml'
       - 'gradle.properties'
@@ -15,6 +16,7 @@ on:
     paths:
       - 'gradle/wrapper/**'
       - '**/*.gradle.kts'
+      - 'build-logic/**'
       - '**/*.java'
       - '**/gradle-build.yml'
       - 'gradle.properties'
@@ -38,6 +40,7 @@ jobs:
             build:
               - 'gradle/wrapper/**'
               - '**/*.gradle.kts'
+              - 'build-logic/**'
               - '**/gradle-build.yml'
               - 'gradle.properties'
             gradle-root:
