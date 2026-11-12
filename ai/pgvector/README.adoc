@@ -5,8 +5,8 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/ai/pgvector
-:source-main: src/main/java/zin/rashidi/boot/ai/pgvector
-:source-test: src/test/java/zin/rashidi/boot/ai/pgvector
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/ai/pgvector
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/ai/pgvector
 
 Traditional keyword searches rely on lexical matching and token stemming, which often fall short when queries express intent through synonyms or contextual descriptions rather than exact terms.
 

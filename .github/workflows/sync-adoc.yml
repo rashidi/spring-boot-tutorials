@@ -6,14 +6,13 @@ on:
       - master
     paths:
       - '**/README.adoc'
-      - '**/sync-adoc.yml'
-
-permissions:
-  contents: write
+      - '.github/workflows/sync-adoc.yml'
 
 jobs:
   sync-to-antora:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Master Branch
         uses: actions/checkout@v7
@@ -52,7 +51,7 @@ jobs:
             esac
             DEST_DOC="${DEST_DIR}/${MODULE_NAME}.adoc"
 
-            # Normalize line endings and relative tutorial links for flattened Antora pages
+            # Normalize line endings and relative tutorial/source links for flattened Antora pages
             python3 - "$file" "$DEST_DOC" "$CATEGORY_DIR" <<'PY'
           import re
           import sys
@@ -74,6 +73,17 @@ jobs:
               return f"xref:{page}.adoc["
 
           content = Path(source).read_text(encoding="utf-8").replace("\r", "")
+          content = re.sub(
+              r"^(:source-(?:main|test):\s*)(?=src/)",
+              r"\1{url-quickref}/",
+              content,
+              flags=re.MULTILINE,
+          )
+          content = re.sub(
+              r"link:(?=src/)",
+              r"link:{url-quickref}/",
+              content,
+          )
           content = re.sub(
               r"link:\.\./(?:\.\./(?P<category>[\w-]+)/)?(?P<topic>[\w-]+)/?\[",
               tutorial_xref,
@@ -161,7 +171,7 @@ jobs:
         run: |
           cd antora
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "github-actions[bot]@users.noreply.com"
 
           # Stage the specific documentation paths
           git add docs/modules/ROOT/pages/*.adoc

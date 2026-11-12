@@ -10,7 +10,6 @@ Rashidi Zin <rashidi@zin.my>
 
 While JPA is commonly used in Java applications, it is not the only option. In this tutorial, we will look at how to use jOOQ with Spring Boot and Gradle.
 
-
 == Background
 
 https://www.jooq.org/[jOOQ] is a Java library that allows for fluent SQL query construction and typesafe database querying. It supports a
@@ -24,7 +23,7 @@ https://github.com/etiennestuder/gradle-jooq-plugin[Gradle jOOQ Plugin].
 
 == Gradle Configuration
 
-In order to enable jOOQ code generation with gradle we will need to include `nu.studer.jooq` plugin in link:{url-quickref}/build.gradle[build.gradle].
+In order to enable jOOQ code generation with gradle we will need to include `nu.studer.jooq` plugin in link:{url-quickref}/build.gradle.kts[build.gradle.kts].
 
 [source, groovy]
 ----
@@ -92,7 +91,7 @@ interface UserRepository {
 ----
 
 As you can see, link:{url-quickref}/src/main/java/zin/rashidi/boot/jooq/user/UserRepository.java[UserRepository] implementation is similar
-to standard Spring Data's implementation. We will implement this interface using jOOQ in link:src/main/java/zin/rashidi/boot/jooq/user/UserJooqRepository.java[UserJooqRepository].
+to standard Spring Data's implementation. We will implement this interface using jOOQ in link:{url-quickref}/src/main/java/zin/rashidi/boot/jooq/user/UserJooqRepository.java[UserJooqRepository].
 
 [source, java]
 ----
