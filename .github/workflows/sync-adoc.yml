@@ -6,13 +6,14 @@ on:
       - master
     paths:
       - '**/README.adoc'
-      - '.github/workflows/sync-adoc.yml'
+      - '**/sync-adoc.yml'
+
+permissions:
+  contents: write
 
 jobs:
   sync-to-antora:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout Master Branch
         uses: actions/checkout@v7
@@ -171,7 +172,7 @@ jobs:
         run: |
           cd antora
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Stage the specific documentation paths
           git add docs/modules/ROOT/pages/*.adoc
@@ -179,7 +180,7 @@ jobs:
 
           # Commit only if there are actual changes
           if git diff --staged --quiet; then
-            echo "No README changes to sync."
+            echo "No README changes to sync.\n"
           else
             git commit -m "docs: sync updated README.adoc files from master"
             git push origin antora
