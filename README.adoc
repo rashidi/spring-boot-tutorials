@@ -50,6 +50,48 @@ The root `check` runs all tutorial tests, generates `testCodeCoverageReport`, an
 80% minimum aggregate instruction coverage via `testCodeCoverageVerification`.
 The aggregate HTML report is at `build/reports/jacoco/testCodeCoverageReport/html/index.html`.
 
+=== Local Development with Sparse Checkout
+
+Use Git sparse checkout to keep only the tutorials or categories you are working on in your local
+working tree. From the repository root in an existing clone, enable cone mode and select a tutorial
+alongside the Gradle wrapper support files and shared build logic:
+
+[source,bash]
+----
+git sparse-checkout init --cone
+git sparse-checkout set gradle build-logic data/jpa-audit
+----
+
+Cone mode also retains root files such as `gradlew`, `settings.gradle.kts`, and `build.gradle.kts`.
+Keep `gradle` and `build-logic` selected so the root wrapper and convention plugin remain available.
+
+Add another tutorial or an entire category without replacing the current selection:
+
+[source,bash]
+----
+git sparse-checkout add ai/pgvector
+git sparse-checkout add web
+----
+
+Because `settings.gradle.kts` dynamically discovers `*/*/build.gradle.kts`, Gradle and the IDE
+automatically configure only the checked-out tutorial modules. Reload the Gradle project in your IDE
+after changing the selection. Run targeted tasks from the root as usual, for example
+`./gradlew :data:jpa-audit:test`; root coverage aggregation also uses only the available tutorials.
+
+The contract consumer depends on the producer's stubs, so include both when working on it:
+
+[source,bash]
+----
+git sparse-checkout add test/contract-consumer test/contract-producer
+----
+
+Restore the full working tree when you need all tutorials:
+
+[source,bash]
+----
+git sparse-checkout disable
+----
+
 == Documentation
 
 All tutorials are documented in AsciiDoc format and published as an https://antora.org[Antora] site at
