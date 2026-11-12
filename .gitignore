@@ -41,6 +41,10 @@ out/
 ### Antora ###
 build/site/
 
+### Generated Spring Modulith documentation ###
+modulith/events/docs/
+modulith/event-externalization/docs/
+
 # gemini-cli settings and credentials
 .gemini/
 gha-creds-*.json
