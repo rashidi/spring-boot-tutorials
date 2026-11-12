@@ -3,6 +3,7 @@ Rashidi Zin <rashidi@zin.my>
 1.0, October 11, 2026: Initial version
 :icons: font
 :source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test/contract-consumer
 
 This module demonstrates the consumer side of Consumer-Driven Contract (CDC) testing using **Stubborn Contract**.
 
@@ -29,7 +30,7 @@ We can use the Stubborn Contract Stub Runner to test our `ProductRepository` aga
 ----
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @AutoConfigureStubRunner(
-        ids = "zin.rashidi.boot:test-contract-producer:+:stubs:8080",
+        ids = "zin.rashidi.boot:contract-producer:+:stubs:8080",
         stubsMode = StubsMode.CLASSPATH
 )
 class ProductRepositoryTests {
@@ -48,4 +49,4 @@ class ProductRepositoryTests {
 }
 ----
 
-By configuring `@AutoConfigureStubRunner` to use the producer's ID (`zin.rashidi.boot:test-contract-producer`) and `StubsMode.CLASSPATH`, Stubborn automatically searches the local classpath for the producer's stub JAR, unpacks it, and starts a WireMock server on the configured port (`8080`). This verifies that our HTTP interactions match the agreed-upon contract without needing a running external server.
+By configuring `@AutoConfigureStubRunner` to use the producer's ID (`zin.rashidi.boot:contract-producer`) and `StubsMode.CLASSPATH`, Stubborn automatically searches the local classpath for the producer's stub JAR, unpacks it, and starts a WireMock server on the configured port (`8080`). This verifies that our HTTP interactions match the agreed-upon contract without needing a running external server.

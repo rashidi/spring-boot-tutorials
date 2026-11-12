@@ -4,7 +4,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :icons: font
 :source-highlighter: highlight.js
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/ai-tool-calling
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/ai/tool-calling
 :source-main: src/main/java/zin/rashidi/boot/ai/toolcalling
 :source-test: src/test/java/zin/rashidi/boot/ai/toolcalling
 

@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :nofooter:
 :icons: font
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/graphql
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/core/graphql
 
 Implementing https://graphql.org/[GraphQL] server with https://spring.io/guides/gs/graphql-server/[Spring Boot GraphQL Server].
 

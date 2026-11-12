@@ -3,7 +3,7 @@ Rashidi Zin <rashidi@zin.my>
 1.0, October 2, 2026: Initial version
 :icons: font
 :source-highlighter: highlight.js
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/main/messaging-kafka
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/messaging/kafka
 :source-main: src/main/java/zin/rashidi/boot/messaging/kafka
 :source-test: src/test/java/zin/rashidi/boot/messaging/kafka
 

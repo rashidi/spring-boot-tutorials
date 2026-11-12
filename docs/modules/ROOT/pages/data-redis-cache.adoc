@@ -6,7 +6,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :nofooter:
 :icons: font
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-redis-cache
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/redis-cache
 
 In this tutorial, we will explore how to implement caching with Spring Data Redis to improve application performance. We will also compare this approach with Hibernate second level caching.
 

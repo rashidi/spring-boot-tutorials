@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :nofooter:
 :icons: font
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch-jdbc-bulk-update
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch/jdbc-bulk-update
 
 Perform a bulk update operation efficiently against a relational database with https://spring.io/projects/spring-batch[Spring Batch] and https://docs.spring.io/spring-framework/reference/data-access/jdbc.html[Spring JDBC].
 

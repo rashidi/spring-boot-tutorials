@@ -4,7 +4,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :icons: font
 :source-highlighter: highlight.js
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/modulith-event-externalization
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/modulith/event-externalization
 :source-main: src/main/java/zin/rashidi/boot/modulith/externalization
 :source-test: src/test/java/zin/rashidi/boot/modulith/externalization
 
@@ -186,5 +186,5 @@ To execute the build and integration tests:
 
 [source,bash]
 ----
-./gradlew :modulith-event-externalization:check
+./gradlew :modulith:event-externalization:check
 ----

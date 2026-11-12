@@ -6,7 +6,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :nofooter:
 :icons: font
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-event
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jpa-event
 
 In this tutorial, we will look into how we can utilise events to perform validation at repository level.
 

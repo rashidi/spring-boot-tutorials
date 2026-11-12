@@ -1,7 +1,7 @@
 = Spring JDBC: JdbcClient
 Rashidi Zin <rashidi@zin.my>
 1.0, October 17, 2026: Initial version
-:url-repo: https://github.com/rashidi/spring-boot-tutorials/tree/master/jdbc-client
+:url-repo: https://github.com/rashidi/spring-boot-tutorials/tree/master/core/jdbc-client
 :source-main: {url-repo}/src/main/java/zin/rashidi/boot/jdbc/client
 :source-test: {url-repo}/src/test/java/zin/rashidi/boot/jdbc/client
 

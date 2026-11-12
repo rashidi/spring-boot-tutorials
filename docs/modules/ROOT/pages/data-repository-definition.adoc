@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :nofooter:
 :icons: font
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-repository-definition
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/repository-definition
 
 Implement custom repository interfaces with @RepositoryDefinition annotation.
 

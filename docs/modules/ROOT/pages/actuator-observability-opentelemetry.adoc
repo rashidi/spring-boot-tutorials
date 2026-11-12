@@ -3,6 +3,7 @@ Rashidi Zin <rashidi@zin.my>
 1.0, October 9, 2024: Initial version
 :icons: font
 :source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/core/actuator-observability-opentelemetry
 
 This tutorial demonstrates how to instrument a Spring Boot application with OpenTelemetry to generate traces and export them.
 

@@ -4,7 +4,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :icons: font
 :source-highlighter: highlight.js
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-keyset-pagination
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jpa-keyset-pagination
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/keyset/pagination
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jpa/keyset/pagination
 

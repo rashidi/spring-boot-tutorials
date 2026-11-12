@@ -4,7 +4,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :icons: font
 :source-highlighter: highlight.js
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test-slice-tests-rest
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test/slice-tests-rest
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/test/slices
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/test/slices
 
@@ -104,8 +104,8 @@ class UserRepositoryTests {
 * `@Sql` - Load test data
 
 With that, we have verified that `UserRepository.findByUsername` is behaving as expected. Full implementation can be found in
-link:{source-main}/user[`user`] package. For other database types, I wrote articles on link:../data-jdbc-audit/[using `@DataJdbcTest`]
-and link:../data-mongodb-audit/[using `@DataMongoTest`]
+link:{source-main}/user[`user`] package. For other database types, I wrote articles on xref:data-jdbc-audit.adoc[using `@DataJdbcTest`]
+and xref:data-mongodb-audit.adoc[using `@DataMongoTest`]
 
 Next, we will implement the web components.
 
@@ -290,7 +290,7 @@ Wherever possible, I will always favour using `@SpringBootTest` as it allows me 
 if the `@SpringBootTest` class takes too long to run then I'd go with `@WebMvcTest`. It is less desire as the test will
 be affected should the production code implementation changes. For example, a refactoring.
 
-With `@SpringBootTest`, I am able to implement my tests following link:../test-rest-assured/[Behaviour Driven Development] easily as
+With `@SpringBootTest`, I am able to implement my tests following xref:test-rest-assured.adoc[Behaviour Driven Development] easily as
 opposed to using `@WebMvcTest` as I don't have to be concerned about the feature's implementation.
 
 In the end, choose the ones that provide you with the efficiency to maintain and to run your tests. Either with `@SpringBootTest` or the combination of `@WebMvcTest` and `@DataJpaTest`.

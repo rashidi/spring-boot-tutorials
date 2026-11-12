@@ -4,7 +4,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :icons: font
 :source-highlighter: highlight.js
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/messaging-rabbitmq-dlq
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/messaging/rabbitmq-dlq
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/messaging/rabbitmq
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/messaging/rabbitmq
 :url-dlx: https://www.rabbitmq.com/docs/dlx

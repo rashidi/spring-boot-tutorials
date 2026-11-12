@@ -3,6 +3,7 @@ Rashidi Zin <rashidi@zin.my>
 1.0, October 11, 2026: Initial version
 :icons: font
 :source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test/contract-producer
 
 This module demonstrates the producer side of Consumer-Driven Contract (CDC) testing using **Stubborn Contract**. Stubborn Contract is the official continuation of Spring Cloud Contract.
 
@@ -59,7 +60,7 @@ public class ProductContractTests {
 }
 ----
 
-When you build the project (`./gradlew build`), Stubborn Contract will automatically:
+When you build the project from the repository root (`./gradlew :test:contract-producer:build`), Stubborn Contract will automatically:
 1. Generate test cases from the YAML files based on `ProductContractTests`.
 2. Execute the tests to verify the controller meets the contract.
 3. Package the WireMock stubs into a jar (`-stubs.jar`), which the consumer can download and use for testing.

@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :nofooter:
 :icons: font
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-jpa-filtered-query
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jpa-filtered-query
 
 Implement global filter query which involves several `Entity` with Spring Data Jpa.
 

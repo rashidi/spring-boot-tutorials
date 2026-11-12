@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 :toc:
 :nofooter:
 :icons: font
-:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data-envers-audit
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/envers-audit
 
 Sample application that demonstrates entity revisions with http://projects.spring.io/spring-data-envers/[Spring Data Envers].
 
