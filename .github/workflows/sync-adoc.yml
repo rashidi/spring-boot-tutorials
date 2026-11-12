@@ -52,7 +52,7 @@ jobs:
             esac
             DEST_DOC="${DEST_DIR}/${MODULE_NAME}.adoc"
 
-            # Normalize line endings and relative tutorial links for flattened Antora pages
+            # Normalize line endings and relative tutorial/source links for flattened Antora pages
             python3 - "$file" "$DEST_DOC" "$CATEGORY_DIR" <<'PY'
           import re
           import sys
@@ -74,6 +74,17 @@ jobs:
               return f"xref:{page}.adoc["
 
           content = Path(source).read_text(encoding="utf-8").replace("\r", "")
+          content = re.sub(
+              r"^(:source-(?:main|test):\s*)(?=src/)",
+              r"\1{url-quickref}/",
+              content,
+              flags=re.MULTILINE,
+          )
+          content = re.sub(
+              r"link:(?=src/)",
+              r"link:{url-quickref}/",
+              content,
+          )
           content = re.sub(
               r"link:\.\./(?:\.\./(?P<category>[\w-]+)/)?(?P<topic>[\w-]+)/?\[",
               tutorial_xref,
@@ -169,7 +180,7 @@ jobs:
 
           # Commit only if there are actual changes
           if git diff --staged --quiet; then
-            echo "No README changes to sync."
+            echo "No README changes to sync.\n"
           else
             git commit -m "docs: sync updated README.adoc files from master"
             git push origin antora

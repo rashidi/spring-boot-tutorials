@@ -5,8 +5,8 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/ai/tool-calling
-:source-main: src/main/java/zin/rashidi/boot/ai/toolcalling
-:source-test: src/test/java/zin/rashidi/boot/ai/toolcalling
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/ai/toolcalling
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/ai/toolcalling
 
 Large Language Models (LLMs) have a fixed knowledge cutoff and cannot natively interact with external systems. Model Tool Calling (also known as Function Calling) bridges this gap by enabling LLMs to invoke client-side Java methods dynamically to fetch real-time data or trigger side effects.
 

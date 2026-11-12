@@ -5,8 +5,8 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/modulith/event-externalization
-:source-main: src/main/java/zin/rashidi/boot/modulith/externalization
-:source-test: src/test/java/zin/rashidi/boot/modulith/externalization
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/modulith/externalization
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/modulith/externalization
 
 In a modular monolith architecture, domain modules communicate in-process via strongly typed domain events. However, external distributed microservices or analytics platforms often require access to these lifecycle changes.
 
