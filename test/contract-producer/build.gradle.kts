@@ -15,11 +15,9 @@ dependencies {
 
     testImplementation(platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
     testImplementation("sh.stubborn:stubborn-contract-starter-verifier")
-}
 
-configurations.matching { it.name.startsWith("contractTest") }.configureEach {
-    dependencies.add(project.dependencies.platform(SpringBootPlugin.BOM_COORDINATES))
-    dependencies.add(project.dependencies.platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
+    add("contractTestImplementation", platform(SpringBootPlugin.BOM_COORDINATES))
+    add("contractTestImplementation", platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
 }
 
 contracts {
