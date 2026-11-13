@@ -9,9 +9,8 @@ version = "0.0.1-SNAPSHOT"
 val stubbornContractVersion = "0.2.2"
 
 dependencies {
-    testImplementation(enforcedPlatform(SpringBootPlugin.BOM_COORDINATES))
-    testRuntimeOnly(enforcedPlatform(SpringBootPlugin.BOM_COORDINATES))
     testImplementation(platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
+    testRuntimeOnly(platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
 
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")

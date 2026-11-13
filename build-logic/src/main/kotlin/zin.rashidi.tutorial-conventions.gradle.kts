@@ -27,6 +27,8 @@ dependencies {
     testRuntimeOnly(platform(SpringBootPlugin.BOM_COORDINATES))
     testCompileOnly(platform(SpringBootPlugin.BOM_COORDINATES))
     testAnnotationProcessor(platform(SpringBootPlugin.BOM_COORDINATES))
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<JavaCompile>().configureEach {
