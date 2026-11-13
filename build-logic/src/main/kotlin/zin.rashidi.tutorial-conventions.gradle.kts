@@ -1,9 +1,9 @@
+import org.gradle.api.tasks.compile.JavaCompile
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     java
     jacoco
-    id("org.springframework.boot")
 }
 
 group = "zin.rashidi.boot"
@@ -24,6 +24,11 @@ dependencies {
     annotationProcessor(platform(SpringBootPlugin.BOM_COORDINATES))
     testImplementation(platform(SpringBootPlugin.BOM_COORDINATES))
     testRuntimeOnly(platform(SpringBootPlugin.BOM_COORDINATES))
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("-parameters")
 }
 
 tasks.withType<Test>().configureEach {
