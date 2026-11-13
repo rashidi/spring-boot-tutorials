@@ -24,3 +24,12 @@ contracts {
     baseClassForTests.set("zin.rashidi.boot.test.contract.producer.product.ProductContractTests")
     failOnNoContracts.set(false)
 }
+
+val stubs = configurations.create("stubs") {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+}
+
+artifacts {
+    add("stubs", tasks.named("verifierStubsJar"))
+}
