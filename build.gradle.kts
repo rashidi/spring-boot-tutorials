@@ -1,30 +1,29 @@
-import org.springframework.boot.gradle.plugin.SpringBootPlugin
-
 plugins {
-    java
-    id("org.springframework.boot") version "4.1.2" apply false
-    id("io.spring.dependency-management") version "1.1.7"
+    base
     id("jacoco-report-aggregation")
 }
 
 group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation(platform(SpringBootPlugin.BOM_COORDINATES))
+    fileTree(rootDir) {
+        include("*/*/build.gradle.kts")
+        exclude("build-logic/**", ".gradle/**", "build/**")
+    }.files.sortedBy { it.relativeTo(rootDir).invariantSeparatorsPath }.forEach {
+        jacocoAggregation(project(":${it.parentFile.relativeTo(rootDir).invariantSeparatorsPath.replace('/', ':')}"))
+    }
+}
 
-    subprojects.filter { it.buildFile.isFile }.forEach { p ->
-        implementation(project(p.path))
+reporting {
+    reports {
+        create<JacocoCoverageReport>("testCodeCoverageReport") {
+            testSuiteName = "test"
+        }
     }
 }
 

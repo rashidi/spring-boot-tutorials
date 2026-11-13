@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
     id("zin.rashidi.tutorial-conventions")
     id("sh.stubborn.contract") version "0.2.2"
@@ -5,12 +7,17 @@ plugins {
 
 version = "0.0.1-SNAPSHOT"
 
+val stubbornContractVersion = "0.2.2"
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    testImplementation(platform("sh.stubborn:stubborn-contract-dependencies:0.2.2"))
+    testImplementation(platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
     testImplementation("sh.stubborn:stubborn-contract-starter-verifier")
+
+    add("contractTestImplementation", platform(SpringBootPlugin.BOM_COORDINATES))
+    add("contractTestImplementation", platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
 }
 
 contracts {

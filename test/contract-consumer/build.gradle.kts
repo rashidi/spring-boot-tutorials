@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
     id("zin.rashidi.tutorial-conventions")
 }
@@ -8,6 +10,7 @@ val stubbornContractVersion = "0.2.2"
 
 dependencies {
     testImplementation(platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
+    testRuntimeOnly(platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
 
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")
