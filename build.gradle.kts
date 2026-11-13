@@ -19,6 +19,14 @@ dependencies {
     }
 }
 
+reporting {
+    reports {
+        val testCodeCoverageReport by creating(JacocoCoverageReport::class) {
+            testSuiteName = "test"
+        }
+    }
+}
+
 tasks.named<JacocoReport>("testCodeCoverageReport") {
     val objectFactory = project.objects
     val exclusions = listOf(
@@ -52,14 +60,13 @@ tasks.named<JacocoReport>("testCodeCoverageReport") {
     )
 }
 
-val testCodeCoverageReport = tasks.named<JacocoReport>("testCodeCoverageReport")
+tasks.register<JacocoCoverageVerification>("testCodeCoverageVerification") {
+    val reportTask = tasks.named<JacocoReport>("testCodeCoverageReport").get()
+    dependsOn(reportTask)
 
-val testCodeCoverageVerification = tasks.register<JacocoCoverageVerification>("testCodeCoverageVerification") {
-    dependsOn(testCodeCoverageReport)
-
-    executionData.setFrom(testCodeCoverageReport.map { it.executionData })
-    classDirectories.setFrom(testCodeCoverageReport.map { it.classDirectories })
-    sourceDirectories.setFrom(testCodeCoverageReport.map { it.sourceDirectories })
+    executionData.setFrom(reportTask.executionData)
+    classDirectories.setFrom(reportTask.classDirectories)
+    sourceDirectories.setFrom(reportTask.sourceDirectories)
 
     violationRules {
         rule {
@@ -72,6 +79,6 @@ val testCodeCoverageVerification = tasks.register<JacocoCoverageVerification>("t
 }
 
 tasks.check {
-    dependsOn(testCodeCoverageReport)
-    dependsOn(testCodeCoverageVerification)
+    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
+    dependsOn(tasks.named<JacocoCoverageVerification>("testCodeCoverageVerification"))
 }
