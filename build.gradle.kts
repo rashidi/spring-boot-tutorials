@@ -1,30 +1,21 @@
-import org.springframework.boot.gradle.plugin.SpringBootPlugin
-
 plugins {
-    java
-    id("org.springframework.boot") version "4.1.2" apply false
-    id("io.spring.dependency-management") version "1.1.7"
+    base
     id("jacoco-report-aggregation")
 }
 
 group = "zin.rashidi.boot"
 version = "0.0.1-SNAPSHOT"
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation(platform(SpringBootPlugin.BOM_COORDINATES))
-
-    subprojects.filter { it.buildFile.isFile }.forEach { p ->
-        implementation(project(p.path))
+    fileTree(rootDir) {
+        include("*/*/build.gradle.kts")
+        exclude("build-logic/**", ".gradle/**", "build/**")
+    }.files.sortedBy { it.relativeTo(rootDir).invariantSeparatorsPath }.forEach {
+        jacocoAggregation(project(":${it.parentFile.relativeTo(rootDir).invariantSeparatorsPath.replace('/', ':')}"))
     }
 }
 
@@ -61,13 +52,14 @@ tasks.named<JacocoReport>("testCodeCoverageReport") {
     )
 }
 
-tasks.register<JacocoCoverageVerification>("testCodeCoverageVerification") {
-    val reportTask = tasks.named<JacocoReport>("testCodeCoverageReport").get()
-    dependsOn(reportTask)
+val testCodeCoverageReport = tasks.named<JacocoReport>("testCodeCoverageReport")
 
-    executionData.setFrom(reportTask.executionData)
-    classDirectories.setFrom(reportTask.classDirectories)
-    sourceDirectories.setFrom(reportTask.sourceDirectories)
+val testCodeCoverageVerification = tasks.register<JacocoCoverageVerification>("testCodeCoverageVerification") {
+    dependsOn(testCodeCoverageReport)
+
+    executionData.setFrom(testCodeCoverageReport.map { it.executionData })
+    classDirectories.setFrom(testCodeCoverageReport.map { it.classDirectories })
+    sourceDirectories.setFrom(testCodeCoverageReport.map { it.sourceDirectories })
 
     violationRules {
         rule {
@@ -80,6 +72,6 @@ tasks.register<JacocoCoverageVerification>("testCodeCoverageVerification") {
 }
 
 tasks.check {
-    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
-    dependsOn(tasks.named<JacocoCoverageVerification>("testCodeCoverageVerification"))
+    dependsOn(testCodeCoverageReport)
+    dependsOn(testCodeCoverageVerification)
 }
