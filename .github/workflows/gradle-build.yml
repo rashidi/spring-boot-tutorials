@@ -79,7 +79,7 @@ jobs:
       - name: Run CI build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew check --configuration-cache --parallel
+        run: ./gradlew check
       - name: Publish JaCoCo Report to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.8.0
