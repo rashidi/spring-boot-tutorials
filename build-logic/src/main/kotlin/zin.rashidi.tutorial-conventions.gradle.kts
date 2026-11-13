@@ -20,10 +20,13 @@ repositories {
 
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
+    runtimeOnly(platform(SpringBootPlugin.BOM_COORDINATES))
     compileOnly(platform(SpringBootPlugin.BOM_COORDINATES))
     annotationProcessor(platform(SpringBootPlugin.BOM_COORDINATES))
     testImplementation(platform(SpringBootPlugin.BOM_COORDINATES))
     testRuntimeOnly(platform(SpringBootPlugin.BOM_COORDINATES))
+    testCompileOnly(platform(SpringBootPlugin.BOM_COORDINATES))
+    testAnnotationProcessor(platform(SpringBootPlugin.BOM_COORDINATES))
 }
 
 tasks.withType<JavaCompile>().configureEach {

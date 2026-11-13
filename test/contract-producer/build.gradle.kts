@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
     id("zin.rashidi.tutorial-conventions")
     id("sh.stubborn.contract") version "0.2.2"
@@ -11,18 +13,12 @@ dependencies {
 
     testImplementation(platform("sh.stubborn:stubborn-contract-dependencies:0.2.2"))
     testImplementation("sh.stubborn:stubborn-contract-starter-verifier")
+
+    contractTestImplementation(platform(SpringBootPlugin.BOM_COORDINATES))
+    contractTestImplementation(platform("sh.stubborn:stubborn-contract-dependencies:0.2.2"))
 }
 
 contracts {
     baseClassForTests.set("zin.rashidi.boot.test.contract.producer.product.ProductContractTests")
     failOnNoContracts.set(false)
-}
-
-val stubs = configurations.create("stubs") {
-    isCanBeConsumed = true
-    isCanBeResolved = false
-}
-
-artifacts {
-    add("stubs", tasks.named("verifierStubsJar"))
 }
