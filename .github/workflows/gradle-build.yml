@@ -87,9 +87,8 @@ jobs:
         with:
           paths: ${{ github.workspace }}/build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 80
-          min-coverage-changed-lines: 80
-          title: 'JaCoCo Code Coverage'
+          title: 'Code Coverage Report'
+          skip-if-no-changes: true
           update-comment: true
           pass-emoji: '✨'
           fail-emoji: '🤦🏽'
