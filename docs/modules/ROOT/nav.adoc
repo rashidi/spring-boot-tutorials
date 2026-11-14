@@ -20,6 +20,7 @@
 ** xref:data-envers-audit.adoc[Spring Data Envers: Audit With Entity Revisions]
 ** xref:data-jdbc-audit.adoc[Spring Data JDBC: Implement Auditing]
 ** xref:data-jdbc-optimistic-locking.adoc[Spring Data JDBC: Optimistic Locking with @Version]
+** xref:data-jdbc-pessimistic-locking.adoc[Spring Data JDBC: Pessimistic Locking with PostgreSQL]
 ** xref:data-jdbc-schema-generation.adoc[Spring Data JDBC: Generate Liquibase Changeset]
 ** xref:data-jpa-audit.adoc[Spring Data Jpa Audit Example]
 ** xref:data-jpa-event.adoc[Spring Data JPA: Perform Entity Validation at Repository Level through Event Driven]

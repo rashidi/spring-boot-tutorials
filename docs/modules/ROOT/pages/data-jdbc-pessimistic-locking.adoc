@@ -1,0 +1,151 @@
+= Spring Data JDBC: Pessimistic Locking with PostgreSQL
+Rashidi Zin <rashidi@zin.my>
+1.0, November 14, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jdbc-pessimistic-locking
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jdbc/pessimisticlocking
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jdbc/pessimisticlocking
+
+In high-contention workloads such as wallet balance debits or inventory reservations, optimistic locking can lead to frequent `OptimisticLockingFailureException` retries. In this tutorial, we explore how to implement pessimistic row-level locking (`@Lock(LockMode.PESSIMISTIC_WRITE)`) using https://spring.io/projects/spring-data-jdbc[Spring Data JDBC] and PostgreSQL, verified under concurrent load with https://testcontainers.com/[Testcontainers].
+
+== Background
+
+While xref:data-jdbc-optimistic-locking.adoc[Spring Data JDBC: Optimistic Locking] detects conflicts at commit time using a `@Version` column, pessimistic locking acquires an exclusive row-level lock (`SELECT ... FOR UPDATE`) when reading the record within an active transaction. Concurrent transactions attempting to lock the same row block until the holding transaction commits or rolls back, preventing lost updates without application-level retry loops.
+
+== Modular Package Structure
+
+Following modular monolith encapsulation rules, all persistence internals reside within the `wallet` domain package:
+
+* link:{source-main}/wallet/Wallet.java[`Wallet`]: `package-private` aggregate entity mapped to the `wallets` table.
+* link:{source-main}/wallet/WalletRepository.java[`WalletRepository`]: `package-private` repository overriding `findById` with `@Lock(LockMode.PESSIMISTIC_WRITE)`.
+* link:{source-main}/wallet/WalletDto.java[`WalletDto`]: `public` record representing the external state snapshot.
+* link:{source-main}/wallet/WalletService.java[`WalletService`]: `public` transactional facade coordinating balance mutations.
+
+== Gradle Configuration
+
+The module applies the shared `zin.rashidi.tutorial-conventions` plugin in link:{url-quickref}/build.gradle.kts[`build.gradle.kts`]:
+
+[source,kotlin]
+----
+plugins {
+    id("zin.rashidi.tutorial-conventions")
+}
+
+version = "0.0.1-SNAPSHOT"
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    runtimeOnly("org.postgresql:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-data-jdbc-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+}
+----
+
+== Domain Aggregate & Pessimistic Lock Query
+
+We define the `package-private` aggregate in link:{source-main}/wallet/Wallet.java[`Wallet`] and annotate `findById` with `@Lock(LockMode.PESSIMISTIC_WRITE)` in link:{source-main}/wallet/WalletRepository.java[`WalletRepository`] so Spring Data JDBC generates the `FOR UPDATE` query automatically:
+
+[source,java]
+----
+interface WalletRepository extends CrudRepository<Wallet, Long> {
+
+    @Override
+    @Lock(LockMode.PESSIMISTIC_WRITE)
+    Optional<Wallet> findById(Long id);
+
+}
+----
+
+== Transactional Service Facade
+
+In link:{source-main}/wallet/WalletService.java[`WalletService`], `debit` executes inside a `@Transactional` boundary so the pessimistic row lock acquired by `findById` is held until the balance deduction is persisted:
+
+[source,java]
+----
+@Service
+public class WalletService {
+
+    private final WalletRepository repository;
+
+    WalletService(WalletRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional
+    public WalletDto debit(Long walletId, BigDecimal amount) {
+        var wallet = repository.findById(walletId)
+                .orElseThrow(() -> new IllegalArgumentException("Wallet not found: " + walletId));
+
+        if (wallet.getBalance().compareTo(amount) < 0) {
+            throw new IllegalStateException("Insufficient balance in wallet: " + walletId);
+        }
+
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+        var saved = repository.save(wallet);
+        return new WalletDto(saved.getId(), saved.getOwner(), saved.getBalance());
+    }
+
+}
+----
+
+== Verification with Testcontainers
+
+In link:{source-test}/wallet/WalletPessimisticLockingTests.java[`WalletPessimisticLockingTests`], we provision a PostgreSQL container via `@ServiceConnection` and execute concurrent debits using virtual threads and `CountDownLatch`:
+
+[source,java]
+----
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest
+@DisplayName("Given a wallet domain module, When concurrent balance updates occur, Then pessimistic locking serializes access without lost updates")
+class WalletPessimisticLockingTests {
+
+    @Autowired
+    private WalletService walletService;
+
+    @Test
+    @DisplayName("Given a wallet with initial balance of 100.00, When two concurrent threads each debit 40.00, Then both transactions succeed sequentially leaving a final balance of 20.00")
+    void concurrentDebitsAreSerialized() throws Exception {
+        var created = walletService.createWallet("Rashidi Zin", new BigDecimal("100.00"));
+        var readyLatch = new CountDownLatch(2);
+        var startLatch = new CountDownLatch(1);
+
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            var firstDebit = CompletableFuture.supplyAsync(() -> {
+                readyLatch.countDown();
+                awaitLatch(startLatch);
+                return walletService.debit(created.id(), new BigDecimal("40.00"));
+            }, executor);
+
+            var secondDebit = CompletableFuture.supplyAsync(() -> {
+                readyLatch.countDown();
+                awaitLatch(startLatch);
+                return walletService.debit(created.id(), new BigDecimal("40.00"));
+            }, executor);
+
+            assertThat(readyLatch.await(5, TimeUnit.SECONDS)).isTrue();
+            startLatch.countDown();
+
+            CompletableFuture.allOf(firstDebit, secondDebit).get(10, TimeUnit.SECONDS);
+        }
+
+        var updated = walletService.getWallet(created.id());
+        assertThat(updated.owner()).isEqualTo("Rashidi Zin");
+        assertThat(updated.balance()).isEqualByComparingTo(new BigDecimal("20.00"));
+    }
+
+}
+----
+
+== Running the Tests
+
+Execute the module verification task from the repository root:
+
+[source,bash]
+----
+./gradlew :data:jdbc-pessimistic-locking:check
+----
