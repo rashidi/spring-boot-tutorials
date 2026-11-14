@@ -1,8 +1,8 @@
 package zin.rashidi.boot.data.jdbc.pessimisticlocking.wallet;
 
-import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.relational.core.sql.LockMode;
+import org.springframework.data.relational.repository.Lock;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -11,7 +11,8 @@ import java.util.Optional;
  */
 interface WalletRepository extends CrudRepository<Wallet, Long> {
 
-    @Query("SELECT id, owner, balance FROM wallets WHERE id = :id FOR UPDATE")
-    Optional<Wallet> findByIdForUpdate(@Param("id") Long id);
+    @Override
+    @Lock(LockMode.PESSIMISTIC_WRITE)
+    Optional<Wallet> findById(Long id);
 
 }

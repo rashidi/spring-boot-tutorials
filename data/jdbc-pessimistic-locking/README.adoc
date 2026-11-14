@@ -8,18 +8,18 @@ Rashidi Zin <rashidi@zin.my>
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jdbc/pessimisticlocking
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jdbc/pessimisticlocking
 
-In high-contention workloads such as wallet balance debits or inventory reservations, optimistic locking can lead to frequent `OptimisticLockingFailureException` retries. In this tutorial, we explore how to implement pessimistic row-level locking (`SELECT ... FOR UPDATE`) using https://spring.io/projects/spring-data-jdbc[Spring Data JDBC] and PostgreSQL, verified under concurrent load with https://testcontainers.com/[Testcontainers].
+In high-contention workloads such as wallet balance debits or inventory reservations, optimistic locking can lead to frequent `OptimisticLockingFailureException` retries. In this tutorial, we explore how to implement pessimistic row-level locking (`@Lock(LockMode.PESSIMISTIC_WRITE)`) using https://spring.io/projects/spring-data-jdbc[Spring Data JDBC] and PostgreSQL, verified under concurrent load with https://testcontainers.com/[Testcontainers].
 
 == Background
 
-While link:../jdbc-optimistic-locking/[Spring Data JDBC: Optimistic Locking] detects conflicts at commit time using a `@Version` column, pessimistic locking acquires an exclusive row-level lock when reading the record within an active transaction. Concurrent transactions attempting to lock the same row block until the holding transaction commits or rolls back, preventing lost updates without application-level retry loops.
+While link:../jdbc-optimistic-locking/[Spring Data JDBC: Optimistic Locking] detects conflicts at commit time using a `@Version` column, pessimistic locking acquires an exclusive row-level lock (`SELECT ... FOR UPDATE`) when reading the record within an active transaction. Concurrent transactions attempting to lock the same row block until the holding transaction commits or rolls back, preventing lost updates without application-level retry loops.
 
 == Modular Package Structure
 
 Following modular monolith encapsulation rules, all persistence internals reside within the `wallet` domain package:
 
 * link:{source-main}/wallet/Wallet.java[`Wallet`]: `package-private` aggregate entity mapped to the `wallets` table.
-* link:{source-main}/wallet/WalletRepository.java[`WalletRepository`]: `package-private` repository declaring the `FOR UPDATE` locking query.
+* link:{source-main}/wallet/WalletRepository.java[`WalletRepository`]: `package-private` repository overriding `findById` with `@Lock(LockMode.PESSIMISTIC_WRITE)`.
 * link:{source-main}/wallet/WalletDto.java[`WalletDto`]: `public` record representing the external state snapshot.
 * link:{source-main}/wallet/WalletService.java[`WalletService`]: `public` transactional facade coordinating balance mutations.
 
@@ -48,21 +48,22 @@ dependencies {
 
 == Domain Aggregate & Pessimistic Lock Query
 
-We define the `package-private` aggregate in link:{source-main}/wallet/Wallet.java[`Wallet`] and acquire an exclusive row lock in link:{source-main}/wallet/WalletRepository.java[`WalletRepository`]:
+We define the `package-private` aggregate in link:{source-main}/wallet/Wallet.java[`Wallet`] and annotate `findById` with `@Lock(LockMode.PESSIMISTIC_WRITE)` in link:{source-main}/wallet/WalletRepository.java[`WalletRepository`] so Spring Data JDBC generates the `FOR UPDATE` query automatically:
 
 [source,java]
 ----
 interface WalletRepository extends CrudRepository<Wallet, Long> {
 
-    @Query("SELECT id, owner, balance FROM wallets WHERE id = :id FOR UPDATE")
-    Optional<Wallet> findByIdForUpdate(@Param("id") Long id);
+    @Override
+    @Lock(LockMode.PESSIMISTIC_WRITE)
+    Optional<Wallet> findById(Long id);
 
 }
 ----
 
 == Transactional Service Facade
 
-In link:{source-main}/wallet/WalletService.java[`WalletService`], `debit` executes inside a `@Transactional` boundary so the `FOR UPDATE` row lock is held until the balance deduction is persisted:
+In link:{source-main}/wallet/WalletService.java[`WalletService`], `debit` executes inside a `@Transactional` boundary so the pessimistic row lock acquired by `findById` is held until the balance deduction is persisted:
 
 [source,java]
 ----
@@ -77,7 +78,7 @@ public class WalletService {
 
     @Transactional
     public WalletDto debit(Long walletId, BigDecimal amount) {
-        var wallet = repository.findByIdForUpdate(walletId)
+        var wallet = repository.findById(walletId)
                 .orElseThrow(() -> new IllegalArgumentException("Wallet not found: " + walletId));
 
         if (wallet.getBalance().compareTo(amount) < 0) {

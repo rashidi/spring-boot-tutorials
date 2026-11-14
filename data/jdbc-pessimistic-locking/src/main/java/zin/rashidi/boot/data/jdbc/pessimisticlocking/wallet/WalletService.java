@@ -32,7 +32,7 @@ public class WalletService {
 
     @Transactional
     public WalletDto debit(Long walletId, BigDecimal amount) {
-        var wallet = repository.findByIdForUpdate(walletId)
+        var wallet = repository.findById(walletId)
                 .orElseThrow(() -> new IllegalArgumentException("Wallet not found: " + walletId));
 
         if (wallet.getBalance().compareTo(amount) < 0) {
