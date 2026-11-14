@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS wallets (
+    id BIGSERIAL PRIMARY KEY,
+    owner VARCHAR(255) NOT NULL,
+    balance NUMERIC(19, 2) NOT NULL
+);

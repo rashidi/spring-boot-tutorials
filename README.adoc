@@ -113,6 +113,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:data/envers-audit[Spring Data Envers Audit] |Enable with Entity Revisions using Spring Data Envers
 |link:data/jdbc-audit[Spring Data JDBC Audit] |Enable Audit with Spring Data JDBC
 |link:data/jdbc-optimistic-locking[Spring Data JDBC: Optimistic Locking] |Implement Optimistic Locking with Spring Data JDBC using @Version
+|link:data/jdbc-pessimistic-locking[Spring Data JDBC: Pessimistic Locking] |Implement Pessimistic Locking with Spring Data JDBC using SELECT FOR UPDATE
 |link:data/jdbc-schema-generation[Spring Data JDBC: Generate Liquibase Changeset] |Generate Liquibase changeset with Spring Data JDBC
 |link:data/jpa-audit[Spring Data JPA Audit] |Enable Audit with Spring Data JPA
 |link:data/jpa-event[Spring Data JPA: Event Driven] |Implement `Entity` validation at `Repository` level through `EventListeners`
