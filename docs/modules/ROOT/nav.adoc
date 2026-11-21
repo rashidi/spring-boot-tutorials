@@ -11,6 +11,7 @@
 ** xref:ai-tool-calling.adoc[Spring AI: Model Tool Calling with WireMock Testcontainers]
 * Spring Batch
 ** xref:batch-jdbc-bulk-update.adoc[Spring Batch: Bulk Update with JDBC]
+** xref:batch-partitioned-step.adoc[Spring Batch: Partitioned Step Processing with Virtual Threads]
 ** xref:batch-rest-repository.adoc[Spring Batch: Working With REST Resources]
 ** xref:batch-skip-step.adoc[Spring Batch: Skip Specific Data]
 * Spring Cloud

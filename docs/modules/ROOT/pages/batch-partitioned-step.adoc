@@ -1,0 +1,130 @@
+= Spring Batch: Partitioned Step Processing with Virtual Threads
+Rashidi Zin <rashidi@zin.my>
+1.0, November 21, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch/partitioned-step
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/batch/partitioning
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/batch/partitioning
+
+When processing large relational datasets, a single-threaded chunk step quickly becomes an I/O bottleneck. Spring Batch partitioning solves this by splitting the dataset into independent, non-overlapping ranges and executing a worker step concurrently across multiple threads or nodes.
+
+In this tutorial, we explore how to implement a partitioned step in https://spring.io/projects/spring-batch[Spring Batch 6] backed by Java 25 virtual threads and PostgreSQL, verified with https://testcontainers.com/[Testcontainers].
+
+== Background
+
+A partitioned step consists of a *manager step* and multiple *worker step executions*:
+
+* *Partitioner*: Inspects the dataset bounds (such as `MIN(id)` and `MAX(id)`) and emits an `ExecutionContext` per slice.
+* *PartitionHandler*: Dispatches each partition's `StepExecution` using a `TaskExecutor` (local concurrency) or messaging channel (remote workers).
+* *Worker Step*: Executes `@StepScope`-bound readers, processors, and writers isolated to each partition's key range.
+
+Because each partition maintains its own `StepExecution` in the Spring Batch `JobRepository`, failed runs can be restarted to reprocess only incomplete partitions.
+
+== Modular Package Structure
+
+All batch domain logic is encapsulated inside the `invoice` package:
+
+* link:{source-main}/invoice/Invoice.java[`Invoice`]: `package-private` domain record representing an invoice row.
+* link:{source-main}/invoice/InvoicePartitioner.java[`InvoicePartitioner`]: `package-private` `Partitioner` slicing pending invoice IDs across `gridSize` ranges.
+* link:{source-main}/invoice/InvoicePartitionJobConfiguration.java[`InvoicePartitionJobConfiguration`]: `package-private` Spring Batch job, manager step, virtual-thread `TaskExecutor`, and chunked worker step configuration.
+
+== Gradle Configuration
+
+The module applies `zin.rashidi.tutorial-conventions` in link:{url-quickref}/build.gradle.kts[`build.gradle.kts`]:
+
+[source,kotlin]
+----
+plugins {
+    id("zin.rashidi.tutorial-conventions")
+}
+
+version = "0.0.1-SNAPSHOT"
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-batch-jdbc")
+    runtimeOnly("org.postgresql:postgresql")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-batch-jdbc-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+}
+----
+
+== Partitioning Implementation
+
+=== Range Partitioner
+
+In link:{source-main}/invoice/InvoicePartitioner.java[`InvoicePartitioner`], we query the minimum and maximum pending invoice IDs via `JdbcClient` and divide the range into `gridSize` non-overlapping `ExecutionContext` entries:
+
+[source,java]
+----
+@Override
+public Map<String, ExecutionContext> partition(int gridSize) {
+    var bounds = jdbcClient.sql("SELECT MIN(id) AS min_id, MAX(id) AS max_id FROM invoices WHERE status = 'PENDING'")
+            .query((rs, rowNum) -> new IdBounds(
+                    rs.getObject("min_id", Long.class),
+                    rs.getObject("max_id", Long.class)))
+            .single();
+
+    if (bounds.minId() == null || bounds.maxId() == null) {
+        return Map.of();
+    }
+    // Split [minId..maxId] into gridSize ExecutionContext slices
+}
+----
+
+=== Manager & Worker Step Configuration
+
+In link:{source-main}/invoice/InvoicePartitionJobConfiguration.java[`InvoicePartitionJobConfiguration`], the manager step dispatches worker executions across Java 25 virtual threads while each `@StepScope` `JdbcPagingItemReader` reads only its assigned `minId`–`maxId` slice:
+
+[source,java]
+----
+@Bean
+Step partitionStep(JobRepository jobRepository, Step workerStep, InvoicePartitioner partitioner) {
+    var taskExecutor = new SimpleAsyncTaskExecutor("batch-partition-");
+    taskExecutor.setVirtualThreads(true);
+
+    return new StepBuilder("partitionStep", jobRepository)
+            .partitioner("workerStep", partitioner)
+            .step(workerStep)
+            .gridSize(4)
+            .taskExecutor(taskExecutor)
+            .build();
+}
+----
+
+== Verification with Testcontainers
+
+In link:{source-test}/invoice/BatchPartitionedStepApplicationTests.java[`BatchPartitionedStepApplicationTests`], we provision PostgreSQL via `@ServiceConnection` and verify with `JobOperatorTestUtils` that all 4 worker partitions execute concurrently and process every pending invoice:
+
+[source,java]
+----
+@SpringBatchTest
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest
+@DisplayName("Given an invoice batch job, When partitioned step processing runs, Then invoices are processed concurrently across worker partitions")
+class BatchPartitionedStepApplicationTests {
+
+    @Autowired
+    private JobOperatorTestUtils jobs;
+
+    @Test
+    @DisplayName("Given 20 pending invoices, When processInvoicesJob runs with gridSize 4, Then 4 worker partitions execute and process all pending invoices")
+    void processesAllPendingInvoicesAcrossPartitions() throws Exception {
+        // Seed 20 PENDING invoices, start job, and assert 4 workerStep:* executions complete
+    }
+
+}
+----
+
+== Running the Tests
+
+Execute the module verification task from the repository root:
+
+[source,bash]
+----
+./gradlew :batch:partitioned-step:check
+----
