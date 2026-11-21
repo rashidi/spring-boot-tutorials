@@ -76,7 +76,7 @@ class InvoicePartitionJobConfiguration {
     ItemStreamReader<Invoice> invoiceReader(
             DataSource dataSource,
             @Value("#{stepExecutionContext['minId']}") Long minId,
-            @Value("#{stepExecutionContext['maxId']}") Long maxId) {
+            @Value("#{stepExecutionContext['maxId']}") Long maxId) throws Exception {
         return new JdbcPagingItemReaderBuilder<Invoice>()
                 .name("invoiceReader")
                 .dataSource(dataSource)
