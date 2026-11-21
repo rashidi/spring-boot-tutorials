@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBatchTest
 @Import(TestcontainersConfiguration.class)
-@SpringBootTest
+@SpringBootTest(properties = "spring.batch.job.enabled=false")
 @DisplayName("Given an invoice batch job, When partitioned step processing runs, Then invoices are processed concurrently across worker partitions")
 class BatchPartitionedStepApplicationTests {
 

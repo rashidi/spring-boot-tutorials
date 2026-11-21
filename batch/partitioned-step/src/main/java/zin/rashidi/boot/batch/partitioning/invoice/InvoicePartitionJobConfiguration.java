@@ -1,21 +1,23 @@
 package zin.rashidi.boot.batch.partitioning.invoice;
 
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemStreamReader;
 import org.springframework.batch.infrastructure.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.infrastructure.item.database.JdbcPagingItemReader;
 import org.springframework.batch.infrastructure.item.database.Order;
 import org.springframework.batch.infrastructure.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.infrastructure.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -57,7 +59,7 @@ class InvoicePartitionJobConfiguration {
     Step workerStep(
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager,
-            JdbcPagingItemReader<Invoice> invoiceReader,
+            ItemStreamReader<Invoice> invoiceReader,
             ItemProcessor<Invoice, Invoice> invoiceProcessor,
             JdbcBatchItemWriter<Invoice> invoiceWriter) {
         return new StepBuilder("workerStep", jobRepository)
@@ -70,17 +72,17 @@ class InvoicePartitionJobConfiguration {
     }
 
     @Bean
-    @StepScope
-    JdbcPagingItemReader<Invoice> invoiceReader(
+    @Scope(value = "step", proxyMode = ScopedProxyMode.INTERFACES)
+    ItemStreamReader<Invoice> invoiceReader(
             DataSource dataSource,
             @Value("#{stepExecutionContext['minId']}") Long minId,
             @Value("#{stepExecutionContext['maxId']}") Long maxId) {
         return new JdbcPagingItemReaderBuilder<Invoice>()
                 .name("invoiceReader")
                 .dataSource(dataSource)
-                .selectClause("SELECT id, customer, amount, status")
-                .fromClause("FROM invoices")
-                .whereClause("WHERE status = 'PENDING' AND id BETWEEN :minId AND :maxId")
+                .selectClause("id, customer, amount, status")
+                .fromClause("invoices")
+                .whereClause("status = 'PENDING' AND id BETWEEN :minId AND :maxId")
                 .parameterValues(Map.of("minId", minId, "maxId", maxId))
                 .sortKeys(Map.of("id", Order.ASCENDING))
                 .pageSize(5)
@@ -103,7 +105,7 @@ class InvoicePartitionJobConfiguration {
         return new JdbcBatchItemWriterBuilder<Invoice>()
                 .dataSource(dataSource)
                 .sql("UPDATE invoices SET status = :status WHERE id = :id")
-                .itemSqlParameterSourceProvider(invoice -> new org.springframework.jdbc.core.namedparam.MapSqlParameterSource()
+                .itemSqlParameterSourceProvider(invoice -> new MapSqlParameterSource()
                         .addValue("id", invoice.id())
                         .addValue("status", invoice.status().name()))
                 .build();
