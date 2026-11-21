@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS invoices (
+    id BIGSERIAL PRIMARY KEY,
+    customer VARCHAR(100) NOT NULL,
+    amount NUMERIC(19, 2) NOT NULL,
+    status VARCHAR(16) NOT NULL
+);
