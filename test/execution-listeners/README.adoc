@@ -1,4 +1,4 @@
-= Spring Test: Managing Test Data with `TestExecutionListener`
+= Spring Test: Managing Test Data with TestExecutionListener
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, September 19, 2023

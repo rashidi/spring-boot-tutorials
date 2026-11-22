@@ -1,4 +1,4 @@
-= Spring Data REST with Composite ID
+= Spring Data REST: Composite ID
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, July 13, 2025

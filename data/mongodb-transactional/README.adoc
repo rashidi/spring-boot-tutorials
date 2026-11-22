@@ -1,4 +1,4 @@
-= @Transactional with Spring Data MongoDB
+= Spring Data MongoDB: Transactions with @Transactional
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.0, October 12, 2023

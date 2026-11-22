@@ -1,4 +1,4 @@
-= Stubborn Contract Producer Tutorial
+= Spring Test: Stubborn Contract Producer
 Rashidi Zin <rashidi@zin.my>
 1.0, October 11, 2026: Initial version
 :icons: font

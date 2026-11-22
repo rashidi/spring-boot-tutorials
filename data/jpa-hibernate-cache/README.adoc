@@ -1,4 +1,4 @@
-= Spring Data JPA: Hibernate Second Level Caching with EhCache
+= Spring Data JPA: Hibernate Second Level Caching with Ehcache
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, July 19, 2025
