@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.testcontainers.junit.jupiter.Container;
@@ -41,6 +42,16 @@ class CloudJdbcEnvRepoApplicationTests {
                 .expectStatus().isOk()
                 .expectBody().jsonPath("$").isEqualTo("Hello, my name is Demo");
 	}
+
+    @Test
+    @DisplayName("Given a greeting containing HTML, When I call greet, Then it is returned as plain text")
+    void greetReturnsPlainText() {
+        restClient.get().uri("/greet?greeting={greeting}", "<script>alert(1)</script>")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_PLAIN)
+                .expectBody(String.class).isEqualTo("<script>alert(1)</script>, my name is Demo");
+    }
 
     @Test
     @DisplayName("Given an updated database property, When I refresh, Then greet uses the new value")

@@ -164,7 +164,7 @@ class GreetResource {
         this.properties = properties;
     }
 
-    @GetMapping("/greet")
+    @GetMapping(value = "/greet", produces = MediaType.TEXT_PLAIN_VALUE)
     public String greet(@RequestParam String greeting) {
         return "%s, my name is %s".formatted(greeting, properties.getName());
     }
