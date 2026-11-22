@@ -53,15 +53,35 @@ You are an autonomous Principal Java & Spring Framework Engineer maintaining `ra
 
 ## Pull Requests & Commit Messages
 - Open pull requests against `master`, which is protected. Ensure relevant Gradle checks pass before marking a pull request ready, and use a clear title and summary that explain the motivation and key changes.
-- Use an imperative commit subject starting with a capitalized verb. Keep it to 55 characters or fewer, with no prefix such as `fix:` or `docs:`, no issue or pull request number, and no trailing period.
-- Wrap the commit body at 72 characters, explain the motivation for the change, and end with `Closes #<number>` referencing the pull request or issue.
+- Use an imperative commit subject starting with a capitalized verb. Keep it to 50 characters or fewer, with no prefix such as `fix:` or `docs:`, no issue or pull request number, and no trailing period.
+- Wrap the commit body at 72 characters, explain the motivation for the change, follow by an empty line, and end with `Closes: #<number>` referencing the pull request or issue.
+- Never write annotations verbatim in commit messages or PR titles (it mentions GitHub users): enclose them in backticks, as in `@Override`.
 
-Example:
+Follow the example taken from https://cbea.ms/git-commit/:
 
 ```text
-Document protected branch checks
+Summarize changes in around 50 characters or less
 
-Master is protected, so this change documents the expected review
-workflow and commit format for contributors.
-Closes #<number>
+More detailed explanatory text, if necessary. Wrap it to about 72
+characters or so. In some contexts, the first line is treated as the
+subject of the commit and the rest of the text as the body. The
+blank line separating the summary from the body is critical (unless
+you omit the body entirely); various tools like `log`, `shortlog`
+and `rebase` can get confused if you run the two together.
+
+Explain the problem that this commit is solving. Focus on why you
+are making this change as opposed to how (the code explains that).
+Are there side effects or other unintuitive consequences of this
+change? Here's the place to explain them.
+
+Further paragraphs come after blank lines.
+
+ - Bullet points are okay, too
+
+ - Typically a hyphen or asterisk is used for the bullet, preceded
+   by a single space, with blank lines in between, but conventions
+   vary here
+
+Closes: #123
+See also: #456, #789
 ```
