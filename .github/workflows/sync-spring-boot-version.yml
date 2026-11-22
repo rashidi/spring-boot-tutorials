@@ -1,0 +1,43 @@
+name: Sync Spring Boot Version
+
+on:
+  pull_request:
+    branches:
+      - master
+    types: [opened, synchronize]
+
+jobs:
+  sync-docs:
+    if: >-
+      github.actor == 'dependabot[bot]' &&
+      (contains(github.event.pull_request.title, 'org.springframework.boot') ||
+       contains(github.event.pull_request.title, 'spring-boot'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Dependabot PR branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.COPILOT_PAT }}
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@://github.com"
+
+      - name: Install GitHub Copilot CLI
+        run: npm install -g @github/copilot
+
+      - name: Run update-spring-boot-version agent
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
+          GH_TOKEN: ${{ secrets.COPILOT_PAT }}
+        run: |
+          copilot --agent update-spring-boot-version \
+            --allow-all-tools \
+            -p "Run the update-spring-boot-version task for this Dependabot PR."
