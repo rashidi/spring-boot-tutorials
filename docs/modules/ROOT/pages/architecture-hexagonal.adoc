@@ -7,6 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/core/architecture-hexagonal
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/architecture/hexagonal
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/architecture/hexagonal
+:page-published: 2026-09-26
 
 Hexagonal Architecture, also known as Ports and Adapters pattern, aims to create loosely coupled application components that can be easily connected to their software environment by means of ports and adapters. This makes components exchangeable at any level and facilitates test automation.
 

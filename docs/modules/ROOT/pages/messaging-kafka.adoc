@@ -6,6 +6,8 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/messaging/kafka
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/messaging/kafka
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/messaging/kafka
+:page-published: 2026-10-03
+:page-updated: 2026-11-12
 
 This tutorial demonstrates how to use Spring for Apache Kafka to publish and listen for messages in a Spring Boot application, and how to write integration tests using Testcontainers.
 

@@ -2,6 +2,7 @@
 Rashidi Zin <rashidi@zin.my>
 1.0, September 12, 2026
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web/problem-details
+:page-published: 2026-09-13
 
 Spring Boot 3 introduces support for link:https://datatracker.ietf.org/doc/html/rfc7807[RFC 7807], Problem Details for HTTP APIs. This specification defines a standard way to return error details from HTTP APIs.
 

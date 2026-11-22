@@ -4,6 +4,7 @@ Rashidi Zin <rashidi@zin.my>
 :url-repo: https://github.com/rashidi/spring-boot-tutorials/tree/master/core/jdbc-client
 :source-main: {url-repo}/src/main/java/zin/rashidi/boot/jdbc/client
 :source-test: {url-repo}/src/test/java/zin/rashidi/boot/jdbc/client
+:page-published: 2026-10-17
 
 Starting from Spring Boot 3.2, `JdbcClient` is available as a modern and fluent API for database operations,
 providing an alternative to the traditional `JdbcTemplate`. It offers a more readable and concise way to interact

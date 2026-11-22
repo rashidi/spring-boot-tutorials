@@ -7,6 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jdbc-pessimistic-locking
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jdbc/pessimisticlocking
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jdbc/pessimisticlocking
+:page-published: 2026-11-14
 
 In high-contention workloads such as wallet balance debits or inventory reservations, optimistic locking can lead to frequent `OptimisticLockingFailureException` retries. In this tutorial, we explore how to implement pessimistic row-level locking (`@Lock(LockMode.PESSIMISTIC_WRITE)`) using https://spring.io/projects/spring-data-jdbc[Spring Data JDBC] and PostgreSQL, verified under concurrent load with https://testcontainers.com/[Testcontainers].
 

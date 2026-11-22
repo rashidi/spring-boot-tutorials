@@ -6,6 +6,8 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/mongodb-transactional
+:page-published: 2023-07-28
+:page-updated: 2026-09-10
 
 Guide to utilise `@Transactional` with Spring Data MongoDB.
 

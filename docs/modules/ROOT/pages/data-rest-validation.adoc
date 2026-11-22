@@ -6,6 +6,8 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/rest-validation
+:page-published: 2023-09-25
+:page-updated: 2026-09-10
 
 Implement validation in Spring Data REST.
 

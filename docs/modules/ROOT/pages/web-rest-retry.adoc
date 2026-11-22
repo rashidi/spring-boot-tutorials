@@ -5,6 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web/rest-retry
+:page-published: 2026-10-24
 
 This tutorial demonstrates how to use Spring Retry with the modern `RestClient` in a Spring Boot application.
 

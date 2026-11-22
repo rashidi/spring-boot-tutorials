@@ -6,6 +6,8 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jpa-audit
+:page-published: 2023-07-12
+:page-updated: 2025-04-22
 
 Enable auditing with Spring Data Jpa's `@CreatedDate` and `@LastModified`. For example with Spring Data MongoDB, please check out xref:data-mongodb-audit.adoc[Spring Data MongoDB Audit Example].
 

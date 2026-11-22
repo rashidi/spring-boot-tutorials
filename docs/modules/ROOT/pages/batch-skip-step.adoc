@@ -6,6 +6,8 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch/skip-step
+:page-published: 2023-10-01
+:page-updated: 2026-11-12
 
 Skip processing specific data through business logic in Spring Batch.
 

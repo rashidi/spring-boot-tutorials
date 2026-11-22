@@ -7,6 +7,8 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web/virtual-threads
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/web/virtualthreads
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/web/virtualthreads
+:page-published: 2026-09-08
+:page-updated: 2026-09-10
 
 Handling high concurrency in web applications often hits a bottleneck when interacting with blocking I/O, such as relational databases. Traditional thread-per-request models limit scalability because OS threads are expensive and quickly exhaust system resources.
 

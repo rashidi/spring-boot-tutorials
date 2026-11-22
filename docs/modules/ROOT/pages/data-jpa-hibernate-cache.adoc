@@ -6,6 +6,7 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jpa-hibernate-cache
+:page-published: 2025-07-19
 
 Implement Hibernate second level caching using Spring Data JPA and EhCache to improve application performance.
 

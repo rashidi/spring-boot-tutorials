@@ -7,6 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jdbc-optimistic-locking
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jdbc/locking
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jdbc/locking
+:page-published: 2026-08-29
 
 In concurrent database operations, preventing lost updates when multiple transactions modify the same record is crucial. In this tutorial, we will explore how to implement optimistic locking with https://spring.io/projects/spring-data-jdbc[Spring Data JDBC] using the `@Version` annotation.
 

@@ -6,6 +6,8 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test/rest-assured
+:page-published: 2023-10-18
+:page-updated: 2025-04-22
 
 Verify API implementation through integration tests with https://www.browserstack.com/guide/what-is-bdd[Behaviour Driven Development (BDD)]
 using Spring Boot, https://testcontainers.com/[Testcontainers], and https://rest-assured.io/[RestAssured].

@@ -7,6 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/modulith/events
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/modulith/events
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/modulith/events
+:page-published: 2026-08-29
 
 In monolithic architectures, ensuring event delivery across module boundaries without tight `@Bean` coupling or data loss is essential. In this tutorial, we will explore how to implement resilient, asynchronous event publication using https://spring.io/projects/spring-modulith[Spring Modulith] and its Event Publication Registry backed by PostgreSQL.
 

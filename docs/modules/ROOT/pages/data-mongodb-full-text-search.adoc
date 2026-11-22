@@ -6,6 +6,8 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/mongodb-full-text-search
+:page-published: 2023-09-25
+:page-updated: 2025-08-30
 
 Implement link:https://docs.mongodb.com/manual/text-search/[MongoDB Full Text Search] with link:https://spring.io/projects/spring-data-mongodb[Spring Data MongoDB].
 

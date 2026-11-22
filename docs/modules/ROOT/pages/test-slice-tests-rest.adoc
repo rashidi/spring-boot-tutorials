@@ -7,6 +7,8 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test/slice-tests-rest
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/test/slices
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/test/slices
+:page-published: 2024-12-22
+:page-updated: 2026-09-10
 
 Testing has become a critical component in today's software development world. It helps us in ensuring high quality product
 that provides stability and scalability. In this article, we will explore about implementing tests for Spring Boot Web application.

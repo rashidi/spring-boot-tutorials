@@ -7,6 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jpa-keyset-pagination
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jpa/keyset/pagination
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jpa/keyset/pagination
+:page-published: 2026-10-24
 
 Traditionally, pagination in Spring Data JPA was done using `Pageable` and offset-based pagination. However, for large datasets, this approach can suffer from performance issues due to high offset values, as the database must scan and skip all rows preceding the offset.
 

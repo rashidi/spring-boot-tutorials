@@ -7,6 +7,8 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web/rest-client
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/web/restclient
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/web/restclient
+:page-published: 2024-12-02
+:page-updated: 2026-10-02
 
 
 == Background

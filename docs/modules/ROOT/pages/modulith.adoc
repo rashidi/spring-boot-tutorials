@@ -5,6 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 :nofooter:
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/modulith/core
+:page-published: 2025-04-06
 
 == Introduction
 

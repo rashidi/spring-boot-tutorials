@@ -7,6 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch/partitioned-step
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/batch/partitioning
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/batch/partitioning
+:page-published: 2026-11-21
 
 When processing large relational datasets, a single-threaded chunk step quickly becomes an I/O bottleneck. Spring Batch partitioning solves this by splitting the dataset into independent, non-overlapping ranges and executing a worker step concurrently across multiple threads or nodes.
 
