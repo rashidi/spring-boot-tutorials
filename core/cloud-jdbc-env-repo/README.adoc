@@ -20,16 +20,17 @@ which allows an application to store its configuration in database.
 
 == Configuration
 
-In order to enable this feature we will include `spring-boot-starter-jdbc` as one of the dependencies for the application and
+In order to enable this feature we include `spring-boot-starter-data-jdbc` as one of the dependencies for the application and
 include `jdbc` as one of its active profiles.
 
 === Include JDBC as dependency
 
-This can be seen in link:{url-quickref}/build.gradle[build.gradle].
+This can be seen in link:{url-quickref}/build.gradle.kts[build.gradle.kts].
 
-[source,groovy]
+[source,kotlin]
 ----
-implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+implementation("org.springframework.boot:spring-boot-starter-actuator")
 ----
 
 === Include `jdbc` as active profile
@@ -70,7 +71,7 @@ CREATE TABLE `PROPERTIES`
 );
 ----
 
-In the script above KEY, APPLICATION, PROFILE, and LABEL are marked as composite key in order to avoid duplicated entry.
+In the script above KEY, APPLICATION, and LABEL are marked as a composite key in order to avoid duplicated entries.
 
 === Populate table
 
@@ -80,14 +81,14 @@ Its script can be found in link:{url-quickref}/src/test/resources/init-script.sq
 [source,sql]
 ----
 INSERT INTO PROPERTIES (`APPLICATION`, `PROFILE`, `LABEL`, `KEY`, `VALUE`)
-VALUES ('demo', 'default', 'master', 'app.greet.name', 'Demo');
+VALUES ('demo', 'default', 'main', 'app.greet.name', 'Demo');
 ----
 
 The script above explains that the configuration `app.greet.name` belongs to:
 
 * an application called _demo_
 * with profile called _default_
-* and labelled _master_
+* and labelled _main_
 
 == Configure Application Properties
 
@@ -111,8 +112,8 @@ bootstrap application context. This can found in link:{url-quickref}/src/main/re
 [source,text]
 ----
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-  org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,\
-  org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration
+  org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,\
+  org.springframework.boot.jdbc.autoconfigure.JdbcTemplateAutoConfiguration
 ----
 
 These two classes will help us to build https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/jdbc/core/JdbcTemplate.html[JdbcTemplate] which is needed to construct https://github.com/spring-cloud/spring-cloud-config/blob/master/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/JdbcEnvironmentRepository.java[JdbcEnvironmentRepository].
@@ -139,16 +140,22 @@ spring:
   cloud:
     config:
       server:
+        bootstrap: true
+        accept-empty: false
         jdbc:
+          default-label: main
           sql: SELECT `KEY`, `VALUE` from PROPERTIES where APPLICATION=? and PROFILE=? and LABEL=?
           sql-without-profile: SELECT `KEY`, `VALUE` from PROPERTIES where APPLICATION=? and PROFILE='default' and LABEL=?
 ----
+
+The JDBC repository uses `main` when no label is supplied. With `accept-empty: false`, the Config Server responds with HTTP 404 when no properties are found. `@EnableConfigServer` enables the Config Server HTTP endpoints; for example, `GET /demo/default` reads the default label.
 
 We will have link:{url-quickref}/src/main/java/zin/rashidi/boot/cloud/jdbcenvrepo/greet/GreetResource.java[GreetResource] which will retrieve the value of `app.greet.name` from link:{url-quickref}/src/main/java/zin/rashidi/boot/cloud/jdbcenvrepo/greet/GreetProperties.java[GreetProperties].
 
 [source,java]
 ----
 @RestController
+@RefreshScope
 class GreetResource {
 
     private final GreetProperties properties;
@@ -157,39 +164,36 @@ class GreetResource {
         this.properties = properties;
     }
 
-    @GetMapping("/greet")
+    @GetMapping(value = "/greet", produces = MediaType.TEXT_PLAIN_VALUE)
     public String greet(@RequestParam String greeting) {
-        return String.format("%s, my name is %s", greeting, properties.name());
+        return "%s, my name is %s".formatted(greeting, properties.getName());
     }
 
 }
 ----
 
-Next we will have link:{url-quickref}/src/test/java/zin/rashidi/boot/cloud/jdbcenvrepo/CloudJdbcEnvRepoApplicationTests.java[CloudJdbcEnvRepoApplicationTests] class that verifies that the value for `app.greet.name` is *Demo* and not *Default*:
+== Refresh configuration
 
-[source,java]
+Actuator exposes only the `refresh` endpoint over HTTP:
+
+[source,yaml]
 ----
-@AutoConfigureRestTestClient
-@Testcontainers
-@SpringBootTest(properties = "spring.datasource.url=jdbc:tc:mysql:lts:///test?TC_INITSCRIPT=init-script.sql", webEnvironment = RANDOM_PORT)
-class CloudJdbcEnvRepoApplicationTests {
-
-    @Container
-    private static final MySQLContainer MYSQL = new MySQLContainer("mysql:lts");
-
-    @Autowired
-    private RestTestClient restClient;
-
-	@Test
-    @DisplayName("Given app.greet.name is configured to Demo in the database When I call greet Then I should get Hello, my name is Demo")
-	void greet() {
-        restClient.get().uri("/greet?greeting={greeting}", "Hello")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody().jsonPath("$").isEqualTo("Hello, my name is Demo");
-	}
-
-}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh
 ----
 
-By executing `greet()` we verify that the returned response is *Hello, my name is Demo* and not *Hello, my name is Default*.
+After updating the `app.greet.name` row for `demo`, `default`, and `main` in `PROPERTIES`, send `POST /actuator/refresh`. Spring Cloud reloads the JDBC property source and rebinds the mutable `GreetProperties`; the refresh-scoped resource is recreated. A subsequent `GET /greet?greeting=Hello` returns the updated name without restarting the application. Protect the refresh and Config Server endpoints appropriately when deploying the application.
+
+The bootstrap datasource settings must also be available when refresh creates a new bootstrap context. Supply them through a configuration file or environment variables; the test retains its inline datasource setting using `spring.cloud.refresh.additional-property-sources-to-retain`.
+
+== Run the tests
+
+The link:{url-quickref}/src/test/java/zin/rashidi/boot/cloud/jdbcenvrepo/CloudJdbcEnvRepoApplicationTests.java[integration tests] use Testcontainers and require Docker. They verify the database value takes precedence over `Default`, refresh after an update, and Config Server responses for existing and missing properties.
+
+[source,shell]
+----
+./gradlew :core:cloud-jdbc-env-repo:check
+----

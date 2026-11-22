@@ -9,4 +9,4 @@ CREATE TABLE `PROPERTIES`
 );
 
 INSERT INTO PROPERTIES (`APPLICATION`, `PROFILE`, `LABEL`, `KEY`, `VALUE`)
-VALUES ('demo', 'default', 'master', 'app.greet.name', 'Demo');
+VALUES ('demo', 'default', 'main', 'app.greet.name', 'Demo');
