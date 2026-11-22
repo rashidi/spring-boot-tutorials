@@ -130,8 +130,14 @@ jobs:
             3. **Implement with Modulith Architecture & Gherkin Tests:**
                - Create a new git branch named `feat/<module-or-topic-slug>`.
                - Create the tutorial under `<category>/<topic>/` (for example `data/jpa-audit/` or `web/rest-client/`), with a `build.gradle.kts` applying `id("zin.rashidi.tutorial-conventions")`. Shared Java 25, Spring Boot, dependency management, repositories, JUnit Platform, and JaCoCo settings come from `build-logic/`; keep only tutorial-specific configuration in the module build.
-               - **Architecture (Modular Monolith / Modulith):** Structure the Java 25 source code under `zin.rashidi.boot.<category>.<topic>` by functional domain modules rather than technical layers (`controller`, `service`, `repository`). Enforce `package-private` visibility on all internal entities, repositories, controllers, and internal services, exposing only public API interfaces, DTOs, or domain events across module boundaries.
+               - **Architecture (Modular Monolith / Modulith):** Structure the Java 25 source code under `zin.rashidi.boot.<category>.<topic>` by functional domain modules rather than technical layers (`controller`, `service`, `repository`). Enforce `package-private` visibility on all internal entities, repositories, REST resources, and internal services, exposing only public API interfaces, DTOs, or domain events across module boundaries.
+               - **Naming Conventions:** Do NOT suffix `@RestController` classes with `Controller`. Always suffix `@RestController` classes with `Resource` instead (for example, `UserResource` rather than `UserController`, and `UserResourceTests` for corresponding test classes).
                - **Testing (Gherkin `@DisplayName`):** Write integration tests using JUnit 5 and Testcontainers. Every test class, `@Nested` class, and `@Test` method MUST be annotated with JUnit's `@DisplayName` following strict Gherkin syntax (`Given ..., When ..., Then ...`).
+               - **Strict Test Coverage (100% New Code / -0% Overall Drop):**
+                 - You MUST NOT drop the repository's overall test coverage (`-0%` tolerance).
+                 - All newly added production code in `<category>/<topic>` MUST achieve **100% instruction and branch coverage** (excluding `@SpringBootApplication` main classes).
+                 - Run `./gradlew :<category>:<topic>:check :<category>:<topic>:jacocoTestReport --console=plain` using `run_shell_command`.
+                 - Inspect `<category>/<topic>/build/reports/jacoco/test/jacocoTestReport.xml` to verify that every non-application class has `missed="0"` for `INSTRUCTION` and `BRANCH` counters. If any lines, instructions, or branches are missed, add or expand tests and re-run until new-code coverage is 100%.
                - The root `settings.gradle.kts` automatically discovers `*/*/build.gradle.kts`; do not add module-local settings or Gradle wrappers.
                - Execute `./gradlew :<category>:<topic>:check` and then `./gradlew check` using `run_shell_command` to verify compilation, integration tests, and aggregate 80% instruction coverage. Fix any build or test failures before proceeding.
 
@@ -141,4 +147,79 @@ jobs:
                - Update the root `README.adoc` to list and link the new tutorial in the appropriate category.
 
             5. **Commit & Open Pull Request:**
-               - Stage all changes, commit them with a clear conventional commit message, push the branch to `origin`, and run `gh pr create` with a comprehensive summary of the new tutorial.
+               - Stage all changes, commit them with a clear conventional commit message, push the branch to `origin`, and run `gh pr create` with a comprehensive summary of the new tutorial.    
+               
+      - name: Verify 100% Coverage on New Module
+        if: steps.cadence.outputs.should_run == 'true'
+        run: |
+          set -euo pipefail
+
+          # Find newly added tutorial modules compared to master
+          NEW_MODULES=$(git diff --name-only --diff-filter=A origin/master...HEAD -- '*/*/build.gradle.kts' | xargs -r -n1 dirname)
+
+          if [[ -z "$NEW_MODULES" ]]; then
+            echo "::error::No new tutorial module (*/*/build.gradle.kts) found on branch $(git rev-parse --abbrev-ref HEAD)."
+            exit 1
+          fi
+
+          for MODULE_DIR in $NEW_MODULES; do
+            GRADLE_PATH=":${MODULE_DIR//\//:}"
+            XML_REPORT="${MODULE_DIR}/build/reports/jacoco/test/jacocoTestReport.xml"
+
+            echo "Generating JaCoCo XML report for ${GRADLE_PATH}..."
+            ./gradlew "${GRADLE_PATH}:jacocoTestReport" --console=plain
+
+            if [[ ! -f "$XML_REPORT" ]]; then
+              echo "::error::Expected JaCoCo XML report not found at ${XML_REPORT}. Ensure reports.xml.required is enabled in build-logic."
+              exit 1
+            fi
+
+            python3 - "$XML_REPORT" <<'PY'
+          import sys
+          import xml.etree.ElementTree as ET
+
+          report_path = sys.argv[1]
+          tree = ET.parse(report_path)
+          root = tree.getroot()
+
+          failed = []
+          checked = 0
+
+          for pkg in root.findall("package"):
+              for cls in pkg.findall("class"):
+                  cls_name = cls.attrib["name"]
+                  simple_name = cls_name.rsplit("/", 1)[-1]
+
+                  # Match repository exclusion for @SpringBootApplication entrypoints
+                  if simple_name.endswith("Application"):
+                      continue
+
+                  instr = cls.find("counter[@type='INSTRUCTION']")
+                  if instr is None:
+                      continue
+
+                  checked += 1
+                  missed = int(instr.attrib["missed"])
+                  covered = int(instr.attrib["covered"])
+                  total = missed + covered
+                  pct = (covered / total * 100.0) if total else 100.0
+
+                  status = "PASS" if missed == 0 else "FAIL"
+                  print(f"[{status}] {cls_name}: {covered}/{total} instructions ({pct:.2f}%, missed={missed})")
+
+                  if missed > 0:
+                      failed.append((cls_name, missed, total, pct))
+
+          if checked == 0:
+              print(f"::error::No non-Application classes found in {report_path}.")
+              sys.exit(1)
+
+          if failed:
+              print("\n::error::New module instruction coverage is below 100%:")
+              for cls_name, missed, total, pct in failed:
+                  print(f"  - {cls_name}: {pct:.2f}% ({missed} missed of {total} instructions)")
+              sys.exit(1)
+
+          print(f"\nAll {checked} new classes achieved 100% instruction coverage.")
+          PY
+          done               
