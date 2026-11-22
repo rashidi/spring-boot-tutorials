@@ -9,11 +9,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/accounts")
-class AccountProfileController {
+class AccountProfileResource {
 
     private final AccountDirectory accountDirectory;
 
-    AccountProfileController(AccountDirectory accountDirectory) {
+    AccountProfileResource(AccountDirectory accountDirectory) {
         this.accountDirectory = accountDirectory;
     }
 
