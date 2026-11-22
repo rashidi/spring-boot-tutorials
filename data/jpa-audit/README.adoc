@@ -7,12 +7,12 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jpa-audit
 
-Enable auditing with Spring Data Jpa's `@CreatedDate` and `@LastModified`. For example with Spring Data MongoDB, please check out link:../mongodb-audit[Spring Data MongoDB Audit Example].
+Enable auditing with Spring Data JPA's `@CreatedDate` and `@LastModified`. For example with Spring Data MongoDB, please check out link:../mongodb-audit[Spring Data MongoDB: Auditing].
 
 
 == Background
 
-http://docs.spring.io/spring-data/jpa/docs/current/reference/html/[Spring Data Jpa] provides auditing feature which includes `@CreateDate`, `@CreatedBy`, `@LastModifiedDate`,
+http://docs.spring.io/spring-data/jpa/docs/current/reference/html/[Spring Data JPA] provides auditing feature which includes `@CreateDate`, `@CreatedBy`, `@LastModifiedDate`,
 and `@LastModifiedBy`. In this example we will see how it can be implemented with very little configurations.
 
 == Entity Class

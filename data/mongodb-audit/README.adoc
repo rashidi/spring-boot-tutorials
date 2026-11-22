@@ -7,7 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/mongodb-audit
 
-Enable auditing with Spring Data MongoDB. For example with Spring Data JPA, visit link:../jpa-audit/[Spring Data JPA Audit Example].
+Enable auditing with Spring Data MongoDB. For example with Spring Data JPA, visit link:../jpa-audit/[Spring Data JPA: Auditing].
 
 
 == Background
