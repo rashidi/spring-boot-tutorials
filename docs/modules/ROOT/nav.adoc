@@ -47,6 +47,8 @@
 ** xref:modulith-event-externalization.adoc[Spring Modulith: Externalizing Domain Events to Apache Kafka]
 ** xref:modulith-events.adoc[Spring Modulith: Event Publication Registry with PostgreSQL]
 ** xref:modulith.adoc[Spring Modulith: Building Modular Monolithic Applications]
+* Spring Security
+** xref:security-one-time-token.adoc[Spring Security: Passwordless One-Time Token Login with PostgreSQL]
 * Spring Test
 ** xref:test-contract-consumer.adoc[Stubborn Contract Consumer Tutorial]
 ** xref:test-contract-producer.adoc[Stubborn Contract Producer Tutorial]

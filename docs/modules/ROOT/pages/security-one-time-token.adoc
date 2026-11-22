@@ -1,0 +1,272 @@
+= Spring Security: Passwordless One-Time Token Login with PostgreSQL
+Rashidi Zin <rashidi@zin.my>
+1.0, November 22, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/security/one-time-token
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/security/onetimetoken
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/security/onetimetoken
+:page-published: 2026-11-22
+
+Passwordless authentication eliminates static password management and credential reuse risks by issuing short-lived, single-use tokens delivered out of band (such as email magic links). Spring Security provides first-class support for this workflow via `oneTimeTokenLogin()` and persistent token storage with `JdbcOneTimeTokenService`.
+
+In this tutorial, we build a passwordless one-time token login flow in Spring Boot 4 and Spring Security 7 backed by PostgreSQL, organized as a modular monolith and verified end-to-end with https://testcontainers.com/[Testcontainers] and `RestTestClient`.
+
+== Background
+
+A Spring Security one-time token authentication flow consists of three steps:
+
+. *Token Generation (`POST /ott/generate`)*: `GenerateOneTimeTokenFilter` resolves a `GenerateOneTimeTokenRequest` (including token TTL) and asks `OneTimeTokenService` to generate and persist a single-use token.
+. *Out-of-Band Delivery*: A `OneTimeTokenGenerationSuccessHandler` receives the newly generated `OneTimeToken` and triggers delivery (for example, sending a magic link over email or SMS) without leaking whether the username exists.
+. *Token Redemption (`POST /login/ott`)*: `OneTimeTokenAuthenticationFilter` delegates to `OneTimeTokenAuthenticationProvider`, which consumes (deletes) the token via `JdbcOneTimeTokenService`, loads authorities via `UserDetailsService`, and establishes an authenticated session.
+
+Using `JdbcOneTimeTokenService` instead of the default `InMemoryOneTimeTokenService` ensures tokens survive restarts, work across horizontally scaled application instances, and support scheduled cleanup of expired entries.
+
+== Modular Monolith Package Structure
+
+Rather than splitting code into top-level technical layers (`controller`, `service`, `repository`), the application is organized into three self-contained domain modules with `package-private` internals:
+
+* `zin.rashidi.boot.security.onetimetoken.account`: Owns user account records, `UserDetailsService`, and the protected `/api/accounts/me` endpoint.
+** Public API: link:{source-main}/account/AccountDirectory.java[`AccountDirectory`], link:{source-main}/account/AccountProfile.java[`AccountProfile`].
+** Internal (`package-private`): link:{source-main}/account/Account.java[`Account`], link:{source-main}/account/AccountRepository.java[`AccountRepository`], link:{source-main}/account/AccountService.java[`AccountService`], link:{source-main}/account/AccountProfileController.java[`AccountProfileController`].
+* `zin.rashidi.boot.security.onetimetoken.token`: Owns Spring Security `oneTimeTokenLogin()` configuration, PostgreSQL `JdbcOneTimeTokenService` persistence, and token issuance event publication.
+** Public API: link:{source-main}/token/OneTimeTokenIssuedEvent.java[`OneTimeTokenIssuedEvent`].
+** Internal (`package-private`): link:{source-main}/token/OneTimeTokenSecurityConfiguration.java[`OneTimeTokenSecurityConfiguration`], link:{source-main}/token/OneTimeTokenGenerationHandler.java[`OneTimeTokenGenerationHandler`].
+* `zin.rashidi.boot.security.onetimetoken.delivery`: Subscribes to `OneTimeTokenIssuedEvent` and records outbound magic-link deliveries in PostgreSQL.
+** Public API: link:{source-main}/delivery/TokenDeliveryLog.java[`TokenDeliveryLog`], link:{source-main}/delivery/TokenDeliveryRecord.java[`TokenDeliveryRecord`].
+** Internal (`package-private`): link:{source-main}/delivery/TokenDelivery.java[`TokenDelivery`], link:{source-main}/delivery/TokenDeliveryRepository.java[`TokenDeliveryRepository`], link:{source-main}/delivery/TokenDeliveryListener.java[`TokenDeliveryListener`], link:{source-main}/delivery/TokenDeliveryService.java[`TokenDeliveryService`].
+
+Cross-module collaboration happens exclusively through public contracts: `token` queries active accounts via `AccountDirectory` and notifies `delivery` asynchronously/decoupled through `OneTimeTokenIssuedEvent`.
+
+== Gradle Configuration
+
+The module applies `zin.rashidi.tutorial-conventions` in link:{url-quickref}/build.gradle.kts[`build.gradle.kts`]:
+
+[source,kotlin]
+----
+plugins {
+    id("zin.rashidi.tutorial-conventions")
+}
+
+version = "0.0.1-SNAPSHOT"
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    runtimeOnly("org.postgresql:postgresql")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-security-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+}
+----
+
+== PostgreSQL Schema
+
+`JdbcOneTimeTokenService` expects a `one_time_tokens` table with `token_value`, `username`, and `expires_at` columns. Alongside it, link:{url-quickref}/src/main/resources/schema.sql[`schema.sql`] defines `accounts` and `token_deliveries`:
+
+[source,sql]
+----
+CREATE TABLE IF NOT EXISTS one_time_tokens (
+    token_value VARCHAR(36) NOT NULL PRIMARY KEY,
+    username    VARCHAR(50) NOT NULL,
+    expires_at  TIMESTAMP   NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS accounts (
+    id           BIGSERIAL PRIMARY KEY,
+    username     VARCHAR(50)  NOT NULL UNIQUE,
+    email        VARCHAR(255) NOT NULL,
+    display_name VARCHAR(100) NOT NULL,
+    role         VARCHAR(30)  NOT NULL,
+    enabled      BOOLEAN      NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS token_deliveries (
+    id              BIGSERIAL PRIMARY KEY,
+    username        VARCHAR(50)              NOT NULL,
+    recipient_email VARCHAR(255)             NOT NULL,
+    token_value     VARCHAR(64)              NOT NULL,
+    magic_link      VARCHAR(512)             NOT NULL,
+    expires_at      TIMESTAMP WITH TIME ZONE NOT NULL,
+    delivered_at    TIMESTAMP WITH TIME ZONE NOT NULL
+);
+----
+
+== Implementation
+
+=== Configuring `JdbcOneTimeTokenService` and `SecurityFilterChain`
+
+In link:{source-main}/token/OneTimeTokenSecurityConfiguration.java[`OneTimeTokenSecurityConfiguration`], we register `JdbcOneTimeTokenService` backed by `JdbcOperations`, configure a 5-minute token TTL with `DefaultGenerateOneTimeTokenRequestResolver`, disable the default HTML submit page for API/SPA usage, and attach JSON authentication handlers:
+
+[source,java]
+----
+@Configuration
+@EnableWebSecurity
+class OneTimeTokenSecurityConfiguration {
+
+    @Bean
+    JdbcOneTimeTokenService oneTimeTokenService(JdbcOperations jdbcOperations) {
+        return new JdbcOneTimeTokenService(jdbcOperations);
+    }
+
+    @Bean
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            OneTimeTokenService oneTimeTokenService,
+            OneTimeTokenGenerationHandler generationHandler,
+            ObjectMapper objectMapper
+    ) throws Exception {
+        var requestResolver = new DefaultGenerateOneTimeTokenRequestResolver();
+        requestResolver.setExpiresIn(Duration.ofMinutes(5));
+
+        return http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/ott/generate", "/login/ott"))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    objectMapper.writeValue(response.getWriter(), Map.of("error", "Authentication required"));
+                }))
+                .oneTimeTokenLogin(ott -> ott
+                        .tokenService(oneTimeTokenService)
+                        .generateRequestResolver(requestResolver)
+                        .tokenGenerationSuccessHandler(generationHandler)
+                        .showDefaultSubmitPage(false)
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(HttpStatus.OK.value());
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            objectMapper.writeValue(response.getWriter(), Map.of(
+                                    "username", authentication.getName(),
+                                    "authenticated", true
+                            ));
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            objectMapper.writeValue(response.getWriter(), Map.of(
+                                    "error", "Invalid or expired one-time token"
+                            ));
+                        })
+                )
+                .build();
+    }
+
+}
+----
+
+=== Preventing Account Enumeration on Token Generation
+
+In link:{source-main}/token/OneTimeTokenGenerationHandler.java[`OneTimeTokenGenerationHandler`], we query `AccountDirectory.findActiveByUsername(...)` before publishing `OneTimeTokenIssuedEvent`. Whether or not the account exists or is enabled, the endpoint always responds with `202 Accepted` and an identical message so attackers cannot enumerate valid usernames:
+
+[source,java]
+----
+@Override
+public void handle(HttpServletRequest request, HttpServletResponse response, OneTimeToken oneTimeToken)
+        throws IOException {
+    accountDirectory.findActiveByUsername(oneTimeToken.getUsername()).ifPresent(account -> {
+        var magicLink = ServletUriComponentsBuilder.fromContextPath(request)
+                .path("/login/ott")
+                .queryParam("token", oneTimeToken.getTokenValue())
+                .build()
+                .toUri();
+
+        eventPublisher.publishEvent(new OneTimeTokenIssuedEvent(
+                account.username(),
+                account.email(),
+                oneTimeToken.getTokenValue(),
+                magicLink,
+                oneTimeToken.getExpiresAt()
+        ));
+    });
+
+    response.setStatus(HttpStatus.ACCEPTED.value());
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    objectMapper.writeValue(
+            response.getWriter(),
+            Map.of("message", "If an active account exists, a one-time login link has been sent.")
+    );
+}
+----
+
+=== Enforcing Account Status During Token Redemption
+
+NOTE: Spring Security's `OneTimeTokenAuthenticationProvider` loads the user via `UserDetailsService` and builds a `OneTimeTokenAuthentication` directly without invoking `AccountStatusUserDetailsChecker`.
+
+To prevent disabled accounts from redeeming tokens, link:{source-main}/account/AccountService.java[`AccountService`] explicitly throws `DisabledException` when `enabled` is `false`:
+
+[source,java]
+----
+@Override
+public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    var account = repository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("Account not found: " + username));
+
+    if (!account.enabled()) {
+        throw new DisabledException("Account is disabled: " + username);
+    }
+
+    return User.withUsername(account.username())
+            .password("")
+            .roles(account.role())
+            .build();
+}
+----
+
+=== Decoupled Token Delivery via Domain Events
+
+The `delivery` module listens for link:{source-main}/token/OneTimeTokenIssuedEvent.java[`OneTimeTokenIssuedEvent`] inside link:{source-main}/delivery/TokenDeliveryListener.java[`TokenDeliveryListener`] and records outbound magic links in PostgreSQL without coupling the `token` module to any mail or notification provider:
+
+[source,java]
+----
+@Component
+class TokenDeliveryListener {
+
+    private final TokenDeliveryRepository repository;
+
+    TokenDeliveryListener(TokenDeliveryRepository repository) {
+        this.repository = repository;
+    }
+
+    @EventListener
+    void on(OneTimeTokenIssuedEvent event) {
+        repository.save(new TokenDelivery(
+                null,
+                event.username(),
+                event.recipientEmail(),
+                event.tokenValue(),
+                event.magicLink().toString(),
+                event.expiresAt(),
+                Instant.now()
+        ));
+    }
+
+}
+----
+
+== Integration Testing with Testcontainers
+
+In link:{source-test}/OneTimeTokenAuthenticationTests.java[`OneTimeTokenAuthenticationTests`], we spin up a real PostgreSQL instance with link:{source-test}/TestcontainersConfiguration.java[`TestcontainersConfiguration`] (`@ServiceConnection`) and exercise the complete HTTP filter chain with `RestTestClient`:
+
+* Rejecting unauthenticated requests to `GET /api/accounts/me` with `401 Unauthorized`.
+* Generating a token via `POST /ott/generate`, verifying persistence in `one_time_tokens` and delivery in `token_deliveries`, redeeming it via `POST /login/ott`, verifying single-use deletion from PostgreSQL, and reading `GET /api/accounts/me` with the issued `JSESSIONID` cookie.
+* Rejecting replayed (already-consumed) tokens, expired tokens (plus verifying `JdbcOneTimeTokenService.cleanupExpiredTokens()`), forged tokens, and tokens belonging to disabled or unknown accounts.
+
+== Running the Tests
+
+Execute the module test or verification task from the repository root:
+
+[source,bash]
+----
+./gradlew :security:one-time-token:test
+./gradlew :security:one-time-token:check
+----
