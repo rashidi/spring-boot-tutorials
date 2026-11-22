@@ -1,4 +1,4 @@
-= Preventing XSS with Spring Security and Thymeleaf
+= Spring Web: Preventing XSS with Spring Security and Thymeleaf
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, May 25, 2023

@@ -1,4 +1,4 @@
-= Spring Data Redis: Implementing Caching with Spring Data Redis
+= Spring Data Redis: Implementing Caching
 :source-highlighter: highlight.js
 :highlightjs-languages: java, groovy
 Rashidi Zin <rashidi@zin.my>

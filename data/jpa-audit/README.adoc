@@ -1,4 +1,4 @@
-= Spring Data Jpa Audit Example
+= Spring Data JPA: Auditing
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.0, October 12, 2023

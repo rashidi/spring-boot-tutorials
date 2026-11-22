@@ -1,4 +1,4 @@
-= GraphQL With Spring Boot
+= Spring GraphQL: Getting Started with Spring Boot
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, September 3, 2023

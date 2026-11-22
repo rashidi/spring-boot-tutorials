@@ -1,4 +1,4 @@
-= Spring Data: Domain Events Example
+= Spring Data: Domain Events
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, July 30, 2023

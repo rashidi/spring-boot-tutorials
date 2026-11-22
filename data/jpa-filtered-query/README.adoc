@@ -1,4 +1,4 @@
-= Spring Data Jpa: Global Filter Query
+= Spring Data JPA: Global Filtered Query
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, October 12, 2023

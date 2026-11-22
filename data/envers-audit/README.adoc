@@ -1,4 +1,4 @@
-= Spring Data Envers: Audit With Entity Revisions
+= Spring Data Envers: Audit with Entity Revisions
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.1, November 26, 2024
