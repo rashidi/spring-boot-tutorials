@@ -1,20 +1,17 @@
 ---
 name: update-spring-boot-version
-description: Synchronizes the Spring Boot version in README.adoc and Antora UI templates across master and antora branches when Dependabot upgrades Spring Boot.
+description: Synchronizes Spring Boot versions across master and antora branches with auto-merge enabled on PRs.
 ---
 
-# Update Spring Boot Version in Documentation
+# Update Spring Boot Version Across Branches
 
-## Context
-When Dependabot upgrades the Spring Boot Gradle plugin in `build.gradle.kts`, documentation and UI files across `master` and `antora` branches must stay synchronized.
+## Task Overview
+When Dependabot updates `org.springframework.boot` in `build.gradle.kts` on `master`, this agent extracts the new version, updates `README.adoc` on `master`, and propagates the changes to the `antora` branch (updating its distinct `README.adoc` and supplemental UI files) before opening a PR with auto-merge enabled.
 
-## Task
-1. **Identify Version Changes:** Read the new `org.springframework.boot` plugin version from `build.gradle.kts` (falling back to `master` if necessary) to extract `<OLD_VERSION>` and `<NEW_VERSION>`. Exit if unchanged.
-2. **Update Branch-Specific Files:**
-   - **`README.adoc` (if present):** Update the badge image URL and Gradle plugin link to `<NEW_VERSION>`.
-   - **`supplemental-ui/partials/footer-content.hbs` (if present, e.g., on `antora`):** Update the badge image `src` URL to `<NEW_VERSION>`.
-3. **Verify:** Run `git diff` to confirm only version strings changed and report modified files.
-
-## Rules
-- Do not modify `build.gradle.kts` or create missing branch-specific files.
-- Preserve all existing formatting and whitespace.
+### Key Steps
+1. **Master Branch Updates:** Detect `<NEW_VERSION>` from `build.gradle.kts` and update badge and plugin links in `README.adoc` on the active PR branch.
+2. **Antora Branch Sync:** Check out `origin/antora` into a feature branch (`chore/update-spring-boot-<NEW_VERSION>`), updating Spring Boot references in `supplemental-ui/partials/footer-content.hbs` and the branch-specific `README.adoc`.
+3. **Auto-Merge PR:** Push the `antora` branch, create a pull request targeting `antora` if needed, and run:
+   ```bash
+   gh pr merge chore/update-spring-boot-<NEW_VERSION> --auto --squash
+   ```
