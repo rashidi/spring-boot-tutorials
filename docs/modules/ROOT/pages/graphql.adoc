@@ -1,4 +1,4 @@
-= GraphQL With Spring Boot
+= Spring GraphQL: Getting Started with Spring Boot
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, September 3, 2023
@@ -7,7 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/core/graphql
 :page-published: 2023-09-03
-:page-updated: 2025-04-22
+:page-updated: 2026-11-22
 
 Implementing https://graphql.org/[GraphQL] server with https://spring.io/guides/gs/graphql-server/[Spring Boot GraphQL Server].
 

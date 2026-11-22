@@ -1,4 +1,4 @@
-= Spring Data Envers: Audit With Entity Revisions
+= Spring Data Envers: Audit with Entity Revisions
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.1, November 26, 2024
@@ -7,7 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/envers-audit
 :page-published: 2023-07-12
-:page-updated: 2025-04-22
+:page-updated: 2026-11-22
 
 Sample application that demonstrates entity revisions with http://projects.spring.io/spring-data-envers/[Spring Data Envers].
 

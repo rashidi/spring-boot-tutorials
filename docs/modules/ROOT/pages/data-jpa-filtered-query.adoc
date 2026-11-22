@@ -1,4 +1,4 @@
-= Spring Data Jpa: Global Filter Query
+= Spring Data JPA: Global Filtered Query
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, October 12, 2023
@@ -7,7 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/jpa-filtered-query
 :page-published: 2023-10-12
-:page-updated: 2026-11-03
+:page-updated: 2026-11-22
 
 Implement global filter query which involves several `Entity` with Spring Data Jpa.
 

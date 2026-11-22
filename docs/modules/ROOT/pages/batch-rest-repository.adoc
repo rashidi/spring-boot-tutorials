@@ -1,4 +1,4 @@
-= Spring Batch: Working With REST Resources
+= Spring Batch: Working with REST Resources
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 2.0, September 27, 2023
@@ -7,7 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/batch/rest-repository
 :page-published: 2023-09-13
-:page-updated: 2026-04-19
+:page-updated: 2026-11-22
 
 Implement batch operation for REST resources with https://spring.io/projects/spring-batch[Spring Batch]
 

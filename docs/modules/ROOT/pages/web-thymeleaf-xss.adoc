@@ -1,4 +1,4 @@
-= Preventing XSS with Spring Security and Thymeleaf
+= Spring Web: Preventing XSS with Spring Security and Thymeleaf
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, May 25, 2023
@@ -7,6 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web/thymeleaf-xss
 :page-published: 2025-05-25
+:page-updated: 2026-11-22
 
 Prevent Cross-Site Scripting (XSS) attacks in Spring Boot applications using Spring Security and Thymeleaf.
 

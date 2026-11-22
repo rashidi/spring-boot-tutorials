@@ -1,4 +1,4 @@
-= Spring Data: Domain Events Example
+= Spring Data: Domain Events
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, July 30, 2023
@@ -7,7 +7,7 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/domain-events
 :page-published: 2023-07-30
-:page-updated: 2026-09-10
+:page-updated: 2026-11-22
 
 Reduce method complexity by utilising `@DomainEvents` from link:https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.domain-events[Spring Data JPA].
 

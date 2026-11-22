@@ -1,11 +1,11 @@
-= Stubborn Contract Producer Tutorial
+= Spring Test: Stubborn Contract Producer
 Rashidi Zin <rashidi@zin.my>
 1.0, October 11, 2026: Initial version
 :icons: font
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test/contract-producer
 :page-published: 2026-10-13
-:page-updated: 2026-11-13
+:page-updated: 2026-11-22
 
 This module demonstrates the producer side of Consumer-Driven Contract (CDC) testing using **Stubborn Contract**. Stubborn Contract is the official continuation of Spring Cloud Contract.
 

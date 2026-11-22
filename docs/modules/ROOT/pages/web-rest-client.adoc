@@ -1,4 +1,4 @@
-= Spring Web: REST Clients for calling Synchronous API
+= Spring Web: REST Clients for Calling Synchronous APIs
 Rashidi Zin <rashidi@zin.my>
 1.0, December 02, 2024: Initial version
 :toc:
@@ -8,7 +8,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/web/restclient
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/web/restclient
 :page-published: 2024-12-02
-:page-updated: 2026-10-02
+:page-updated: 2026-11-22
 
 
 == Background

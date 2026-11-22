@@ -1,4 +1,4 @@
-= Spring Data REST with Composite ID
+= Spring Data REST: Composite ID
 :source-highlighter: highlight.js
 Rashidi Zin <rashidi@zin.my>
 1.0, July 13, 2025
@@ -9,7 +9,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/rest/compositeid
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/rest/compositeid
 :page-published: 2025-07-13
-:page-updated: 2026-11-03
+:page-updated: 2026-11-22
 
 Implementing and exposing entities with composite IDs through Spring Data REST.
 

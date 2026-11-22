@@ -1,4 +1,4 @@
-= Spring Data Redis: Implementing Caching with Spring Data Redis
+= Spring Data Redis: Implementing Caching
 :source-highlighter: highlight.js
 :highlightjs-languages: java, groovy
 Rashidi Zin <rashidi@zin.my>
@@ -8,6 +8,7 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/data/redis-cache
 :page-published: 2025-07-20
+:page-updated: 2026-11-22
 
 In this tutorial, we will explore how to implement caching with Spring Data Redis to improve application performance. We will also compare this approach with Hibernate second level caching.
 
