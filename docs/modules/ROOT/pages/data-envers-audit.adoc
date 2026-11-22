@@ -14,7 +14,7 @@ Sample application that demonstrates entity revisions with http://projects.sprin
 
 == Background
 
-https://projects.spring.io/spring-data-jpa/[Spring Data Jpa] provides rough audit information. However, if you are looking for what are the exact changes being
+https://projects.spring.io/spring-data-jpa/[Spring Data JPA] provides rough audit information. However, if you are looking for what are the exact changes being
 made to an entity you can do so with http://projects.spring.io/spring-data-envers/[Spring Data Envers].
 
 As the name has suggested http://projects.spring.io/spring-data-envers/[Spring Data Envers] utilises and simplifies the usage of http://hibernate.org/orm/envers/[Hibernate Envers].

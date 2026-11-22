@@ -9,7 +9,7 @@ Rashidi Zin <rashidi@zin.my>
 :page-published: 2025-07-19
 :page-updated: 2026-11-22
 
-Implement Hibernate second level caching using Spring Data JPA and EhCache to improve application performance.
+Implement Hibernate second level caching using Spring Data JPA and Ehcache to improve application performance.
 
 == Background
 
@@ -17,7 +17,7 @@ In a typical Spring Data JPA application, when an entity is retrieved from the d
 
 This is where Hibernate's second-level cache comes into play. The second-level cache is a session-factory-level cache that is shared across all sessions created by the same session factory. This means that entities can be cached and reused across multiple transactions, reducing database load and improving application performance.
 
-In this tutorial, we will implement Hibernate second-level cache using Spring Data JPA and EhCache as the caching provider.
+In this tutorial, we will implement Hibernate second-level cache using Spring Data JPA and Ehcache as the caching provider.
 
 == Implementation
 
@@ -37,12 +37,12 @@ dependencies {
 
 The key dependencies are:
 
-* `org.ehcache:ehcache::jakarta` - EhCache implementation with Jakarta EE support
-* `org.hibernate.orm:hibernate-jcache` - Hibernate JCache integration, which allows Hibernate to use JCache-compatible caching providers like EhCache
+* `org.ehcache:ehcache::jakarta` - Ehcache implementation with Jakarta EE support
+* `org.hibernate.orm:hibernate-jcache` - Hibernate JCache integration, which allows Hibernate to use JCache-compatible caching providers like Ehcache
 
 === Configuration
 
-Next, we need to configure Hibernate to use EhCache as the second-level cache provider. This is done in the `application.properties` file:
+Next, we need to configure Hibernate to use Ehcache as the second-level cache provider. This is done in the `application.properties` file:
 
 [source,properties]
 ----
@@ -55,13 +55,13 @@ spring.jpa.properties.hibernate.cache.use_second_level_cache=true
 These properties configure Hibernate to:
 
 * Use JCache as the caching implementation (`hibernate.cache.region.factory_class=jcache`)
-* Use the EhCache configuration file located at `/ehcache.xml` (`hibernate.cache.jcache.uri=/ehcache.xml`)
-* Use EhCache as the JCache provider (`hibernate.cache.jcache.provider=org.ehcache.jsr107.EhcacheCachingProvider`)
+* Use the Ehcache configuration file located at `/ehcache.xml` (`hibernate.cache.jcache.uri=/ehcache.xml`)
+* Use Ehcache as the JCache provider (`hibernate.cache.jcache.provider=org.ehcache.jsr107.EhcacheCachingProvider`)
 * Enable the second-level cache (`hibernate.cache.use_second_level_cache=true`)
 
-=== EhCache Configuration
+=== Ehcache Configuration
 
-We need to create an EhCache configuration file (`ehcache.xml`) in the resources directory:
+We need to create an Ehcache configuration file (`ehcache.xml`) in the resources directory:
 
 [source,xml]
 ----
@@ -98,7 +98,7 @@ class Customer {
 The `@Cache` annotation has two important attributes:
 
 * `usage` - Specifies the cache concurrency strategy. In this case, we're using `READ_WRITE`, which is appropriate for entities that can be updated.
-* `region` - Specifies the cache region (or name) to use. This should match the cache alias defined in the EhCache configuration file.
+* `region` - Specifies the cache region (or name) to use. This should match the cache alias defined in the Ehcache configuration file.
 
 == Validation
 
@@ -180,12 +180,12 @@ public class TestcontainersConfiguration {
 
 == Benefits of Second-Level Caching
 
-Implementing Hibernate second-level caching with EhCache offers several benefits:
+Implementing Hibernate second-level caching with Ehcache offers several benefits:
 
 1. **Improved Performance**: By caching frequently accessed entities, we reduce the number of database queries, resulting in faster response times.
 2. **Reduced Database Load**: Fewer database queries mean less load on the database server, which can improve overall system performance.
 3. **Scalability**: With proper caching, applications can handle more concurrent users without proportionally increasing database load.
-4. **Flexibility**: EhCache offers various configuration options, such as cache size, expiration policies, and storage options (heap, off-heap, disk).
+4. **Flexibility**: Ehcache offers various configuration options, such as cache size, expiration policies, and storage options (heap, off-heap, disk).
 
 == Considerations
 
@@ -198,6 +198,6 @@ While second-level caching can significantly improve performance, there are some
 
 == Conclusion
 
-In this tutorial, we've implemented Hibernate second-level caching using Spring Data JPA and EhCache. We've configured the necessary dependencies, set up the cache configuration, and annotated our entities to use the cache. We've also demonstrated how to validate that the cache is working correctly using Hibernate's statistics API.
+In this tutorial, we've implemented Hibernate second-level caching using Spring Data JPA and Ehcache. We've configured the necessary dependencies, set up the cache configuration, and annotated our entities to use the cache. We've also demonstrated how to validate that the cache is working correctly using Hibernate's statistics API.
 
 By implementing second-level caching, we can improve the performance of our Spring Data JPA applications, reduce database load, and enhance scalability.
