@@ -3,22 +3,14 @@
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials
 
-Samples and tutorials for https://spring.io/projects/spring-boot[Spring Boot] modules such as, but not limited to,
-Spring Data, Spring Batch, Spring Cloud, Spring Security, Spring GraphQL, and Spring Test. Each tutorial is equipped
-with source code in individual submodules and can be found on {url-quickref}[GitHub].
+Runnable https://spring.io/projects/spring-boot[Spring Boot] sample applications and step-by-step guides covering Spring AI, Batch, Cloud, Data, GraphQL, Messaging, Modulith, Observability, Security, Test, and Web. Each tutorial includes runnable source code organized as `<category>/<tutorial>` Gradle submodules on {url-quickref}[GitHub].
 
 == Motivation
 
-While it is common to find https://spring.io/projects/spring-boot[Spring Boot] tutorials on the Internet, it is
-challenging to find tutorials that are up-to-date and include automated tests to demonstrate the implementation and
-ensure stability.
+While Spring Boot tutorials are widely available, it is challenging to find guides that stay up-to-date and include automated integration tests—backed by real databases and services via Testcontainers—to verify the implementation and ensure long-term stability.
 
 == Commitment
 
-Continual improvement is fundamental in software development. This repository is committed in ensuring adherence to
-best practices and keeping all dependencies up-to-date. The quality of these tutorials and the knowledge imparted is,
-and always will be, my primary goal.
+Continual improvement is fundamental in software development. This repository is committed to adhering to best practices and keeping all dependencies current. The quality of these tutorials and the knowledge imparted is, and always will be, my primary goal.
 
-With the help of https://github.com/dependabot[Dependabot], each tutorial is also kept up-to-date with the latest
-dependencies. Currently, we are using Java https://adoptium.net/en-GB/temurin/releases/?version=25[Temurin 25] 
-with https://plugins.gradle.org/plugin/org.springframework.boot/4.1.2[Spring Boot 4.1.2]
+With the help of https://github.com/dependabot[Dependabot], every tutorial is continuously updated to the latest dependencies, targeting Java https://adoptium.net/en-GB/temurin/releases/?version=25[Temurin 25] and the latest https://spring.io/projects/spring-boot[Spring Boot] release.
