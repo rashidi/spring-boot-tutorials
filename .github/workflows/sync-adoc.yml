@@ -6,7 +6,8 @@ on:
       - master
     paths:
       - '**/README.adoc'
-      - '**/sync-adoc.yml'
+      - '.github/workflows/sync-adoc.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -52,13 +53,45 @@ jobs:
             esac
             DEST_DOC="${DEST_DIR}/${MODULE_NAME}.adoc"
 
-            # Normalize line endings and relative tutorial/source links for flattened Antora pages
+            # Normalize line endings, links, and date metadata for flattened Antora pages
             python3 - "$file" "$DEST_DOC" "$CATEGORY_DIR" <<'PY'
           import re
+          import subprocess
           import sys
           from pathlib import Path
 
           source, destination, category = sys.argv[1:]
+          BULK_REFACTOR_COMMIT = "83afc73ebcbcba883b5bcaf0cd7325689be44f4b"
+
+          def git_lines(args):
+              result = subprocess.run(
+                  ["git", *args],
+                  capture_output=True,
+                  text=True,
+                  check=False,
+              )
+              return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+          def resolve_dates(source_path):
+              readme_history = git_lines(["log", "--follow", "--format=%H %cs", "--", source_path])
+              published = readme_history[-1].split()[1] if readme_history else ""
+
+              tutorial_dir = str(Path(source_path).parent)
+              dir_latest = git_lines(["log", "-1", "--format=%H %cs", "--", tutorial_dir])
+              updated = ""
+              if dir_latest:
+                  sha, date = dir_latest[0].split()
+                  if sha != BULK_REFACTOR_COMMIT:
+                      updated = date
+
+              if not updated:
+                  for entry in readme_history:
+                      sha, date = entry.split()
+                      if sha != BULK_REFACTOR_COMMIT:
+                          updated = date
+                          break
+
+              return published, updated
 
           def tutorial_xref(match):
               target_category = match["category"] or category
@@ -90,6 +123,22 @@ jobs:
               tutorial_xref,
               content,
           )
+
+          published, updated = resolve_dates(source)
+          extra_attrs = []
+          if published and not re.search(r"^:page-published:", content, flags=re.MULTILINE):
+              extra_attrs.append(f":page-published: {published}")
+          if updated and updated != published and not re.search(r"^:page-updated:", content, flags=re.MULTILINE):
+              extra_attrs.append(f":page-updated: {updated}")
+
+          if extra_attrs:
+              attr_block = "\n".join(extra_attrs)
+              if "\n\n" in content:
+                  header, body = content.split("\n\n", 1)
+                  content = f"{header}\n{attr_block}\n\n{body}"
+              else:
+                  content = f"{content.rstrip()}\n{attr_block}\n"
+
           Path(destination).write_text(content, encoding="utf-8")
           PY
 
@@ -123,7 +172,7 @@ jobs:
                 ;;
               jdbc-*)
                 CATEGORY_TITLE="Spring JDBC"
-                ;;                
+                ;;
               jooq)
                 CATEGORY_TITLE="jOOQ"
                 ;;
