@@ -29,7 +29,7 @@ with https://plugins.gradle.org/plugin/org.springframework.boot/4.1.2[Spring Boo
 == Repository Layout and Build
 
 Tutorials live under `<category>/<topic>/`, grouped into `ai`, `batch`, `core`, `data`, `messaging`,
-`modulith`, `test`, and `web`. For example, `data/jpa-audit` is Gradle project `:data:jpa-audit`,
+`modulith`, `security`, `test`, and `web`. For example, `data/jpa-audit` is Gradle project `:data:jpa-audit`,
 and `modulith/core` is `:modulith:core`.
 
 The included `build-logic` build provides `zin.rashidi.tutorial-conventions`, which configures Java 25,
@@ -137,6 +137,7 @@ All tutorials are documented in AsciiDoc format and published as an https://anto
 |link:modulith/core[Spring Modulith] |Building modular applications with Spring Modulith
 |link:modulith/event-externalization[Spring Modulith: Event Externalization with Kafka] |Externalize domain events to Apache Kafka topics using Spring Modulith @Externalized and Testcontainers
 |link:modulith/events[Spring Modulith: Event Publication Registry] |Implement resilient event publication with Spring Modulith and PostgreSQL Outbox
+|link:security/one-time-token[Spring Security: Passwordless One-Time Token Login with PostgreSQL] |Implement passwordless one-time token login with Spring Security, `JdbcOneTimeTokenService`, PostgreSQL, and Testcontainers
 |link:test/contract-consumer[Stubborn Contract: Consumer] |Implementing contract testing consumer using Stubborn Contract Stub Runner
 |link:test/contract-producer[Stubborn Contract: Producer] |Implementing contract testing producer using Stubborn Contract
 |link:test/execution-listeners[Spring Test: Custom TestExecutionListener] |Custom `TestExecutionListener` to manage test lifecycle
