@@ -1,0 +1,6 @@
+{{#with page.attributes.published}}
+    <meta property="article:published_time" content="{{this}}">
+{{/with}}
+{{#with (or page.attributes.updated page.attributes.published)}}
+    <meta property="article:modified_time" content="{{this}}">
+{{/with}}
