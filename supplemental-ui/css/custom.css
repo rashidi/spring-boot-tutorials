@@ -423,6 +423,16 @@ code, kbd, pre {
   color: var(--sbt-heading);
 }
 
+.doc .meta-chip.meta-date {
+  cursor: default;
+}
+
+.doc .meta-chip.meta-date:hover {
+  border-color: var(--sbt-border);
+  background: var(--sbt-surface);
+  color: var(--sbt-text);
+}
+
 .doc .meta-chip code {
   border: 0;
   background: transparent;
