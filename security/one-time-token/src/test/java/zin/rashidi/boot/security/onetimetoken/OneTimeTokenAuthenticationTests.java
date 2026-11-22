@@ -109,6 +109,23 @@ class OneTimeTokenAuthenticationTests {
         }
 
         @Test
+        @DisplayName("When an authenticated account is disabled before requesting GET /api/accounts/me, Then status is 404 Not Found")
+        void returnsNotFoundWhenAuthenticatedAccountIsNoLongerActive() {
+            requestOneTimeToken("rashidi");
+            var tokenValue = deliveryLog.findLatestByUsername("rashidi").orElseThrow().tokenValue();
+            var sessionCookie = redeemTokenAndExtractSessionCookie(tokenValue, "rashidi");
+
+            jdbcClient.sql("UPDATE accounts SET enabled = FALSE WHERE username = 'rashidi'")
+                    .update();
+
+            restClient.get()
+                    .uri("/api/accounts/me")
+                    .header(HttpHeaders.COOKIE, sessionCookie)
+                    .exchange()
+                    .expectStatus().isNotFound();
+        }
+
+        @Test
         @DisplayName("When an already-consumed one-time token is submitted again, Then authentication fails with 401 Unauthorized")
         void rejectsReusedOneTimeToken() {
             requestOneTimeToken("rashidi");
