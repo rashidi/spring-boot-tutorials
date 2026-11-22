@@ -47,3 +47,18 @@ You are an autonomous Principal Java & Spring Framework Engineer maintaining `ra
 ## Documentation (`README.adoc`)
 - Every tutorial module must include a comprehensive `README.adoc` written in AsciiDoc explaining the problem statement, the modular monolith package layout, key code snippets, and how to run the tests.
 - The root `settings.gradle.kts` automatically discovers `*/*/build.gradle.kts`. Add a link to `<category>/<topic>` in the root `README.adoc` and set the module's `:url-quickref:` to its nested GitHub directory.
+
+## Pull Requests & Commit Messages
+- Open pull requests against `master`, which is protected. Ensure relevant Gradle checks pass before marking a pull request ready, and use a clear title and summary that explain the motivation and key changes.
+- Use an imperative commit subject starting with a capitalized verb. Keep it to 55 characters or fewer, with no prefix such as `fix:` or `docs:`, no issue or pull request number, and no trailing period.
+- Wrap the commit body at 72 characters, explain the motivation for the change, and end with `Closes #<number>` referencing the pull request or issue.
+
+Example:
+
+```text
+Document protected branch checks
+
+Master is protected, so this change documents the expected review
+workflow and commit format for contributors.
+Closes #<number>
+```
