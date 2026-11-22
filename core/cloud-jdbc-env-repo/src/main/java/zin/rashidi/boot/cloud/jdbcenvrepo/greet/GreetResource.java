@@ -1,5 +1,6 @@
 package zin.rashidi.boot.cloud.jdbcenvrepo.greet;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Rashidi Zin
  */
 @RestController
+@RefreshScope
 class GreetResource {
 
     private final GreetProperties properties;
@@ -18,7 +20,7 @@ class GreetResource {
 
     @GetMapping("/greet")
     public String greet(@RequestParam String greeting) {
-        return "%s, my name is %s".formatted(greeting, properties.name());
+        return "%s, my name is %s".formatted(greeting, properties.getName());
     }
 
 }
