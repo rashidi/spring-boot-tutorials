@@ -1,4 +1,5 @@
 = Spring Boot Tutorials — Antora Documentation Site
+:site-url: https://rashidi.zin.my/spring-boot-tutorials/
 :url-repo: https://github.com/rashidi/spring-boot-tutorials
 :url-master: {url-repo}/tree/master
 :url-actions: {url-repo}/actions
@@ -6,11 +7,11 @@
 image:{url-actions}/workflows/build-and-publish-antora.yml/badge.svg?branch=antora[Build and Publish Antora Site,link={url-actions}/workflows/build-and-publish-antora.yml]
 image:{url-actions}/workflows/sync-adoc.yml/badge.svg?branch=master[Sync AsciiDoc to Antora,link={url-actions}/workflows/sync-adoc.yml]
 
-This branch hosts the **Antora documentation architecture, synced AsciiDoc pages, and custom UI templates** for *Spring Boot Tutorials* (see `antora-playbook.yml` for the configured `site.url`).
+This branch hosts the **Antora documentation architecture, synced AsciiDoc pages, and custom UI templates** for *Spring Boot Tutorials*, published at **{site-url}[rashidi.zin.my/spring-boot-tutorials]**.
 
 [NOTE]
 ====
-**Looking for runnable Java 25 & Spring Boot 4.1.2 source code?** +
+**Looking for runnable Java 25 & Spring Boot source code?** +
 Switch to the link:{url-master}[`master`] branch, which contains the multi-module Gradle project, Testcontainers integration tests, and tutorial source files.
 ====
 
@@ -25,11 +26,12 @@ master (<category>/<topic>/README.adoc)
    ▼  sync-adoc.yml (on push to master)
 antora (docs/modules/ROOT/pages/<category>-<topic>.adoc)
    │  • Strips CRLF line endings
+   │  • Injects :page-published: and :page-updated: dates from Git history
    │  • Rewrites relative src/ links to master tree/blob URLs
    │  • Normalizes cross-module links to Antora xref: targets
    ▼
 build-and-publish-antora.yml (on push to antora)
-   │  • Builds site via Antora 3.1.14 + Lunr search index
+   │  • Builds site via Antora 3.1 + Lunr search index
    │  • Applies supplemental-ui/ Handlebars partials & CSS
    ▼
 gh-pages (published site)
@@ -62,11 +64,11 @@ gh-pages (published site)
 | **Automated (`sync-adoc.yml`) — do not edit manually**
 
 | `supplemental-ui/partials/`
-| Custom Handlebars templates (`article.hbs`, `header-content.hbs`, `footer-content.hbs`, `head-styles.hbs`, `head-icons.hbs`, `edit-this-page.hbs`).
+| Custom Handlebars templates (`article.hbs`, `edit-this-page.hbs`, `footer-content.hbs`, `head-icons.hbs`, `head-meta.hbs`, `head-styles.hbs`, `header-content.hbs`).
 | Branch (`antora`)
 
 | `supplemental-ui/helpers/`
-| Custom Handlebars helpers (`module-slug.js` maps flattened page URLs back to `<category>/<topic>` paths and `:test` Gradle tasks; `module-tags.js` derives topic badges).
+| Custom Handlebars helpers (`format-date.js` formats published/updated date chips; `module-slug.js` maps flattened page URLs back to `<category>/<topic>` paths and `:test` Gradle tasks; `module-tags.js` derives topic badges).
 | Branch (`antora`)
 
 | `supplemental-ui/css/custom.css`
@@ -74,7 +76,7 @@ gh-pages (published site)
 | Branch (`antora`)
 
 | `.github/workflows/build-and-publish-antora.yml`
-| Builds the Antora site with Node.js 22 and deploys `build/site` to `gh-pages`.
+| Builds the Antora site with Node.js 26 and deploys `build/site` to `gh-pages`.
 | Branch (`antora`)
 |===
 
@@ -87,12 +89,12 @@ gh-pages (published site)
 
 == Local Build & Preview
 
-Prerequisites: **Node.js 22+**
+Prerequisites: **Node.js 26+**
 
 [source,bash]
 ----
 # 1. Install Antora CLI, site generator, and Lunr search extension
-npm install --no-save @antora/cli@3.1.14 @antora/site-generator@3.1.14 @antora/lunr-extension
+npm install --no-save @antora/cli@3.1 @antora/site-generator@3.1 @antora/lunr-extension
 
 # 2. Generate the static site into build/site/
 DOCSEARCH_ENABLED=true DOCSEARCH_ENGINE=lunr npx antora antora-playbook.yml
