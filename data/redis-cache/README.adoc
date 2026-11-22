@@ -235,9 +235,9 @@ spring.jpa.properties.hibernate.cache.jcache.provider=org.ehcache.jsr107.Ehcache
 spring.jpa.properties.hibernate.cache.use_second_level_cache=true
 ----
 
-These properties configure Hibernate to use JCache (JSR-107) with EhCache as the provider.
+These properties configure Hibernate to use JCache (JSR-107) with Ehcache as the provider.
 
-==== EhCache Configuration
+==== Ehcache Configuration
 
 [source, xml]
 ----
@@ -311,7 +311,7 @@ These tests use Hibernate's Statistics API to verify cache hits and misses.
 
 |Cache Provider
 |Redis
-|Various providers (EhCache in our example)
+|Various providers (Ehcache in our example)
 
 |Cache Granularity
 |Method level
@@ -323,7 +323,7 @@ These tests use Hibernate's Statistics API to verify cache hits and misses.
 
 |Distributed Caching
 |Yes, Redis is a distributed cache
-|Depends on the provider (EhCache can be distributed)
+|Depends on the provider (Ehcache can be distributed)
 
 |Integration with Spring
 |Seamless integration with Spring's caching abstraction

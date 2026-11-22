@@ -8,7 +8,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/data/jdbc
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/data/jdbc
 
-We have explored on how to implement auditing with link:../jpa-audit/[Spring Data Jpa], link:../envers-audit/[Spring Data Enver], and link:../mongodb-audit/[Spring Data Mongo]. In this tutorial, we will implement auditing with https://spring.io/projects/spring-data-jdbc[Spring Data JDBC].
+We have explored on how to implement auditing with link:../jpa-audit/[Spring Data JPA], link:../envers-audit/[Spring Data Envers], and link:../mongodb-audit/[Spring Data MongoDB]. In this tutorial, we will implement auditing with https://spring.io/projects/spring-data-jdbc[Spring Data JDBC].
 
 
 == Background
