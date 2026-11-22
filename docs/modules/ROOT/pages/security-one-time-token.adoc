@@ -29,7 +29,7 @@ Rather than splitting code into top-level technical layers (`controller`, `servi
 
 * `zin.rashidi.boot.security.onetimetoken.account`: Owns user account records, `UserDetailsService`, and the protected `/api/accounts/me` endpoint.
 ** Public API: link:{source-main}/account/AccountDirectory.java[`AccountDirectory`], link:{source-main}/account/AccountProfile.java[`AccountProfile`].
-** Internal (`package-private`): link:{source-main}/account/Account.java[`Account`], link:{source-main}/account/AccountRepository.java[`AccountRepository`], link:{source-main}/account/AccountService.java[`AccountService`], link:{source-main}/account/AccountProfileController.java[`AccountProfileController`].
+** Internal (`package-private`): link:{source-main}/account/Account.java[`Account`], link:{source-main}/account/AccountRepository.java[`AccountRepository`], link:{source-main}/account/AccountService.java[`AccountService`], link:{source-main}/account/AccountProfileResource.java[`AccountProfileResource`].
 * `zin.rashidi.boot.security.onetimetoken.token`: Owns Spring Security `oneTimeTokenLogin()` configuration, PostgreSQL `JdbcOneTimeTokenService` persistence, and token issuance event publication.
 ** Public API: link:{source-main}/token/OneTimeTokenIssuedEvent.java[`OneTimeTokenIssuedEvent`].
 ** Internal (`package-private`): link:{source-main}/token/OneTimeTokenSecurityConfiguration.java[`OneTimeTokenSecurityConfiguration`], link:{source-main}/token/OneTimeTokenGenerationHandler.java[`OneTimeTokenGenerationHandler`].
