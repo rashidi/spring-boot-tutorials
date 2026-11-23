@@ -27,7 +27,7 @@ We add `spring-ai-starter-model-openai` alongside `RestClient` and WireMock Test
 
 [source,kotlin]
 ----
-val springAiVersion = "2.0.2"
+val springAiVersion = "2.1.0"
 
 dependencies {
     implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))

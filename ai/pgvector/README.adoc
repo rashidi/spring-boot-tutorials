@@ -26,22 +26,20 @@ We include `spring-ai-starter-vector-store-pgvector` alongside PostgreSQL and Te
 
 [source,kotlin]
 ----
+val springAiVersion = "2.1.0"
+
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
 
     runtimeOnly("org.postgresql:postgresql")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.ai:spring-ai-bom:1.0.0-M6")
-    }
+    testImplementation("org.springframework.ai:spring-ai-spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
 }
 ----
 

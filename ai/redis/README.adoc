@@ -26,7 +26,7 @@ We include `spring-ai-starter-vector-store-redis` and Jedis alongside Testcontai
 
 [source,kotlin]
 ----
-val springAiVersion = "2.0.1"
+val springAiVersion = "2.1.0"
 
 dependencies {
     implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))

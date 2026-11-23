@@ -3,7 +3,7 @@ package zin.rashidi.boot.test.contract.consumer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 @SpringBootApplication
 public class TestContractConsumerApplication {
@@ -13,7 +13,7 @@ public class TestContractConsumerApplication {
     }
 
     @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
+    public RestClient restClient(RestClient.Builder builder) {
+        return builder.build();
     }
 }

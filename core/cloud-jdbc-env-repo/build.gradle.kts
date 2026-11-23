@@ -4,7 +4,7 @@ plugins {
 
 version = "0.0.1-SNAPSHOT"
 
-val springCloudVersion = "2025.1.4"
+val springCloudVersion = "2026.0.0"
 
 configurations {
     compileOnly {

@@ -4,7 +4,7 @@ plugins {
 
 version = "0.0.1-SNAPSHOT"
 
-val springAiVersion = "2.0.2"
+val springAiVersion = "2.1.0"
 
 dependencies {
     implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
