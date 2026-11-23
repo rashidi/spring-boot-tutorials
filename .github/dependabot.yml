@@ -1,11 +1,16 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
-    directory: "/"
+    directories:
+      - "/"
+      - "/*/*"
     target-branch: "master"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    groups:
+      shared-dependencies:
+        group-by: "dependency-name"
 
   - package-ecosystem: "github-actions"
     directory: "/"
