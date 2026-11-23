@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id("zin.rashidi.tutorial-conventions")
-    id("sh.stubborn.contract") version "0.2.2"
+    id("sh.stubborn.contract") version "0.2.3"
 }
 
 version = "0.0.1-SNAPSHOT"
