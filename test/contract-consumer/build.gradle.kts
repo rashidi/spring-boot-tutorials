@@ -6,7 +6,7 @@ plugins {
 
 version = "0.0.1-SNAPSHOT"
 
-val stubbornContractVersion = "0.2.2"
+val stubbornContractVersion = "0.2.3"
 
 dependencies {
     testImplementation(platform("sh.stubborn:stubborn-contract-dependencies:$stubbornContractVersion"))
