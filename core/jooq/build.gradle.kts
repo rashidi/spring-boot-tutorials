@@ -9,7 +9,7 @@ plugins {
 
 version = "0.0.1-SNAPSHOT"
 
-val jooqVersion = "3.20.8"
+val jooqVersion = "3.21.10"
 
 dependencies {
     jooqGenerator(platform(SpringBootPlugin.BOM_COORDINATES))
