@@ -8,7 +8,7 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.boot.amqp.autoconfigure.RabbitListenerRetrySettingsCustomizer;
+import org.springframework.boot.rabbitmq.autoconfigure.RabbitListenerRetrySettingsCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import tools.jackson.databind.json.JsonMapper;

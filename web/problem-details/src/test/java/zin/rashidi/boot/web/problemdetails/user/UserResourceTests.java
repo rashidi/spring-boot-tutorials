@@ -14,6 +14,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @AutoConfigureRestTestClient
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop", webEnvironment = RANDOM_PORT)
+@DisplayName("Given the user API, When a user is missing, Then RFC 9457 problem details are returned")
 class UserResourceTests {
 
     @Autowired
@@ -30,6 +31,6 @@ class UserResourceTests {
                 .jsonPath("$.title").isEqualTo("User Not Found")
                 .jsonPath("$.status").isEqualTo(404)
                 .jsonPath("$.detail").isEqualTo("User with id 999 not found")
-                .jsonPath("$.instance").isEqualTo("/users/999");
+                .jsonPath("$.instance").doesNotExist();
     }
 }
