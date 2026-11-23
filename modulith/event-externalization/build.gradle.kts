@@ -5,7 +5,7 @@ plugins {
 version = "0.0.1-SNAPSHOT"
 
 dependencies {
-    implementation(platform("org.springframework.modulith:spring-modulith-bom:2.1.2"))
+    implementation(platform("org.springframework.modulith:spring-modulith-bom:2.2.0"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-kafka")
