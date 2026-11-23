@@ -5,6 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/core/actuator-observability-opentelemetry
 :page-published: 2026-10-10
+:page-updated: 2026-11-24
 
 This tutorial demonstrates how to instrument a Spring Boot application with OpenTelemetry to generate traces and export them.
 
@@ -14,7 +15,7 @@ To enable OpenTelemetry in our application, we will need to add the following de
 
 [source,kotlin]
 ----
-implementation("org.springframework.boot:spring-boot-starter-web")
+implementation("org.springframework.boot:spring-boot-starter-webmvc")
 implementation("org.springframework.boot:spring-boot-starter-actuator")
 implementation("io.micrometer:micrometer-tracing-bridge-otel")
 implementation("io.opentelemetry:opentelemetry-exporter-otlp")

@@ -8,7 +8,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/ai/toolcalling
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/ai/toolcalling
 :page-published: 2026-11-07
-:page-updated: 2026-11-12
+:page-updated: 2026-11-24
 
 Large Language Models (LLMs) have a fixed knowledge cutoff and cannot natively interact with external systems. Model Tool Calling (also known as Function Calling) bridges this gap by enabling LLMs to invoke client-side Java methods dynamically to fetch real-time data or trigger side effects.
 
@@ -29,7 +29,7 @@ We add `spring-ai-starter-model-openai` alongside `RestClient` and WireMock Test
 
 [source,kotlin]
 ----
-val springAiVersion = "2.0.2"
+val springAiVersion = "2.1.0"
 
 dependencies {
     implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))

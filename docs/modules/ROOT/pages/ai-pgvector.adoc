@@ -8,7 +8,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/ai/pgvector
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/ai/pgvector
 :page-published: 2026-09-05
-:page-updated: 2026-11-12
+:page-updated: 2026-11-24
 
 Traditional keyword searches rely on lexical matching and token stemming, which often fall short when queries express intent through synonyms or contextual descriptions rather than exact terms.
 
@@ -28,22 +28,20 @@ We include `spring-ai-starter-vector-store-pgvector` alongside PostgreSQL and Te
 
 [source,kotlin]
 ----
+val springAiVersion = "2.1.0"
+
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
 
     runtimeOnly("org.postgresql:postgresql")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.ai:spring-ai-bom:1.0.0-M6")
-    }
+    testImplementation("org.springframework.ai:spring-ai-spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
 }
 ----
 

@@ -9,6 +9,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/messaging/rabbitmq
 :url-dlx: https://www.rabbitmq.com/docs/dlx
 :page-published: 2026-10-04
+:page-updated: 2026-11-24
 
 Not every message can be processed successfully. A malformed payload or a violated business rule will fail no matter
 how many times it is consumed. In this tutorial, we will explore how to route such messages into a Dead Letter Queue

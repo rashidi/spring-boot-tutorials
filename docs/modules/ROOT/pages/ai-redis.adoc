@@ -8,7 +8,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/ai/redis
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/ai/redis
 :page-published: 2026-09-17
-:page-updated: 2026-11-12
+:page-updated: 2026-11-24
 
 Traditional keyword searches rely on lexical matching and token stemming, which often fall short when queries express intent through synonyms or contextual descriptions rather than exact terms.
 
@@ -28,7 +28,7 @@ We include `spring-ai-starter-vector-store-redis` and Jedis alongside Testcontai
 
 [source,kotlin]
 ----
-val springAiVersion = "2.0.1"
+val springAiVersion = "2.1.0"
 
 dependencies {
     implementation(platform("org.springframework.ai:spring-ai-bom:${springAiVersion}"))

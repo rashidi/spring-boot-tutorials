@@ -8,7 +8,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-main: {url-quickref}/src/main/java/zin/rashidi/boot/modulith/externalization
 :source-test: {url-quickref}/src/test/java/zin/rashidi/boot/modulith/externalization
 :page-published: 2026-11-08
-:page-updated: 2026-11-12
+:page-updated: 2026-11-24
 
 In a modular monolith architecture, domain modules communicate in-process via strongly typed domain events. However, external distributed microservices or analytics platforms often require access to these lifecycle changes.
 
@@ -28,7 +28,7 @@ We add `spring-modulith-starter-core`, `spring-modulith-starter-jdbc`, `spring-m
 [source,kotlin]
 ----
 dependencies {
-    implementation(platform("org.springframework.modulith:spring-modulith-bom:2.1.2"))
+    implementation(platform("org.springframework.modulith:spring-modulith-bom:2.2.0"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-kafka")

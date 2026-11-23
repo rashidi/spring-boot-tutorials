@@ -5,7 +5,7 @@ Rashidi Zin <rashidi@zin.my>
 :source-highlighter: highlight.js
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/test/contract-consumer
 :page-published: 2026-10-13
-:page-updated: 2026-11-22
+:page-updated: 2026-11-24
 
 This module demonstrates the consumer side of Consumer-Driven Contract (CDC) testing using **Stubborn Contract**.
 
