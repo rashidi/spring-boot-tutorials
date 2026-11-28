@@ -8,7 +8,7 @@ Rashidi Zin <rashidi@zin.my>
 :icons: font
 :url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/core/jooq
 :page-published: 2023-11-08
-:page-updated: 2026-11-13
+:page-updated: 2026-11-24
 
 While JPA is commonly used in Java applications, it is not the only option. In this tutorial, we will look at how to use jOOQ with Spring Boot and Gradle.
 

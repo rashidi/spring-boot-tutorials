@@ -56,6 +56,7 @@
 ** xref:test-contract-consumer.adoc[Spring Test: Stubborn Contract Consumer]
 ** xref:test-contract-producer.adoc[Spring Test: Stubborn Contract Producer]
 * Spring Web
+** xref:web-api-versioning.adoc[Spring Web: First-Class API Versioning with Spring Boot]
 ** xref:web-thymeleaf-xss.adoc[Spring Web: Preventing XSS with Spring Security and Thymeleaf]
 ** xref:web-problem-details.adoc[Spring Web: Problem Details for HTTP APIs]
 ** xref:web-rest-client.adoc[Spring Web: REST Clients for Calling Synchronous APIs]

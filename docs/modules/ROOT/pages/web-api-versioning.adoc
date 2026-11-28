@@ -1,0 +1,288 @@
+= Spring Web: First-Class API Versioning with Spring Boot
+Rashidi Zin <rashidi@zin.my>
+1.0, November 28, 2026: Initial version
+:toc:
+:icons: font
+:source-highlighter: highlight.js
+:url-quickref: https://github.com/rashidi/spring-boot-tutorials/tree/master/web/api-versioning
+:source-main: {url-quickref}/src/main/java/zin/rashidi/boot/web/apiversioning
+:source-test: {url-quickref}/src/test/java/zin/rashidi/boot/web/apiversioning
+:page-published: 2026-11-28
+
+Evolving HTTP APIs without breaking existing consumers is a recurring challenge in long-lived backend services. Spring Framework 7 and Spring Boot 4 introduce first-class API versioning directly in Spring MVC through declarative `@RequestMapping(version = ...)` attributes, semantic baseline matching (`2.0+`), RFC 8594 deprecation headers via `StandardApiVersionDeprecationHandler`, and client-side version insertion with `ApiVersionInserter`.
+
+In this tutorial, we build a versioned product catalog API in Spring Boot 4 backed by PostgreSQL, organized as a modular monolith and verified end-to-end with https://testcontainers.com/[Testcontainers] and `RestTestClient`.
+
+== Background
+
+Spring MVC's built-in API versioning removes the need for custom request matchers, duplicated controller paths, or ad-hoc header inspection:
+
+. *Version Resolution*: Clients supply a version via HTTP header (`API-Version`), query parameter, path segment, or media type parameter. Spring Boot auto-configures the strategy via `spring.mvc.apiversion.*` properties and can apply a default version when the header is omitted.
+. *Semantic Version & Baseline Matching*: Handler methods declare exact versions (`version = "1.0"`, `version = "2.0"`) or baseline versions (`version = "2.0+"`, `version = "2.1+"`). Baseline matching allows endpoints whose contract has not changed to automatically serve newer minor versions without duplicating handler methods.
+. *Deprecation & Sunset Signaling (RFC 8594 / RFC 9745)*: Registering an `ApiVersionDeprecationHandler` bean using `StandardApiVersionDeprecationHandler` automatically attaches `Deprecation`, `Sunset`, and `Link` (`rel="deprecation"`) headers to responses served by deprecated API versions.
+. *RFC 9457 Problem Details*: Enabling `spring.mvc.problemdetails.enabled=true` ensures unsupported or malformed API versions return standardized `400 Bad Request` `application/problem+json` payloads.
+
+In our product catalog API, the contract evolves across three versions:
+
+[cols="1,2,3"]
+|===
+| Version | Status | Contract Behavior
+
+| `1.0`
+| Deprecated (with `Deprecation`, `Sunset`, and `Link` headers)
+| Read-only (`GET /api/products`, `GET /api/products/{sku}`) returning flat `price` and `currency` fields. `POST /api/products` returns `404 Not Found`.
+
+| `2.0`
+| Default & baseline (`2.0+`)
+| Introduces nested `Money` (`{amount, currency}`), real-time inventory availability (`IN_STOCK`, `LOW_STOCK`, `OUT_OF_STOCK`), and `POST /api/products` creation.
+
+| `2.1`
+| Current minor evolution
+| Inherits `GET /api/products` and `POST /api/products` via `2.0+` baseline matching while evolving `GET /api/products/{sku}` (`2.1+`) to add `category` and `restockRecommended`.
+|===
+
+== Modular Monolith Package Structure
+
+Rather than organizing code by technical layers (`controller`, `service`, `repository`), the application is structured into four acyclic domain modules with `package-private` internals:
+
+* `zin.rashidi.boot.web.apiversioning.versioning`: Owns API version deprecation policy configuration.
+** Internal (`package-private`): link:{source-main}/versioning/ApiVersioningConfiguration.java[`ApiVersioningConfiguration`].
+* `zin.rashidi.boot.web.apiversioning.inventory`: Owns stock levels and availability classification (`IN_STOCK`, `LOW_STOCK`, `OUT_OF_STOCK`) in PostgreSQL.
+** Public API: link:{source-main}/inventory/InventoryCatalog.java[`InventoryCatalog`], link:{source-main}/inventory/StockSnapshot.java[`StockSnapshot`], link:{source-main}/inventory/StockAvailability.java[`StockAvailability`].
+** Internal (`package-private`): link:{source-main}/inventory/StockItem.java[`StockItem`], link:{source-main}/inventory/StockItemRepository.java[`StockItemRepository`], link:{source-main}/inventory/InventoryService.java[`InventoryService`].
+* `zin.rashidi.boot.web.apiversioning.catalog`: Owns products, versioned REST endpoints, ProblemDetail error mapping, and `ProductCreatedEvent` publication.
+** Public API: link:{source-main}/catalog/Money.java[`Money`], link:{source-main}/catalog/ProductV1Response.java[`ProductV1Response`], link:{source-main}/catalog/ProductV2Response.java[`ProductV2Response`], link:{source-main}/catalog/ProductV21Response.java[`ProductV21Response`], link:{source-main}/catalog/CreateProductRequest.java[`CreateProductRequest`], link:{source-main}/catalog/ProductCreatedEvent.java[`ProductCreatedEvent`].
+** Internal (`package-private`): link:{source-main}/catalog/Product.java[`Product`], link:{source-main}/catalog/ProductRepository.java[`ProductRepository`], link:{source-main}/catalog/CatalogService.java[`CatalogService`], link:{source-main}/catalog/ProductResource.java[`ProductResource`], link:{source-main}/catalog/CatalogExceptionHandler.java[`CatalogExceptionHandler`], link:{source-main}/catalog/ProductNotFoundException.java[`ProductNotFoundException`], link:{source-main}/catalog/DuplicateSkuException.java[`DuplicateSkuException`].
+* `zin.rashidi.boot.web.apiversioning.audit`: Subscribes to `ProductCreatedEvent` and records catalog registration entries in PostgreSQL.
+** Public API: link:{source-main}/audit/CatalogAuditLog.java[`CatalogAuditLog`], link:{source-main}/audit/AuditEntryRecord.java[`AuditEntryRecord`].
+** Internal (`package-private`): link:{source-main}/audit/AuditEntry.java[`AuditEntry`], link:{source-main}/audit/AuditEntryRepository.java[`AuditEntryRepository`], link:{source-main}/audit/CatalogAuditListener.java[`CatalogAuditListener`], link:{source-main}/audit/CatalogAuditService.java[`CatalogAuditService`].
+
+Cross-module collaboration is strictly acyclic: `catalog` queries and initializes stock through `InventoryCatalog`, and `audit` reacts to `ProductCreatedEvent` without importing any internal entities or repositories from `catalog`.
+
+== Gradle Configuration
+
+The module applies `zin.rashidi.tutorial-conventions` in link:{url-quickref}/build.gradle.kts[`build.gradle.kts`]:
+
+[source,kotlin]
+----
+plugins {
+    id("zin.rashidi.tutorial-conventions")
+}
+
+version = "0.0.1-SNAPSHOT"
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    runtimeOnly("org.postgresql:postgresql")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+}
+----
+
+== Configuration and PostgreSQL Schema
+
+In link:{url-quickref}/src/main/resources/application.properties[`application.properties`], we configure header-based version resolution (`API-Version`), set `2.0` as the default version, declare supported versions (`1.0,2.0,2.1`), and enable RFC 9457 Problem Details:
+
+[source,properties]
+----
+spring.application.name=web-api-versioning
+spring.mvc.apiversion.use.header=API-Version
+spring.mvc.apiversion.default=2.0
+spring.mvc.apiversion.supported=1.0,2.0,2.1
+spring.mvc.problemdetails.enabled=true
+----
+
+Link:{url-quickref}/src/main/resources/schema.sql[`schema.sql`] defines the PostgreSQL tables for `products`, `inventory_items`, and `catalog_audit_entries`:
+
+[source,sql]
+----
+CREATE TABLE IF NOT EXISTS products (
+    id       BIGSERIAL PRIMARY KEY,
+    sku      VARCHAR(64)    NOT NULL UNIQUE,
+    name     VARCHAR(150)   NOT NULL,
+    category VARCHAR(80)    NOT NULL,
+    price    NUMERIC(12, 2) NOT NULL,
+    currency VARCHAR(3)     NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS inventory_items (
+    id                BIGSERIAL PRIMARY KEY,
+    sku               VARCHAR(64) NOT NULL UNIQUE,
+    quantity          INTEGER     NOT NULL,
+    reorder_threshold INTEGER     NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS catalog_audit_entries (
+    id         BIGSERIAL PRIMARY KEY,
+    sku        VARCHAR(64)              NOT NULL,
+    action     VARCHAR(50)              NOT NULL,
+    detail     VARCHAR(255)             NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+----
+
+== Implementation
+
+=== Signaling Deprecated API Versions with `StandardApiVersionDeprecationHandler`
+
+Spring Boot's `WebMvcAutoConfiguration` automatically wires any `ApiVersionDeprecationHandler` bean into `ApiVersionConfigurer`. In link:{source-main}/versioning/ApiVersioningConfiguration.java[`ApiVersioningConfiguration`], we mark version `1.0` as deprecated with a sunset timestamp and migration link:
+
+[source,java]
+----
+@Configuration
+class ApiVersioningConfiguration {
+
+    static final ZonedDateTime V1_DEPRECATION_DATE = ZonedDateTime.of(2026, 6, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    static final ZonedDateTime V1_SUNSET_DATE = ZonedDateTime.of(2027, 6, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    static final URI V1_MIGRATION_GUIDE = URI.create("https://rashidi.zin.my/spring-boot-tutorials/web-api-versioning.html");
+
+    @Bean
+    ApiVersionDeprecationHandler apiVersionDeprecationHandler() {
+        var handler = new StandardApiVersionDeprecationHandler();
+        handler.configureVersion("1.0")
+                .setDeprecationDate(V1_DEPRECATION_DATE)
+                .setSunsetDate(V1_SUNSET_DATE)
+                .setDeprecationLink(V1_MIGRATION_GUIDE);
+        return handler;
+    }
+
+}
+----
+
+=== Versioned REST Resource with Exact and Baseline Matching
+
+In link:{source-main}/catalog/ProductResource.java[`ProductResource`], all versions share the same `/api/products` resource URI while routing requests cleanly by semantic version:
+
+[source,java]
+----
+@RestController
+@RequestMapping("/api/products")
+class ProductResource {
+
+    private final CatalogService catalogService;
+
+    ProductResource(CatalogService catalogService) {
+        this.catalogService = catalogService;
+    }
+
+    @GetMapping(version = "1.0")
+    List<ProductV1Response> findAllV1() {
+        return catalogService.findAllV1();
+    }
+
+    @GetMapping(version = "2.0+")
+    List<ProductV2Response> findAllV2() {
+        return catalogService.findAllV2();
+    }
+
+    @GetMapping(path = "/{sku}", version = "1.0")
+    ProductV1Response findBySkuV1(@PathVariable String sku) {
+        return catalogService.findBySkuV1(sku);
+    }
+
+    @GetMapping(path = "/{sku}", version = "2.0")
+    ProductV2Response findBySkuV2(@PathVariable String sku) {
+        return catalogService.findBySkuV2(sku);
+    }
+
+    @GetMapping(path = "/{sku}", version = "2.1+")
+    ProductV21Response findBySkuV21(@PathVariable String sku) {
+        return catalogService.findBySkuV21(sku);
+    }
+
+    @PostMapping(version = "2.0+")
+    ResponseEntity<ProductV2Response> create(@Valid @RequestBody CreateProductRequest request) {
+        var created = catalogService.create(request);
+        var location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{sku}")
+                .buildAndExpand(created.sku())
+                .toUri();
+        return ResponseEntity.created(location).body(created);
+    }
+
+}
+----
+
+Notice how `GET /api/products` and `POST /api/products` use `version = "2.0+"`, so requests specifying `API-Version: 2.1` automatically match them without duplicating handler code, while `GET /api/products/{sku}` overrides `2.1+` to return the richer link:{source-main}/catalog/ProductV21Response.java[`ProductV21Response`].
+
+=== Cross-Module Inventory Lookup and Audit Events
+
+When `CatalogService` creates a product in link:{source-main}/catalog/CatalogService.java[`CatalogService`], it persists the product, initializes stock through the `inventory` module's public link:{source-main}/inventory/InventoryCatalog.java[`InventoryCatalog`] interface, and publishes link:{source-main}/catalog/ProductCreatedEvent.java[`ProductCreatedEvent`]:
+
+[source,java]
+----
+@Transactional
+ProductV2Response create(CreateProductRequest request) {
+    if (repository.existsBySku(request.sku())) {
+        throw new DuplicateSkuException(request.sku());
+    }
+
+    var saved = repository.save(new Product(
+            null,
+            request.sku(),
+            request.name(),
+            request.category(),
+            request.price(),
+            request.currency()
+    ));
+
+    var stock = inventoryCatalog.registerInitialStock(
+            saved.sku(),
+            request.initialQuantity(),
+            request.reorderThreshold()
+    );
+
+    eventPublisher.publishEvent(new ProductCreatedEvent(saved.sku(), saved.name(), saved.category()));
+
+    return toV2Response(saved, stock);
+}
+----
+
+The `audit` module listens for `ProductCreatedEvent` in link:{source-main}/audit/CatalogAuditListener.java[`CatalogAuditListener`] and records the registration in PostgreSQL without coupling `catalog` to audit storage.
+
+== Integration Testing with Testcontainers and `RestTestClient`
+
+In link:{source-test}/catalog/ProductResourceTests.java[`ProductResourceTests`], we spin up PostgreSQL via link:{source-test}/TestcontainersConfiguration.java[`TestcontainersConfiguration`] (`@ServiceConnection`) and configure `RestTestClient` with `ApiVersionInserter.useHeader("API-Version")`:
+
+[source,java]
+----
+versionedClient = restClient.mutate()
+        .apiVersionInserter(ApiVersionInserter.useHeader("API-Version"))
+        .build();
+
+versionedClient.get()
+        .uri("/api/products")
+        .apiVersion("1.0")
+        .exchange()
+        .expectStatus().isOk()
+        .expectHeader().exists("Deprecation")
+        .expectHeader().exists("Sunset")
+        .expectBody()
+        .jsonPath("$[1].price").isEqualTo(149.99)
+        .jsonPath("$[1].currency").isEqualTo("USD");
+----
+
+The test suite verifies:
+
+* Deprecated `1.0` responses return legacy flat payloads alongside `Deprecation`, `Sunset`, and `Link` headers, and reject `POST /api/products` with `404 Not Found`.
+* Omitting `API-Version` defaults to `2.0`, returning nested `Money` objects and stock availability (`IN_STOCK`, `LOW_STOCK`, `OUT_OF_STOCK`) without deprecation headers.
+* `POST /api/products` on `2.0` and `2.1` persists the product, initializes inventory, records an audit entry via `ProductCreatedEvent`, and returns `409 Conflict` / `400 Bad Request` RFC 9457 `ProblemDetail` responses for duplicate SKUs or invalid payloads.
+* Requests with `API-Version: 2.1` fall back to `2.0+` handlers for unchanged endpoints while serving the evolved `2.1+` response for `GET /api/products/{sku}`.
+* Unsupported (`9.0`) or malformed (`not-a-version`) version headers fail with `400 Bad Request` RFC 9457 `ProblemDetail`.
+
+== Running the Tests
+
+Execute the module tests or verification tasks from the repository root:
+
+[source,bash]
+----
+./gradlew :web:api-versioning:test
+./gradlew :web:api-versioning:check
+----
