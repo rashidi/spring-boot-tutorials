@@ -44,7 +44,7 @@ Tutorials are organized as `<category>/<tutorial>` Gradle submodules (e.g., `dat
 | Slice testing, RestAssured BDD, `TestExecutionListener`, Spring Cloud Contract / Stubborn Contract
 
 | link:web/[`web`]
-| `RestClient` and retries, Problem Details (RFC 9457), Virtual Threads, Thymeleaf XSS prevention
+| link:web/api-versioning/[API Versioning], `RestClient` and retries, Problem Details (RFC 9457), Virtual Threads, Thymeleaf XSS prevention
 |===
 
 == Running a Tutorial
