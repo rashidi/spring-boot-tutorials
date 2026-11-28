@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
@@ -39,4 +40,10 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     finalizedBy(tasks.named("jacocoTestReport"))
+}
+
+tasks.withType<JacocoReport>().configureEach {
+    reports {
+        xml.required = true
+    }
 }
